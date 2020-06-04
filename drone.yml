@@ -62,7 +62,7 @@ steps:
     password:
       from_secret: docker_login_token
     repo: argosnotary/argos-integration-test-service
-    tags: ${DRONE_BRANCH/\//_}
+    tags: ${DRONE_BRANCH/\//_}${DRONE_TAG}
     username:
       from_secret: docker_login_user
   depends_on:
