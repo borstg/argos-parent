@@ -9,7 +9,7 @@ platform:
 
 steps:
 - name: build
-  image: argosnotary/argos-build:latest
+  image: argosnotary/argos-build:3.6.3
   commands:
   - mvn -q install
   volumes:
@@ -17,7 +17,7 @@ steps:
     path: /root/.m2/repository
 
 - name: sonar
-  image: argosnotary/argos-build:latest
+  image: argosnotary/argos-build:3.6.3
   commands:
   - mvn -q -e verify sonar:sonar -Psonar -Dsonar.projectKey=argosnotary_argos-parent -Dsonar.organization=argosnotary -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_LOGIN
   environment:
@@ -30,7 +30,7 @@ steps:
   - build
 
 - name: pitest
-  image: argosnotary/argos-build:latest
+  image: argosnotary/argos-build:3.6.3
   commands:
   - mvn -q -e verify -Ppitest
   volumes:
@@ -180,7 +180,7 @@ steps:
   - build xldeploy
 
 - name: regression test
-  image: argosnotary/argos-build:latest
+  image: argosnotary/argos-build:3.6.3
   commands:
   - cd argos-test
   - mvn -q clean verify -Pregression-test-drone
@@ -233,7 +233,7 @@ steps:
   - regression test
 
 - name: deploy argos4j snapshot to sonatype
-  image: argosnotary/argos-build:latest
+  image: argosnotary/argos-build:3.6.3
   volumes:
     - name: mvn_cache
       path: /root/.m2/repository
@@ -253,7 +253,7 @@ steps:
       - push
 
 - name: deploy release to sonatype
-  image: argosnotary/argos-build:latest
+  image: argosnotary/argos-build:3.6.3
   commands:
   - cp argos4j/dependency-reduced-pom.xml argos4j/target/pom.xml
   - cp argos4j/dependency-reduced-pom.xml.asc argos4j/target/pom.xml.asc

@@ -13,10 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+FROM openjdk:8-jdk-buster as jdk8
 
 FROM maven:3.6.3-jdk-11
 
-RUN apt-get update && apt-get install -y openjdk-8-jdk
+# jdk8 not available anymore
+# install from image
+RUN mkdir -p /usr/local/openjdk-8
+COPY --from=jdk8 /usr/local/openjdk-8 /usr/local/openjdk-8
+
+# install helm
+
+ENV SHA256SUM 983c4f167060b3892a42f353c7891cabac36ec49f6042eae1046bd8a258b8a14
+ENV HELM_VERSION 3.2.1
+
+RUN wget "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" \
+    && wget "https://get.helm.sh/helm-v3.2.1-linux-amd64.tar.gz.sha256sum" \
+    && sha256sum -c "helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum" \
+    && tar -xzf "helm-v${HELM_VERSION}-linux-amd64.tar.gz" \
+    && mv linux-amd64/helm /usr/local/bin/helm \
+    && rm -rf linux-amd64
 
 COPY files/settings.xml /root/.m2/settings.xml
 COPY files/toolchains.xml /root/.m2/toolchains.xml
