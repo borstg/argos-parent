@@ -261,7 +261,6 @@ steps:
       from_secret: slack_webhook
   depends_on:
   - regression test
-  - deploy argos4j snapshot to sonatype
   - release argos service image
   - deploy release to sonatype
 
