@@ -27,7 +27,7 @@ following products on your development machine:
 
 * [Docker](https://www.docker.com).
 
-* jdk8 and jdk11 installation
+* [Java 8 and 11](https://adoptopenjdk.net)
 
 * [Toolchain](https://maven.apache.org/guides/mini/guide-using-toolchains.html)
 
