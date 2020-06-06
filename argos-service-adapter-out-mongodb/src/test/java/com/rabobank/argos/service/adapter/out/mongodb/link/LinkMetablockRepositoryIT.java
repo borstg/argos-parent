@@ -15,8 +15,8 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.link;
 
-import com.github.mongobee.Mongobee;
-import com.github.mongobee.exception.MongobeeException;
+import com.github.cloudyrock.mongock.SpringMongock;
+import com.github.cloudyrock.mongock.SpringMongockBuilder;
 import com.mongodb.client.MongoClients;
 import com.rabobank.argos.domain.Signature;
 import com.rabobank.argos.domain.layout.ArtifactType;
@@ -36,7 +36,6 @@ import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.runtime.Network;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -68,7 +67,7 @@ public class LinkMetablockRepositoryIT {
     private LinkMetaBlockRepository linkMetaBlockRepository;
 
     @BeforeAll
-    void setup() throws IOException, MongobeeException {
+    void setup() throws IOException {
         String ip = "localhost";
         int port = Network.getFreeServerPort();
         IMongodConfig mongodConfig = new MongodConfigBuilder().version(Version.Main.PRODUCTION)
@@ -81,10 +80,8 @@ public class LinkMetablockRepositoryIT {
         String connectionString = "mongodb://localhost:" + port;
         MongoTemplate mongoTemplate = new MongoTemplate(MongoClients.create(connectionString), "test");
         linkMetaBlockRepository = new LinkMetaBlockRepositoryImpl(mongoTemplate);
-        Mongobee runner = new Mongobee(connectionString);
-        runner.setChangeLogsScanPackage("com.rabobank.argos.service.adapter.out.mongodb.link");
-        runner.setMongoTemplate(mongoTemplate);
-        runner.setDbName("test");
+        SpringMongock runner = new SpringMongockBuilder(mongoTemplate, "com.rabobank.argos.service.adapter.out.mongodb.link").build();
+        
         runner.execute();
         loadData();
     }

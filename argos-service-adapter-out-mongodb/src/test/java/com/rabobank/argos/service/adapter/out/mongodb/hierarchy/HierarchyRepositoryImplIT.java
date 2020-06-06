@@ -15,8 +15,8 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.hierarchy;
 
-import com.github.mongobee.Mongobee;
-import com.github.mongobee.exception.MongobeeException;
+import com.github.cloudyrock.mongock.SpringMongock;
+import com.github.cloudyrock.mongock.SpringMongockBuilder;
 import com.mongodb.client.MongoClients;
 import com.rabobank.argos.domain.account.ServiceAccount;
 import com.rabobank.argos.domain.hierarchy.HierarchyMode;
@@ -71,7 +71,7 @@ class HierarchyRepositoryImplIT {
     private MongoTemplate mongoTemplate;
 
     @BeforeAll
-    void setup() throws IOException, MongobeeException {
+    void setup() throws IOException {
         String ip = LOCALHOST;
         int port = Network.getFreeServerPort();
         IMongodConfig mongodConfig = new MongodConfigBuilder().version(Version.Main.PRODUCTION)
@@ -87,10 +87,7 @@ class HierarchyRepositoryImplIT {
         labelRepository = new LabelRepositoryImpl(mongoTemplate);
         supplyChainRepository = new SupplyChainRepositoryImpl(mongoTemplate);
         serviceAccountRepository = new ServiceAccountRepositoryImpl(mongoTemplate);
-        Mongobee runner = new Mongobee(connectionString);
-        runner.setChangeLogsScanPackage(SCAN_PACKAGE);
-        runner.setMongoTemplate(mongoTemplate);
-        runner.setDbName(MONGO_DB);
+        SpringMongock runner = new SpringMongockBuilder(mongoTemplate, SCAN_PACKAGE).build();  
         runner.execute();
         createDataSet();
     }
