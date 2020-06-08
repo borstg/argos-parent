@@ -199,7 +199,9 @@ steps:
 - name: release argos service image
   image: plugins/docker
   settings:
-    auto_tag: true
+    tags:
+    - ${DRONE_TAG}
+    - latest
     build_args:
     - VERSION=${DRONE_TAG}
     context: argos-docker
@@ -240,7 +242,6 @@ steps:
   - cp argos4j/dependency-reduced-pom.xml.asc argos4j/target/pom.xml.asc
   - mvn -q -f argos4j/pom.xml deploy:deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/
   - mvn -q -f argos-service/pom.xml deploy:deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/
-  - mvn -q deploy:deploy-file -Dfile=argos-jenkins-plugin/target/argos.hpi -Dpackaging=hpi -DpomFile=argos-jenkins-plugin/pom.xml -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/
   environment:
     ossrh_password:
       from_secret: ossrh_login_password
