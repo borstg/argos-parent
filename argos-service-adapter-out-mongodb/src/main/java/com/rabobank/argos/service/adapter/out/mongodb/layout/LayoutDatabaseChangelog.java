@@ -15,11 +15,12 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.layout;
 
-import com.github.mongobee.changeset.ChangeLog;
-import com.github.mongobee.changeset.ChangeSet;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.HashedIndex;
 import org.springframework.data.mongodb.core.index.IndexDefinition;
+
+import com.github.cloudyrock.mongock.ChangeLog;
+import com.github.cloudyrock.mongock.ChangeSet;
 
 import static com.rabobank.argos.service.adapter.out.mongodb.layout.LayoutMetaBlockRepositoryImpl.COLLECTION;
 import static com.rabobank.argos.service.adapter.out.mongodb.layout.LayoutMetaBlockRepositoryImpl.SUPPLY_CHAIN_ID_FIELD;

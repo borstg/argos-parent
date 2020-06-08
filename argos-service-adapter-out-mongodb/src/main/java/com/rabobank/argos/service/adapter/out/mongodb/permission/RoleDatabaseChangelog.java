@@ -15,8 +15,8 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.permission;
 
-import com.github.mongobee.changeset.ChangeLog;
-import com.github.mongobee.changeset.ChangeSet;
+import com.github.cloudyrock.mongock.ChangeLog;
+import com.github.cloudyrock.mongock.ChangeSet;
 import com.rabobank.argos.domain.permission.Permission;
 import com.rabobank.argos.domain.permission.Role;
 import org.springframework.data.mongodb.core.MongoTemplate;

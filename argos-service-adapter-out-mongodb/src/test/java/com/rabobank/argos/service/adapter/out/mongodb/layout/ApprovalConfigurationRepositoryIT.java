@@ -15,8 +15,8 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.layout;
 
-import com.github.mongobee.Mongobee;
-import com.github.mongobee.exception.MongobeeException;
+import com.github.cloudyrock.mongock.SpringMongock;
+import com.github.cloudyrock.mongock.SpringMongockBuilder;
 import com.mongodb.client.MongoClients;
 import com.rabobank.argos.domain.layout.ApprovalConfiguration;
 import com.rabobank.argos.service.domain.layout.ApprovalConfigurationRepository;
@@ -56,7 +56,7 @@ class ApprovalConfigurationRepositoryIT {
     private ApprovalConfigurationRepository approvalConfigurationRepository;
 
     @BeforeAll
-    void setup() throws IOException, MongobeeException {
+    void setup() throws IOException {
         String ip = "localhost";
         int port = Network.getFreeServerPort();
         IMongodConfig mongodConfig = new MongodConfigBuilder().version(Version.Main.PRODUCTION)
@@ -69,10 +69,7 @@ class ApprovalConfigurationRepositoryIT {
         String connectionString = "mongodb://localhost:" + port;
         mongoTemplate = new MongoTemplate(MongoClients.create(connectionString), "test");
         approvalConfigurationRepository = new ApprovalConfigurationRepositoryImpl(mongoTemplate);
-        Mongobee runner = new Mongobee(connectionString);
-        runner.setChangeLogsScanPackage("com.rabobank.argos.service.adapter.out.mongodb.layout");
-        runner.setMongoTemplate(mongoTemplate);
-        runner.setDbName("test");
+        SpringMongock runner = new SpringMongockBuilder(mongoTemplate, "com.rabobank.argos.service.adapter.out.mongodb.layout").build();
         runner.execute();
     }
 

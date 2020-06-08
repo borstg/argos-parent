@@ -15,10 +15,12 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb;
 
-import com.github.mongobee.Mongobee;
+import com.github.cloudyrock.mongock.SpringBootMongock;
+import com.github.cloudyrock.mongock.SpringBootMongockBuilder;
 import com.rabobank.argos.service.adapter.out.mongodb.account.converter.ByteArrayToPublicKeyToReadConverter;
 import com.rabobank.argos.service.adapter.out.mongodb.account.converter.PublicKeyToByteArrayWriteConverter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -42,10 +44,9 @@ public class MongoConfig {
     private String mongoURI;
 
     @Bean
-    public Mongobee mongobee(MongoTemplate mongoTemplate) {
-        Mongobee runner = new Mongobee(mongoURI);
-        runner.setChangeLogsScanPackage("com.rabobank.argos.service.adapter.out.mongodb");
-        runner.setMongoTemplate(mongoTemplate);
-        return runner;
+    public SpringBootMongock mongogock(MongoTemplate mongoTemplate, ApplicationContext springContext) {
+      return new SpringBootMongockBuilder(mongoTemplate, "com.rabobank.argos.service.adapter.out.mongodb")
+          .setApplicationContext(springContext)
+          .build();
     }
 }

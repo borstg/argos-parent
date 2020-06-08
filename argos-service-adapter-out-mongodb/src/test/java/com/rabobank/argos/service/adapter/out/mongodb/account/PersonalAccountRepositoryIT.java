@@ -15,8 +15,8 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.account;
 
-import com.github.mongobee.Mongobee;
-import com.github.mongobee.exception.MongobeeException;
+import com.github.cloudyrock.mongock.SpringMongock;
+import com.github.cloudyrock.mongock.SpringMongockBuilder;
 import com.mongodb.client.MongoClients;
 import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.service.domain.account.AccountSearchParams;
@@ -51,9 +51,9 @@ public class PersonalAccountRepositoryIT {
     public static final PersonalAccount KLAASJE = PersonalAccount.builder().name("Klaasje").email("klaasje@klaas.nl").build();
     private MongodExecutable mongodExecutable;
     private PersonalAccountRepository personalAccountRepository;
-
+    
     @BeforeAll
-    void setup() throws IOException, MongobeeException {
+    void setup() throws IOException {
         String ip = "localhost";
         int port = Network.getFreeServerPort();
         IMongodConfig mongodConfig = new MongodConfigBuilder().version(Version.Main.PRODUCTION)
@@ -66,11 +66,7 @@ public class PersonalAccountRepositoryIT {
         String connectionString = "mongodb://localhost:" + port;
         MongoTemplate mongoTemplate = new MongoTemplate(MongoClients.create(connectionString), "test");
         personalAccountRepository = new PersonalAccountRepositoryImpl(mongoTemplate);
-
-        Mongobee runner = new Mongobee(connectionString);
-        runner.setChangeLogsScanPackage("com.rabobank.argos.service.adapter.out.mongodb.account");
-        runner.setMongoTemplate(mongoTemplate);
-        runner.setDbName("test");
+        SpringMongock runner = new SpringMongockBuilder(mongoTemplate, "com.rabobank.argos.service.adapter.out.mongodb.account").build();
         runner.execute();
         loadData();
     }
