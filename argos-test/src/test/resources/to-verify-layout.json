@@ -160,31 +160,6 @@
           ]
         }
       ]
-    },
-    {
-      "name": "approve",
-      "steps": [
-        {
-          "name": "approve_deploy",
-          "authorizedKeyIds": [
-            "467904d745289ea88f499a43f94d088c273f1ab6c1607fe3aa2b9911cb56d47f",
-            "637e8074aada6c5caff89d7f120671f40a635c5138bf21b0dff17f869c384ed1"
-          ],
-          "requiredNumberOfLinks": 2,
-          "expectedCommand": [],
-          "expectedMaterials": [
-          ],
-          "expectedProducts": [
-            {
-              "ruleType": "MATCH",
-              "pattern": "**",
-              "destinationType": "PRODUCTS",
-              "destinationStepName": "collect_dar",
-              "destinationSegmentName": "xldeploy"
-            }
-          ]
-        }
-      ]
     }
   ]
 }
