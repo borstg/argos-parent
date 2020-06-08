@@ -175,7 +175,8 @@ steps:
   detach: true
   environment:
     ADMIN_PASSWORD: admin
-    ACCEPT_EULA: Y
+    XL_LICENSE:
+      from_secret: lic_secret
   depends_on:
   - build xldeploy
 
