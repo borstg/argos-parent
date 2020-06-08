@@ -41,7 +41,7 @@ class XLDeployContextInputValidatorTest {
 
     @BeforeEach
     void setup() {
-        xlDeployContextInputValidator = (XLDeployContextInputValidator) ContextInputValidator.of(RestArtifactCollectorSpecification.TypeEnum.XLDEPLOY);
+        xlDeployContextInputValidator = ContextInputValidator.of(RestArtifactCollectorSpecification.TypeEnum.XLDEPLOY);
     }
 
     @Test

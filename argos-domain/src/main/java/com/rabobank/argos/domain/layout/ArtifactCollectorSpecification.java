@@ -29,7 +29,7 @@ import java.util.Map;
 @Builder
 @ToString
 public class ArtifactCollectorSpecification {
-    public enum CollectorType {XLDEPLOY}
+    public enum CollectorType {XLDEPLOY, GIT}
     private String name;
     private URI uri;
     private CollectorType type;
