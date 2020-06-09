@@ -4,11 +4,11 @@
     "segmentName": "segment1",
     "artifactCollectorSpecifications": [
       {
-        "name": "xldeploy1",
-        "type": "XLDEPLOY",
-        "uri": "http://deploy.nl",
+        "name": "git1",
+        "type": "GIT",
+        "uri": "http://git.nl",
         "context": {
-          "applicationName": "argos"
+          "repository": "argos"
         }
       }
     ]
