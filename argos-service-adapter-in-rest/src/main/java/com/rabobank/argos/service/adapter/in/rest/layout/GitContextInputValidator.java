@@ -18,6 +18,7 @@ package com.rabobank.argos.service.adapter.in.rest.layout;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestArtifactCollectorSpecification;
 
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static com.rabobank.argos.service.adapter.in.rest.api.model.RestValidationMessage.TypeEnum.DATA_INPUT;
 import static com.rabobank.argos.service.adapter.in.rest.layout.ValidationHelper.throwLayoutValidationException;
@@ -26,6 +27,7 @@ public class GitContextInputValidator extends ContextInputValidator {
 
     private static final int MAX_LENGTH = 255;
     private static final String REPOSITORY_NAME = "repository";
+    private static final Pattern INVALID_CHAR = Pattern.compile("^[A-Za-z0-9_.\\-/]*$");
 
 
     @Override
@@ -36,7 +38,10 @@ public class GitContextInputValidator extends ContextInputValidator {
     @Override
     protected void checkFieldsForInputConsistencyRules(RestArtifactCollectorSpecification restArtifactCollectorSpecification) {
         String repositoryNameValue = restArtifactCollectorSpecification.getContext().get(REPOSITORY_NAME);
-
+        if (!INVALID_CHAR.matcher(repositoryNameValue).matches()) {
+            throwLayoutValidationException(DATA_INPUT, REPOSITORY_NAME,
+                    "repository field contains invalid characters");
+        }
         if (repositoryNameValue.length() > MAX_LENGTH) {
             throwLayoutValidationException(DATA_INPUT, REPOSITORY_NAME,
                     "repository name is too long "

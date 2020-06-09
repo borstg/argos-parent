@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Collections;
 import java.util.Map;
 
+import static com.rabobank.argos.service.adapter.in.rest.layout.RandomStringHelper.getAlphaNumericString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -67,7 +68,7 @@ class XLDeployContextInputValidatorTest {
 
     @Test
     void validateContextFieldsWithTooLongCharacterValueShouldThrowException() {
-        when(restArtifactCollectorSpecification.getContext()).thenReturn(Map.of("applicationName", "very long and boring name with also  many chars and blah                                                                                                                                                                                                       e"));
+        when(restArtifactCollectorSpecification.getContext()).thenReturn(Map.of("applicationName", getAlphaNumericString(256)));
         LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> xlDeployContextInputValidator.validateContextFields(restArtifactCollectorSpecification));
         assertThat(layoutValidationException.getValidationMessages().isEmpty(), is(false));
         assertThat(layoutValidationException.getValidationMessages().get(0).getField(), is("applicationName"));
