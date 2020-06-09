@@ -174,6 +174,21 @@ class ServiceAccountRestServiceTest {
     }
 
     @Test
+    void deleteServiceAccount() {
+        when(accountService.deleteServiceAccount(ACCOUNT_ID)).thenReturn(true);
+        ResponseEntity<Void> response = service.deleteServiceAccount(ACCOUNT_ID);
+        assertThat(response.getStatusCodeValue(), is(200));
+    }
+
+    @Test
+    void deleteServiceAccountWithInvalidAccountIdShouldReturnNotFound() {
+        when(accountService.deleteServiceAccount(ACCOUNT_ID)).thenReturn(false);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.deleteServiceAccount(ACCOUNT_ID));
+        assertThat(exception.getStatus().value(), is(404));
+        assertThat(exception.getMessage(), is("404 NOT_FOUND \"no service account with id : accountId found\""));
+    }
+
+    @Test
     void updateServiceAccountById() {
         when(restServiceAccount.getParentLabelId()).thenReturn(PARENT_LABEL_ID);
         when(labelRepository.exists(PARENT_LABEL_ID)).thenReturn(true);
