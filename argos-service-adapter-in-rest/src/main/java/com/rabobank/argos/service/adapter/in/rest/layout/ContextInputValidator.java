@@ -25,9 +25,12 @@ import static com.rabobank.argos.service.adapter.in.rest.layout.ValidationHelper
 
 public abstract class ContextInputValidator {
 
-    static ContextInputValidator of(TypeEnum type) {
+    static <T extends ContextInputValidator> T of(TypeEnum type) {
         if (type == TypeEnum.XLDEPLOY) {
-            return new XLDeployContextInputValidator();
+            return (T) new XLDeployContextInputValidator();
+        }
+        if (type == TypeEnum.GIT) {
+            return (T) new GitContextInputValidator();
         }
         throw new IllegalArgumentException("context validator for collector type: " + type + "is not implemented");
 
