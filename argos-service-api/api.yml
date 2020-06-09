@@ -865,6 +865,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceAccount"
+        '404':
+          description: the service account is not found
         '500':
           $ref: '#/components/responses/Error'
     put:
@@ -890,8 +892,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceAccount"
+        '404':
+          description: the service account is not found
         '400':
           $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: deletes a service account
+      operationId: deleteServiceAccount
+      tags:
+        - service account
+      parameters:
+        - name: serviceAccountId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: deleted service account
+        '404':
+          description: the service account is not found
         '500':
           $ref: '#/components/responses/Error'
   /serviceaccount/{serviceAccountId}/key:
@@ -923,7 +945,9 @@ paths:
               schema:
                 type: string
                 format: uri
-              description: location where the created service account can be found
+              description: location where the created key can be found
+        '404':
+          description: the service account is not found
         '400':
           $ref: '#/components/responses/ValidationError'
         '500':
