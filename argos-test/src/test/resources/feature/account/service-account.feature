@@ -29,6 +29,16 @@ Feature: Non Personal Account
     * def result = call read('create-service-account.feature') { name: 'sa 1', parentLabelId: #(rootLabelId)}
     * match result.response == { name: 'sa 1', id: '#uuid', parentLabelId: '#uuid' }
 
+  Scenario: delete service account should return a 200 and get should return a 403
+    * def result = call read('create-service-account.feature') { name: 'sa 1', parentLabelId: #(rootLabelId)}
+    * def restPath = '/api/serviceaccount/'+result.response.id
+    Given path restPath
+    When method DELETE
+    Then status 200
+    Given path restPath
+    When method GET
+    Then status 403
+
   Scenario: store a service account without SERVICE_ACCOUNT_EDIT permission should return a 403 error
     * configure headers = call read('classpath:headers.js') { token: #(defaultTestData.adminToken)}
     Given path '/api/serviceaccount'

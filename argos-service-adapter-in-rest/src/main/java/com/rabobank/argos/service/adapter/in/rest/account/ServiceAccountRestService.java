@@ -106,7 +106,8 @@ public class ServiceAccountRestService implements ServiceAccountApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteServiceAccount(String serviceAccountId) {
+    @PermissionCheck(permissions = SERVICE_ACCOUNT_EDIT)
+    public ResponseEntity<Void> deleteServiceAccount(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR) String serviceAccountId) {
         boolean isDeleted = accountService.deleteServiceAccount(serviceAccountId);
         if (!isDeleted) {
             throw accountNotFound(serviceAccountId);
