@@ -30,7 +30,7 @@ public class RepositoryResetProviderImpl implements RepositoryResetProvider {
 
     private final MongoTemplate template;
 
-    private static final Set<String> IGNORED_COLLECTIONS_FOR_ALL = Set.of("dbchangelog", "mongobeelock", "hierarchy", "hierarchy_tmp", "system.views", "roles");
+    private static final Set<String> IGNORED_COLLECTIONS_FOR_ALL = Set.of("mongockChangeLog", "mongockLock", "hierarchy", "hierarchy_tmp", "system.views", "roles");
     private static final Set<String> IGNORED_COLLECTIONS = new HashSet<>();
 
     static {

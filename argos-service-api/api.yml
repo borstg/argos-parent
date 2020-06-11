@@ -1524,6 +1524,7 @@ components:
           type: string
           enum:
             - XLDEPLOY
+            - GIT
         uri:
           description: base url of the artifact collector server
           type: string

@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Collections;
 import java.util.Map;
 
+import static com.rabobank.argos.service.adapter.in.rest.api.model.RestArtifactCollectorSpecification.TypeEnum;
 import static com.rabobank.argos.service.adapter.in.rest.layout.RandomStringHelper.getAlphaNumericString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -34,52 +35,53 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class XLDeployContextInputValidatorTest {
+class GitContextInputValidatorTest {
 
-    private XLDeployContextInputValidator xlDeployContextInputValidator;
+    private GitContextInputValidator gitContextInputValidator;
     @Mock
     private RestArtifactCollectorSpecification restArtifactCollectorSpecification;
 
+
     @BeforeEach
     void setup() {
-        xlDeployContextInputValidator = ContextInputValidator.of(RestArtifactCollectorSpecification.TypeEnum.XLDEPLOY);
+        gitContextInputValidator = ContextInputValidator.of(TypeEnum.GIT);
     }
 
     @Test
-    void validateContextFieldsWithNoRequiredFieldsShouldThrowException() {
+    void validateContextFieldsWithNoRequiredFieldShouldThrowException() {
         when(restArtifactCollectorSpecification.getContext()).thenReturn(Collections.emptyMap());
-        when(restArtifactCollectorSpecification.getType()).thenReturn(RestArtifactCollectorSpecification.TypeEnum.XLDEPLOY);
-        LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> xlDeployContextInputValidator.validateContextFields(restArtifactCollectorSpecification));
+        when(restArtifactCollectorSpecification.getType()).thenReturn(TypeEnum.GIT);
+        LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> gitContextInputValidator.validateContextFields(restArtifactCollectorSpecification));
         assertThat(layoutValidationException.getValidationMessages().isEmpty(), is(false));
         assertThat(layoutValidationException.getValidationMessages().get(0).getField(), is("context"));
-        assertThat(layoutValidationException.getValidationMessages().get(0).getMessage(), is("required fields : [applicationName] not present for collector type: XLDEPLOY"));
-
+        assertThat(layoutValidationException.getValidationMessages().get(0).getMessage(), is("required fields : [repository] not present for collector type: GIT"));
     }
 
     @Test
-    void validateContextFieldsWithInvalidCharacterValueShouldThrowException() {
-        when(restArtifactCollectorSpecification.getContext()).thenReturn(Map.of("applicationName", "xlde*ploy"));
-        LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> xlDeployContextInputValidator.validateContextFields(restArtifactCollectorSpecification));
+    void validateContextFieldsWithInValidInputFieldShouldThrowException() {
+        when(restArtifactCollectorSpecification.getContext()).thenReturn(Map.of("repository", "xlde*ploy"));
+        LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> gitContextInputValidator.validateContextFields(restArtifactCollectorSpecification));
         assertThat(layoutValidationException.getValidationMessages().isEmpty(), is(false));
-        assertThat(layoutValidationException.getValidationMessages().get(0).getField(), is("applicationName"));
-        assertThat(layoutValidationException.getValidationMessages().get(0).getMessage(), is("(no `/`, `\\`, `:`, `[`, `]`, `|`, `,` or `*`) characters are allowed"));
-
+        assertThat(layoutValidationException.getValidationMessages().get(0).getField(), is("repository"));
+        assertThat(layoutValidationException.getValidationMessages().get(0).getMessage(), is("repository field contains invalid characters"));
     }
 
     @Test
     void validateContextFieldsWithTooLongCharacterValueShouldThrowException() {
-        when(restArtifactCollectorSpecification.getContext()).thenReturn(Map.of("applicationName", getAlphaNumericString(256)));
-        LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> xlDeployContextInputValidator.validateContextFields(restArtifactCollectorSpecification));
+        when(restArtifactCollectorSpecification.getContext()).thenReturn(Map.of("repository", getAlphaNumericString(256)));
+        LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> gitContextInputValidator.validateContextFields(restArtifactCollectorSpecification));
         assertThat(layoutValidationException.getValidationMessages().isEmpty(), is(false));
-        assertThat(layoutValidationException.getValidationMessages().get(0).getField(), is("applicationName"));
-        assertThat(layoutValidationException.getValidationMessages().get(0).getMessage(), is("applicationName is to long 256 only 255 is allowed"));
-
+        assertThat(layoutValidationException.getValidationMessages().get(0).getField(), is("repository"));
+        assertThat(layoutValidationException.getValidationMessages().get(0).getMessage(), is("repository name is too long 256 only 255 is allowed"));
     }
+
 
     @Test
     void validateContextFieldsWithRequiredFields() {
-        when(restArtifactCollectorSpecification.getContext()).thenReturn(Map.of("applicationName", "xldeploy"));
-        xlDeployContextInputValidator.validateContextFields(restArtifactCollectorSpecification);
+        when(restArtifactCollectorSpecification.getContext()).thenReturn(Map.of("repository", "argos"));
+        gitContextInputValidator.validateContextFields(restArtifactCollectorSpecification);
         verify(restArtifactCollectorSpecification, times(2)).getContext();
     }
+
+
 }
