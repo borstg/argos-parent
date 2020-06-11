@@ -24,4 +24,6 @@ public interface LayoutMetaBlockRepository {
     Optional<LayoutMetaBlock> findBySupplyChainId(String supplyChainId);
 
     void createOrUpdate(LayoutMetaBlock layoutMetaBlock);
+
+    void deleteBySupplyChainId(String supplyChainId);
 }

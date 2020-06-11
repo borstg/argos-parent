@@ -38,4 +38,6 @@ public interface LinkMetaBlockRepository {
     List<LinkMetaBlock> findByRunId(String supplyChainId, String runId);
 
     List<LinkMetaBlock> findByRunId(String supplyChainId, String segmentName, String runId, Set<String> resolvedSteps);
+
+    void deleteBySupplyChainId(String supplyChainId);
 }

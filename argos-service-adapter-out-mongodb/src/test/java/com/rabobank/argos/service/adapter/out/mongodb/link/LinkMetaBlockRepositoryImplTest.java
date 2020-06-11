@@ -29,15 +29,13 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.rabobank.argos.service.adapter.out.mongodb.link.LinkMetaBlockRepositoryImpl.COLLECTION;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.sameInstance;
@@ -138,6 +136,12 @@ class LinkMetaBlockRepositoryImplTest {
         assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"supplyChainId\" : \"supplyChainId\", \"link.runId\" : \"runId\", \"link.layoutSegmentName\" : \"layoutSegmentName\", \"link.stepName\" : { \"$nin\" : [\"resolvedStep\"]}}, Fields: {}, Sort: {}"));
     }
 
+    @Test
+    void deleteBySupplyChainId() {
+        repository.deleteBySupplyChainId("supplyChainId");
+        verify(template).remove(queryArgumentCaptor.capture(), eq(COLLECTION));
+        assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"supplyChainId\" : \"supplyChainId\"}, Fields: {}, Sort: {}"));
+    }
 
     @Test
     void save() {

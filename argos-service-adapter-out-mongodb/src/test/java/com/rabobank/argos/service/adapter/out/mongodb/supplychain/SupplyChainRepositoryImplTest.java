@@ -152,4 +152,11 @@ class SupplyChainRepositoryImplTest {
         verify(template).findOne(queryArgumentCaptor.capture(), eq(SupplyChain.class), eq(COLLECTION));
         assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"supplyChainId\" : \"supplyChainId\"}, Fields: { \"parentLabelId\" : 1}, Sort: {}"));
     }
+
+    @Test
+    void delete() {
+        repository.delete(SUPPLY_CHAIN_ID);
+        verify(template).remove(queryArgumentCaptor.capture(), eq(COLLECTION));
+        assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"supplyChainId\" : \"supplyChainId\"}, Fields: {}, Sort: {}"));
+    }
 }

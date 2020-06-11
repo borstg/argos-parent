@@ -82,4 +82,10 @@ class ApprovalConfigurationRepositoryImplTest {
         assertThat(queryArgumentCaptor.getValue().toString(), Matchers.is("Query: { \"supplyChainId\" : \"supplyChain\"}, Fields: {}, Sort: {}"));
     }
 
+    @Test
+    void deleteBySupplyChainId() {
+        approvalConfigurationRepository.deleteBySupplyChainId("supplyChain");
+        verify(template).remove(queryArgumentCaptor.capture(), eq(COLLECTION));
+        assertThat(queryArgumentCaptor.getValue().toString(), Matchers.is("Query: { \"supplyChainId\" : \"supplyChain\"}, Fields: {}, Sort: {}"));
+    }
 }
