@@ -19,6 +19,7 @@ import com.github.cloudyrock.mongock.SpringMongock;
 import com.github.cloudyrock.mongock.SpringMongockBuilder;
 import com.mongodb.client.MongoClients;
 import com.rabobank.argos.domain.account.PersonalAccount;
+import com.rabobank.argos.domain.key.KeyPair;
 import com.rabobank.argos.service.domain.account.AccountSearchParams;
 import com.rabobank.argos.service.domain.account.PersonalAccountRepository;
 import de.flapdoodle.embed.mongo.Command;
@@ -38,6 +39,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static de.flapdoodle.embed.process.config.io.ProcessOutput.getDefaultInstanceSilent;
 import static org.hamcrest.Matchers.contains;
@@ -47,11 +50,22 @@ import static org.junit.Assert.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PersonalAccountRepositoryIT {
 
-    public static final PersonalAccount PIETJE = PersonalAccount.builder().name("Pietje").email("pietje@piet.nl").build();
-    public static final PersonalAccount KLAASJE = PersonalAccount.builder().name("Klaasje").email("klaasje@klaas.nl").build();
+
+    public static final String PIETJE = "Pietje";
+    public static final PersonalAccount PIETJE_ACCOUNT = PersonalAccount.builder().name(PIETJE).email("pietje@piet.nl")
+            .activeKeyPair(new KeyPair("keyId1", null, null))
+            .inactiveKeyPairs(List.of(
+                    new KeyPair("keyId2", null, null),
+                    new KeyPair("keyId3", null, null))).build();
+    public static final String KLAASJE = "Klaasje";
+    public static final PersonalAccount KLAASJE_ACCOUNT = PersonalAccount.builder().name(KLAASJE).email("klaasje@klaas.nl")
+            .activeKeyPair(new KeyPair("keyId4", null, null))
+            .inactiveKeyPairs(List.of(
+                    new KeyPair("keyId5", null, null),
+                    new KeyPair("keyId6", null, null))).build();
     private MongodExecutable mongodExecutable;
     private PersonalAccountRepository personalAccountRepository;
-    
+
     @BeforeAll
     void setup() throws IOException {
         String ip = "localhost";
@@ -72,19 +86,53 @@ public class PersonalAccountRepositoryIT {
     }
 
     private void loadData() {
-        personalAccountRepository.save(PIETJE);
-        personalAccountRepository.save(KLAASJE);
+        personalAccountRepository.save(PIETJE_ACCOUNT);
+        personalAccountRepository.save(KLAASJE_ACCOUNT);
     }
 
     @Test
     void searchByName() {
-        assertThat(personalAccountRepository.search(AccountSearchParams.builder().name("tje").build()), contains(PIETJE));
-        assertThat(personalAccountRepository.search(AccountSearchParams.builder().name("je").build()), contains(KLAASJE, PIETJE));
-        assertThat(personalAccountRepository.search(AccountSearchParams.builder().name("J").build()), contains(KLAASJE, PIETJE));
-        assertThat(personalAccountRepository.search(AccountSearchParams.builder().name("Klaa").build()), contains(KLAASJE));
-        assertThat(personalAccountRepository.search(AccountSearchParams.builder().name("klaasje").build()), contains(KLAASJE));
-        assertThat(personalAccountRepository.search(AccountSearchParams.builder().name("Pietje").build()), contains(PIETJE));
-        assertThat(personalAccountRepository.search(AccountSearchParams.builder().name("z").build()), empty());
+        assertThat(searchByName("tje"), contains(PIETJE));
+        assertThat(searchByName("je"), contains(KLAASJE, PIETJE));
+        assertThat(searchByName("J"), contains(KLAASJE, PIETJE));
+        assertThat(searchByName("Klaa"), contains(KLAASJE));
+        assertThat(searchByName("klaasje"), contains(KLAASJE));
+        assertThat(searchByName("Pietje"), contains(PIETJE));
+        assertThat(searchByName("z"), empty());
+    }
+
+    @Test
+    void searchByActiveIds() {
+        assertThat(searchActiveIds(List.of("keyId4", "keyId1")), contains(KLAASJE, PIETJE));
+        assertThat(searchActiveIds(List.of("keyId4", "otherKey")), contains(KLAASJE));
+        assertThat(searchActiveIds(List.of("otherKey", "keyId1")), contains(PIETJE));
+        assertThat(searchActiveIds(List.of("otherKey", "keyId2")), empty());
+    }
+
+    @Test
+    void searchByInActiveIds() {
+        assertThat(searchInActiveIds(List.of("keyId1", "keyId2", "keyId3", "keyId4", "keyId5", "keyId6", "other")), contains(KLAASJE, PIETJE));
+        assertThat(searchInActiveIds(List.of("keyId6", "otherKey")), contains(KLAASJE));
+        assertThat(searchInActiveIds(List.of("otherKey", "keyId2")), contains(PIETJE));
+        assertThat(searchInActiveIds(List.of("keyId3")), contains(PIETJE));
+        assertThat(searchInActiveIds(List.of("keyId5")), contains(KLAASJE));
+        assertThat(searchInActiveIds(List.of("otherKey", "keyId1")), empty());
+    }
+
+    private List<String> searchByName(String name) {
+        return searchAccount(AccountSearchParams.builder().name(name).build());
+    }
+
+    private List<String> searchActiveIds(List<String> activeIds) {
+        return searchAccount(AccountSearchParams.builder().activeKeyIds(activeIds).build());
+    }
+
+    private List<String> searchInActiveIds(List<String> inActiveIds) {
+        return searchAccount(AccountSearchParams.builder().inActiveKeyIds(inActiveIds).build());
+    }
+
+    private List<String> searchAccount(AccountSearchParams params) {
+        return personalAccountRepository.search(params).stream().map(PersonalAccount::getName).collect(Collectors.toList());
     }
 
     @AfterAll

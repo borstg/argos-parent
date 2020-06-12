@@ -89,11 +89,13 @@ public class PersonalAccountRestService implements PersonalAccountApi {
 
     @Override
     @PermissionCheck(permissions = {Permission.PERSONAL_ACCOUNT_READ})
-    public ResponseEntity<List<RestPersonalAccount>> searchPersonalAccounts(String roleName, String localPermissionsLabelId, String name) {
+    public ResponseEntity<List<RestPersonalAccount>> searchPersonalAccounts(String roleName, String localPermissionsLabelId, String name, List<String> activeKeyIds, List<String> inActiveKeyIds) {
         return ResponseEntity.ok(accountService.searchPersonalAccounts(AccountSearchParams.builder()
                 .roleId(personalAccountMapper.convertToRoleId(roleName))
                 .localPermissionsLabelId(localPermissionsLabelId)
                 .name(name)
+                .activeKeyIds(activeKeyIds)
+                .inActiveKeyIds(inActiveKeyIds)
                 .build()).stream()
                 .map(personalAccountMapper::convertToRestPersonalAccountWithoutRoles).collect(Collectors.toList()));
     }

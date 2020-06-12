@@ -200,7 +200,7 @@ class PersonalAccountRestServiceTest {
         when(personalAccountMapper.convertToRoleId(ROLE_NAME)).thenReturn(ROLE_ID);
         when(accountService.searchPersonalAccounts(any(AccountSearchParams.class))).thenReturn(List.of(personalAccount));
         when(personalAccountMapper.convertToRestPersonalAccountWithoutRoles(personalAccount)).thenReturn(restPersonalAccount);
-        ResponseEntity<List<RestPersonalAccount>> response = service.searchPersonalAccounts(ROLE_NAME, LABEL_ID, NAME);
+        ResponseEntity<List<RestPersonalAccount>> response = service.searchPersonalAccounts(ROLE_NAME, LABEL_ID, NAME, null, null);
         assertThat(response.getBody(), contains(restPersonalAccount));
         assertThat(response.getStatusCodeValue(), Matchers.is(200));
         verify(accountService).searchPersonalAccounts(searchParamsArgumentCaptor.capture());

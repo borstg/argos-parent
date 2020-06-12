@@ -648,6 +648,28 @@ paths:
           required: false
           schema:
             type: string
+        - name: activeKeyIds
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              minLength: 64
+              maxLength: 64
+              pattern: '^[0-9a-f]*$'
+        - name: inActiveKeyIds
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              minLength: 64
+              maxLength: 64
+              pattern: '^[0-9a-f]*$'
       responses:
         '200':
           description: list of personal accounts without roles property
