@@ -39,8 +39,8 @@ import java.net.URI;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.rabobank.argos.domain.permission.Permission.SERVICE_ACCOUNT_EDIT;
 import static com.rabobank.argos.domain.permission.Permission.READ;
+import static com.rabobank.argos.domain.permission.Permission.SERVICE_ACCOUNT_EDIT;
 import static com.rabobank.argos.service.adapter.in.rest.account.ServiceAccountLabelIdExtractor.SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR;
 
 @RestController

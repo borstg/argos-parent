@@ -1,0 +1,58 @@
+<!--
+    Copyright (C) 2019 - 2020 Rabobank Nederland
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<configuration>
+    <springProperty name="appication-name" source="spring.application.name"/>
+    <springProperty name="autitlog-uri" source="autitlog.dburi"/>
+    <springProperty name="autitlog-dbname" source="autitlog.dbname"/>
+    <springProperty name="autitlog-collection" source="autitlog.collection"/>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <encoder>
+            <pattern>%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%-5level)
+                [${appication-name:-},traceId=%X{traceId:-},accountId=%X{accountId:-},accountName=%X{accountName}]
+                %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan}
+                %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}
+            </pattern>
+        </encoder>
+    </appender>
+    <appender name="MONGO" class="com.rabobank.argos.service.adapter.out.mongodb.auditlog.MongoDBAppender">
+        <connectionSource class="com.rabobank.argos.service.adapter.out.mongodb.auditlog.MongoDBConnectionSource">
+            <uri>${autitlog-uri}</uri>
+            <db>${autitlog-dbname}</db>
+            <collection>${autitlog-collection}</collection>
+        </connectionSource>
+    </appender>
+    <appender name="ASYNC_MONGO"
+              class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0
+        </discardingThreshold> <!-- default 20, means drop lower event when has 20% capacity remaining -->
+        <appender-ref ref="MONGO"/>
+        <queueSize>256</queueSize> <!-- default 256 -->
+        <includeCallerData>false</includeCallerData><!-- default false -->
+        <neverBlock>true</neverBlock><!-- default false, set to true to cause the
+            Appender not block the application and just drop the messages -->
+    </appender>
+
+    <logger name="argos.AuditLog" level="TRACE">
+        <appender-ref ref="ASYNC_MONGO"/>
+    </logger>
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
