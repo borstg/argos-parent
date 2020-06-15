@@ -38,8 +38,7 @@ public class ApprovalConfigurationRepositoryImpl implements ApprovalConfiguratio
 
     @Override
     public void saveAll(String supplyChainId, List<ApprovalConfiguration> approvalConfigurations) {
-        Criteria criteria = Criteria.where(SUPPLYCHAIN_ID_FIELD).is(supplyChainId);
-        template.remove(new Query(criteria), COLLECTION);
+        deleteBySupplyChainId(supplyChainId);
         template.insert(approvalConfigurations, COLLECTION);
     }
 
@@ -55,8 +54,16 @@ public class ApprovalConfigurationRepositoryImpl implements ApprovalConfiguratio
 
     @Override
     public List<ApprovalConfiguration> findBySupplyChainId(String supplyChainId) {
-        Criteria criteria = Criteria.where(SUPPLYCHAIN_ID_FIELD).is(supplyChainId);
-        return template.find(new Query(criteria), ApprovalConfiguration.class, COLLECTION);
+        return template.find(bySupplyChainId(supplyChainId), ApprovalConfiguration.class, COLLECTION);
+    }
+
+    private Query bySupplyChainId(String supplyChainId) {
+        return new Query(Criteria.where(SUPPLYCHAIN_ID_FIELD).is(supplyChainId));
+    }
+
+    @Override
+    public void deleteBySupplyChainId(String supplyChainId) {
+        template.remove(bySupplyChainId(supplyChainId), COLLECTION);
     }
 
 }

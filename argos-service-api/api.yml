@@ -137,6 +137,23 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '500':
           $ref: '#/components/responses/Error'
+    delete:
+      summary: delete supply chain by id. The layout, approval configs and link objects are also deleted
+      operationId: deleteSupplyChainById
+      tags:
+        - supplychain
+      parameters:
+        - name: supplyChainId
+          in: path
+          description: supply chain id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: supply chain deleted
+        '500':
+          $ref: '#/components/responses/Error'
   /supplychain/{supplyChainId}/link:
     get:
       summary: find link

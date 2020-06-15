@@ -23,6 +23,9 @@ import com.rabobank.argos.service.adapter.in.rest.api.handler.SupplychainApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestSupplyChain;
 import com.rabobank.argos.service.domain.hierarchy.HierarchyRepository;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
+import com.rabobank.argos.service.domain.layout.ApprovalConfigurationRepository;
+import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
+import com.rabobank.argos.service.domain.link.LinkMetaBlockRepository;
 import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
 import com.rabobank.argos.service.domain.security.PermissionCheck;
 import com.rabobank.argos.service.domain.supplychain.SupplyChainRepository;
@@ -51,6 +54,9 @@ public class SupplyChainRestService implements SupplychainApi {
     private final HierarchyRepository hierarchyRepository;
     private final SupplyChainMapper converter;
     private final LabelRepository labelRepository;
+    private final LayoutMetaBlockRepository layoutRepository;
+    private final LinkMetaBlockRepository linkMetaBlockRepository;
+    private final ApprovalConfigurationRepository approvalConfigurationRepository;
 
     @Override
     @PermissionCheck(permissions = Permission.TREE_EDIT)
@@ -103,8 +109,18 @@ public class SupplyChainRestService implements SupplychainApi {
                 .orElseThrow(() -> supplyChainNotFound(supplyChainId));
     }
 
+    @Override
+    @PermissionCheck(permissions = Permission.TREE_EDIT)
+    public ResponseEntity<Void> deleteSupplyChainById(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId) {
+        layoutRepository.deleteBySupplyChainId(supplyChainId);
+        linkMetaBlockRepository.deleteBySupplyChainId(supplyChainId);
+        approvalConfigurationRepository.deleteBySupplyChainId(supplyChainId);
+        supplyChainRepository.delete(supplyChainId);
+        return ResponseEntity.noContent().build();
+    }
+
     private void verifyParentLabelExists(String parentLabelId) {
-        if(!labelRepository.exists(parentLabelId)) {
+        if (!labelRepository.exists(parentLabelId)) {
             throw parentLabelNotFound(parentLabelId);
         }
     }

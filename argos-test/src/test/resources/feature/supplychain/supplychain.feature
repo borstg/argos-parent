@@ -237,3 +237,19 @@ Feature: SupplyChain
     And param path = 'otherlabel'
     When method GET
     Then status 404
+
+  Scenario: delete supplychain with valid id should return a 200
+    * def result = call read('create-supplychain-with-label.feature') { supplyChainName: 'name'}
+    * def restPath = '/api/supplychain/'+result.response.id
+    Given path restPath
+    When method DELETE
+    Then status 204
+
+  Scenario: delete supplychain without local permission TREE_EDIT should return a 403
+    * def info = call read('classpath:create-local-authorized-account.js') {permissions: ["READ"]}
+    * def labelResult = call read('classpath:feature/label/create-label.feature') {name: sublabel, parentLabelId: #(info.labelId)}
+    * def supplyChain = call read('create-supplychain.feature') {supplyChainName: name, parentLabelId: #(labelResult.response.id)}
+    * configure headers = call read('classpath:headers.js') { token: #(info.token)}
+    Given path '/api/supplychain/'+supplyChain.response.id
+    When method DELETE
+    Then status 403
