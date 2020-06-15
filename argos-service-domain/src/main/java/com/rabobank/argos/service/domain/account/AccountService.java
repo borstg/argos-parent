@@ -15,9 +15,9 @@
  */
 package com.rabobank.argos.service.domain.account;
 
+import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.domain.account.ServiceAccount;
 import com.rabobank.argos.domain.account.ServiceAccountKeyPair;
-import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.domain.key.KeyPair;
 import com.rabobank.argos.domain.permission.LocalPermissions;
 
@@ -44,6 +44,8 @@ public interface AccountService {
     Optional<PersonalAccount> updatePersonalAccountLocalPermissionsById(String accountId, LocalPermissions localPermissions);
 
     void save(ServiceAccount serviceAccount);
+
+    boolean deleteServiceAccount(String accountId);
 
     Optional<ServiceAccount> findServiceAccountById(String accountId);
 

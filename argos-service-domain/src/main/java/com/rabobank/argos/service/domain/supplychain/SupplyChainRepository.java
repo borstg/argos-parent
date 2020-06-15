@@ -29,4 +29,6 @@ public interface SupplyChainRepository {
     boolean exists(String supplyChainId);
 
     Optional<String> findParentLabelIdBySupplyChainId(String supplyChainId);
+
+    void delete(String supplyChainId);
 }

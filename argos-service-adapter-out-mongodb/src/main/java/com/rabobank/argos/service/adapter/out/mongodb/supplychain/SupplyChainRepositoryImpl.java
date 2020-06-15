@@ -84,6 +84,11 @@ public class SupplyChainRepositoryImpl implements SupplyChainRepository {
         return Optional.ofNullable(template.findOne(query, SupplyChain.class, COLLECTION)).map(SupplyChain::getParentLabelId);
     }
 
+    @Override
+    public void delete(String supplyChainId) {
+        template.remove(getPrimaryKeyQuery(supplyChainId), COLLECTION);
+    }
+
     private Query getPrimaryKeyQuery(String supplyChainId) {
         return new Query(Criteria.where(SUPPLY_CHAIN_ID_FIELD).is(supplyChainId));
     }

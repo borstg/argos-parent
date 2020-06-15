@@ -15,6 +15,7 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.account;
 
+import com.mongodb.client.result.DeleteResult;
 import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.account.ServiceAccount;
 import com.rabobank.argos.service.domain.account.ServiceAccountRepository;
@@ -69,6 +70,12 @@ public class ServiceAccountRepositoryImpl implements ServiceAccountRepository {
         } catch (DuplicateKeyException e) {
             throw duplicateKeyException(account, e);
         }
+    }
+
+    @Override
+    public boolean delete(String accountId) {
+        DeleteResult result = template.remove(getPrimaryKeyQuery(accountId), ServiceAccount.class, COLLECTION);
+        return result.getDeletedCount() >= 1;
     }
 
     @Override

@@ -20,6 +20,9 @@ import com.rabobank.argos.domain.supplychain.SupplyChain;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestSupplyChain;
 import com.rabobank.argos.service.domain.hierarchy.HierarchyRepository;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
+import com.rabobank.argos.service.domain.layout.ApprovalConfigurationRepository;
+import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
+import com.rabobank.argos.service.domain.link.LinkMetaBlockRepository;
 import com.rabobank.argos.service.domain.supplychain.SupplyChainRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -76,9 +79,18 @@ class SupplyChainRestServiceTest {
     @Mock
     private TreeNode treeNode;
 
+    @Mock
+    private LayoutMetaBlockRepository layoutRepository;
+
+    @Mock
+    private LinkMetaBlockRepository linkMetaBlockRepository;
+
+    @Mock
+    private ApprovalConfigurationRepository approvalConfigurationRepository;
+
     @BeforeEach
     public void setup() {
-        supplyChainRestService = new SupplyChainRestService(supplyChainRepository, hierarchyRepository, converter, labelRepository);
+        supplyChainRestService = new SupplyChainRestService(supplyChainRepository, hierarchyRepository, converter, labelRepository, layoutRepository, linkMetaBlockRepository, approvalConfigurationRepository);
     }
 
     @Test
@@ -183,5 +195,14 @@ class SupplyChainRestServiceTest {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> supplyChainRestService.getSupplyChainByPath(SUPPLY_CHAIN_NAME, List.of(LABEL_NAME)));
         assertThat(exception.getStatus().value(), is(404));
         assertThat(exception.getMessage(), is("404 NOT_FOUND \"supply chain not found : supplyChainName with path labelName\""));
+    }
+
+    @Test
+    void deleteSupplyChainById() {
+        assertThat(supplyChainRestService.deleteSupplyChainById(SUPPLY_CHAIN_ID).getStatusCodeValue(), is(204));
+        verify(approvalConfigurationRepository).deleteBySupplyChainId(SUPPLY_CHAIN_ID);
+        verify(linkMetaBlockRepository).deleteBySupplyChainId(SUPPLY_CHAIN_ID);
+        verify(supplyChainRepository).delete(SUPPLY_CHAIN_ID);
+        verify(layoutRepository).deleteBySupplyChainId(SUPPLY_CHAIN_ID);
     }
 }

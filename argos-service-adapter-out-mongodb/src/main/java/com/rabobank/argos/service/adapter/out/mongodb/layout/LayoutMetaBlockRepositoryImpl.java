@@ -15,7 +15,6 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.layout;
 
-import com.mongodb.client.result.UpdateResult;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
 import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
 import lombok.RequiredArgsConstructor;
@@ -51,11 +50,15 @@ public class LayoutMetaBlockRepositoryImpl implements LayoutMetaBlockRepository 
         }
     }
 
-    private boolean update(LayoutMetaBlock layoutMetaBlock) {
+    @Override
+    public void deleteBySupplyChainId(String supplyChainId) {
+        template.remove(getPrimaryQuery(supplyChainId), COLLECTION);
+    }
+
+    private void update(LayoutMetaBlock layoutMetaBlock) {
         Document document = new Document();
         template.getConverter().write(layoutMetaBlock, document);
-        UpdateResult updateResult = template.updateFirst(getPrimaryQuery(layoutMetaBlock.getSupplyChainId()), Update.fromDocument(document), LayoutMetaBlock.class, COLLECTION);
-        return updateResult.getMatchedCount() > 0;
+        template.updateFirst(getPrimaryQuery(layoutMetaBlock.getSupplyChainId()), Update.fromDocument(document), LayoutMetaBlock.class, COLLECTION);
     }
 
     private Query getPrimaryQuery(String supplyChainId) {

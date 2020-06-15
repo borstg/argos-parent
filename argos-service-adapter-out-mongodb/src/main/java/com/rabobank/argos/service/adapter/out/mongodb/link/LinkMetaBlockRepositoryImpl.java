@@ -143,4 +143,9 @@ public class LinkMetaBlockRepositoryImpl implements LinkMetaBlockRepository {
         );
         return template.find(query, LinkMetaBlock.class, COLLECTION);
     }
+
+    @Override
+    public void deleteBySupplyChainId(String supplyChainId) {
+        template.remove(new Query(new Criteria(SUPPLY_CHAIN_ID_FIELD).is(supplyChainId)), COLLECTION);
+    }
 }

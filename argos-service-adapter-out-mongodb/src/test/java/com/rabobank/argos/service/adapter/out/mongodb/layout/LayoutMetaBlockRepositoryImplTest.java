@@ -89,7 +89,6 @@ class LayoutMetaBlockRepositoryImplTest {
     void update() {
         when(template.findOne(any(Query.class), eq(LayoutMetaBlock.class), eq(COLLECTION))).thenReturn(layoutMetaBlock);
         when(template.getConverter()).thenReturn(converter);
-        when(updateResult.getMatchedCount()).thenReturn(1L);
         when(template.updateFirst(any(Query.class), any(Update.class), eq(LayoutMetaBlock.class), eq(COLLECTION))).thenReturn(updateResult);
         when(layoutMetaBlock.getSupplyChainId()).thenReturn(SUPPLY_CHAIN_ID);
         repository.createOrUpdate(layoutMetaBlock);
@@ -100,4 +99,10 @@ class LayoutMetaBlockRepositoryImplTest {
         verify(converter).write(eq(layoutMetaBlock), any(Document.class));
     }
 
+    @Test
+    void deleteBySupplyChainId() {
+        repository.deleteBySupplyChainId(SUPPLY_CHAIN_ID);
+        verify(template).remove(queryArgumentCaptor.capture(), eq(COLLECTION));
+        assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"supplyChainId\" : \"supplyChainId\"}, Fields: {}, Sort: {}"));
+    }
 }

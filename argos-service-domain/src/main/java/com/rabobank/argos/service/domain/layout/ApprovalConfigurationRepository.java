@@ -25,4 +25,5 @@ public interface ApprovalConfigurationRepository {
 
     List<ApprovalConfiguration> findBySupplyChainId(String supplyChainId);
 
+    void deleteBySupplyChainId(String supplyChainId);
 }

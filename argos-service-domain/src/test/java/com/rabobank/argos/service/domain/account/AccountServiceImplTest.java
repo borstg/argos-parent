@@ -17,9 +17,9 @@ package com.rabobank.argos.service.domain.account;
 
 import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.account.Account;
+import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.domain.account.ServiceAccount;
 import com.rabobank.argos.domain.account.ServiceAccountKeyPair;
-import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.domain.key.KeyPair;
 import com.rabobank.argos.domain.permission.LocalPermissions;
 import com.rabobank.argos.domain.permission.Permission;
@@ -391,5 +391,12 @@ class AccountServiceImplTest {
         when(personalAccountRepository.findByAccountId(ACCOUNT_ID)).thenReturn(Optional.empty());
         assertThat(accountService.updatePersonalAccountLocalPermissionsById(ACCOUNT_ID, newLocalPermissions), is(Optional.empty()));
         verifyNoMoreInteractions(personalAccountRepository);
+    }
+
+    @Test
+    void deleteServiceAccount() {
+        when(serviceAccountRepository.delete(ACCOUNT_ID)).thenReturn(true);
+        assertThat(accountService.deleteServiceAccount(ACCOUNT_ID), is(true));
+        verify(serviceAccountRepository).delete(ACCOUNT_ID);
     }
 }

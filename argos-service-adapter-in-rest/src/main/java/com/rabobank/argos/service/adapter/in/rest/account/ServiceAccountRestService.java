@@ -107,6 +107,18 @@ public class ServiceAccountRestService implements ServiceAccountApi {
 
     @Override
     @PermissionCheck(permissions = SERVICE_ACCOUNT_EDIT)
+    public ResponseEntity<Void> deleteServiceAccount(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR) String serviceAccountId) {
+        boolean isDeleted = accountService.deleteServiceAccount(serviceAccountId);
+        if (!isDeleted) {
+            throw accountNotFound(serviceAccountId);
+        }
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
+    }
+
+    @Override
+    @PermissionCheck(permissions = SERVICE_ACCOUNT_EDIT)
     public ResponseEntity<RestServiceAccount> updateServiceAccountById(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR) String serviceAccountId, RestServiceAccount restServiceAccount) {
         verifyParentLabelExists(restServiceAccount.getParentLabelId());
         ServiceAccount serviceAccount = accountMapper.convertFromRestServiceAccount(restServiceAccount);
