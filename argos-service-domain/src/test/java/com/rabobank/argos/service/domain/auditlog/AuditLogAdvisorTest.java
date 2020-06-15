@@ -17,12 +17,15 @@ package com.rabobank.argos.service.domain.auditlog;
 
 import com.rabobank.argos.service.domain.util.reflection.ParameterData;
 import com.rabobank.argos.service.domain.util.reflection.ReflectionHelper;
+import lombok.Builder;
+import lombok.Data;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,6 +36,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,6 +48,7 @@ class AuditLogAdvisorTest {
     private static final String BEAN_NAME = "beanName";
     private static final String METHOD_NAME = "methodName";
     private static final String STRING_RETURN_VALUE = "stringReturnValue";
+    private static final String VALUE_STRINGVALUE = "{\"value\":\"stringvalue\"}";
     @Mock
     private ApplicationContext applicationContext;
     @Mock
@@ -69,9 +74,11 @@ class AuditLogAdvisorTest {
 
     @Captor
     private ArgumentCaptor<AuditLogData> serializerArgumentCaptor;
-
+    @Captor
+    private ArgumentCaptor<ArgumentValue> serializerObjectArgumentCaptor;
     private AuditLogAdvisor auditLogAdvisor;
     private static final Object[] STRING_ARGUMENT_VALUES = {STRING_ARGUMENT_VALUE};
+
     @Mock
     private ParameterData<AuditParam, Object> parameterData;
 
@@ -79,11 +86,12 @@ class AuditLogAdvisorTest {
     void setup() {
         auditLogAdvisor = new AuditLogAdvisor(applicationContext, reflectionHelper);
         when(joinPoint.getSignature()).thenReturn(signature);
-        when(joinPoint.getArgs()).thenReturn(STRING_ARGUMENT_VALUES);
+
     }
 
     @Test
     void auditLogWithStringArgument() {
+        when(joinPoint.getArgs()).thenReturn(STRING_ARGUMENT_VALUES);
         when(auditParam.value()).thenReturn(ARGUMENT_NAME);
         when(auditLog.argumentSerializerBeanName()).thenReturn(BEAN_NAME);
         when(applicationContext.getBean(BEAN_NAME, ArgumentSerializer.class)).thenReturn(argumentSerializer);
@@ -99,5 +107,36 @@ class AuditLogAdvisorTest {
         assertThat(auditLogData.getReturnValue(), is(STRING_RETURN_VALUE));
         assertThat(auditLogData.getArgumentData().isEmpty(), is(false));
         assertThat(auditLogData.getArgumentData().get(ARGUMENT_NAME), is(STRING_ARGUMENT_VALUE));
+    }
+
+    @Test
+    void auditLogWithObjectArgument() {
+        ArgumentValue argumentValue = ArgumentValue.builder().value("stringValue").build();
+        Object[] argumentvalues = new Object[]{argumentValue};
+        when(joinPoint.getArgs()).thenReturn(argumentvalues);
+        when(auditParam.value()).thenReturn(ARGUMENT_NAME);
+        when(auditLog.argumentSerializerBeanName()).thenReturn(BEAN_NAME);
+        when(applicationContext.getBean(BEAN_NAME, ArgumentSerializer.class)).thenReturn(argumentSerializer);
+        when(parameterData.getAnnotation()).thenReturn(auditParam);
+        when(parameterData.getValue()).thenReturn(argumentValue);
+        when(signature.getMethod()).thenReturn(method);
+        when(method.getName()).thenReturn(METHOD_NAME);
+        when(argumentSerializer.serialize(argumentValue)).thenReturn(VALUE_STRINGVALUE);
+        when(reflectionHelper.getParameterDataByAnnotation(ArgumentMatchers.any(), eq(AuditParam.class), ArgumentMatchers.any()))
+                .thenReturn(Stream.of(parameterData));
+        auditLogAdvisor.auditLog(joinPoint, auditLog, STRING_RETURN_VALUE);
+        verify(argumentSerializer, times(2)).serialize(serializerArgumentCaptor.capture());
+        AuditLogData auditLogData = serializerArgumentCaptor.getValue();
+        assertThat(auditLogData.getMethodName(), is(METHOD_NAME));
+        assertThat(auditLogData.getReturnValue(), is(STRING_RETURN_VALUE));
+        assertThat(auditLogData.getArgumentData().isEmpty(), is(false));
+        assertThat(auditLogData.getArgumentData().get(ARGUMENT_NAME), is(VALUE_STRINGVALUE));
+
+    }
+
+    @Data
+    @Builder
+    public static class ArgumentValue {
+        private String value;
     }
 }
