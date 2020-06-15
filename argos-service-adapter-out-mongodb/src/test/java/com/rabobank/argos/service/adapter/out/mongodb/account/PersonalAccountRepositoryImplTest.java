@@ -161,4 +161,19 @@ class PersonalAccountRepositoryImplTest {
         assertThat(queryArgumentCaptor.getValue().toString(), Matchers.is("Query: { \"name\" : { \"$regex\" : \".*name.*\", \"$options\" : \"i\"}}, Fields: { \"accountId\" : 1, \"name\" : 1, \"email\" : 1}, Sort: { \"name\" : 1}"));
     }
 
+    @Test
+    void searchByActiveKeyIds() {
+        when(template.find(any(Query.class), eq(PersonalAccount.class), eq(COLLECTION))).thenReturn(List.of(personalAccount));
+        assertThat(repository.search(AccountSearchParams.builder().activeKeyIds(List.of("key1", "key2")).build()), contains(personalAccount));
+        verify(template).find(queryArgumentCaptor.capture(), eq(PersonalAccount.class), eq(COLLECTION));
+        assertThat(queryArgumentCaptor.getValue().toString(), Matchers.is("Query: { \"activeKeyPair.keyId\" : { \"$in\" : [\"key1\", \"key2\"]}}, Fields: { \"accountId\" : 1, \"name\" : 1, \"email\" : 1}, Sort: { \"name\" : 1}"));
+    }
+
+    @Test
+    void searchByInActiveKeyIds() {
+        when(template.find(any(Query.class), eq(PersonalAccount.class), eq(COLLECTION))).thenReturn(List.of(personalAccount));
+        assertThat(repository.search(AccountSearchParams.builder().inActiveKeyIds(List.of("key1", "key2")).build()), contains(personalAccount));
+        verify(template).find(queryArgumentCaptor.capture(), eq(PersonalAccount.class), eq(COLLECTION));
+        assertThat(queryArgumentCaptor.getValue().toString(), Matchers.is("Query: { \"inactiveKeyPairs.keyId\" : { \"$in\" : [\"key1\", \"key2\"]}}, Fields: { \"accountId\" : 1, \"name\" : 1, \"email\" : 1}, Sort: { \"name\" : 1}"));
+    }
 }

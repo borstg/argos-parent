@@ -659,7 +659,7 @@ paths:
               minLength: 64
               maxLength: 64
               pattern: '^[0-9a-f]*$'
-        - name: inActiveKeyIds
+        - name: inactiveKeyIds
           in: query
           required: false
           explode: false

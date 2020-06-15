@@ -64,6 +64,8 @@ class PersonalAccountRestServiceTest {
     private static final String ROLE_NAME = "roleName";
     private static final String LABEL_ID = "labelId";
     private static final String ROLE_ID = "roleId";
+    private static final String KEY1 = "key1";
+    private static final String KEY2 = "key2";
 
     private PersonalAccountRestService service;
     @Mock
@@ -200,7 +202,7 @@ class PersonalAccountRestServiceTest {
         when(personalAccountMapper.convertToRoleId(ROLE_NAME)).thenReturn(ROLE_ID);
         when(accountService.searchPersonalAccounts(any(AccountSearchParams.class))).thenReturn(List.of(personalAccount));
         when(personalAccountMapper.convertToRestPersonalAccountWithoutRoles(personalAccount)).thenReturn(restPersonalAccount);
-        ResponseEntity<List<RestPersonalAccount>> response = service.searchPersonalAccounts(ROLE_NAME, LABEL_ID, NAME, null, null);
+        ResponseEntity<List<RestPersonalAccount>> response = service.searchPersonalAccounts(ROLE_NAME, LABEL_ID, NAME, List.of(KEY1), List.of(KEY2));
         assertThat(response.getBody(), contains(restPersonalAccount));
         assertThat(response.getStatusCodeValue(), Matchers.is(200));
         verify(accountService).searchPersonalAccounts(searchParamsArgumentCaptor.capture());
@@ -208,6 +210,8 @@ class PersonalAccountRestServiceTest {
         assertThat(searchParams.getLocalPermissionsLabelId(), is(Optional.of(LABEL_ID)));
         assertThat(searchParams.getRoleId(), is(Optional.of(ROLE_ID)));
         assertThat(searchParams.getName(), is(Optional.of(NAME)));
+        assertThat(searchParams.getActiveKeyIds().get(), contains(KEY1));
+        assertThat(searchParams.getInActiveKeyIds().get(), contains(KEY2));
     }
 
     @Test
