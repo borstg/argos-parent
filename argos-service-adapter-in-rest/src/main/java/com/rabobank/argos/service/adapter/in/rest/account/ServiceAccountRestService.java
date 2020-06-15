@@ -39,8 +39,8 @@ import java.net.URI;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.rabobank.argos.domain.permission.Permission.SERVICE_ACCOUNT_EDIT;
 import static com.rabobank.argos.domain.permission.Permission.READ;
+import static com.rabobank.argos.domain.permission.Permission.SERVICE_ACCOUNT_EDIT;
 import static com.rabobank.argos.service.adapter.in.rest.account.ServiceAccountLabelIdExtractor.SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR;
 
 @RestController
@@ -103,6 +103,18 @@ public class ServiceAccountRestService implements ServiceAccountApi {
                 .map(accountMapper::convertToRestServiceAccount)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> accountNotFound(serviceAccountId));
+    }
+
+    @Override
+    @PermissionCheck(permissions = SERVICE_ACCOUNT_EDIT)
+    public ResponseEntity<Void> deleteServiceAccount(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR) String serviceAccountId) {
+        boolean isDeleted = accountService.deleteServiceAccount(serviceAccountId);
+        if (!isDeleted) {
+            throw accountNotFound(serviceAccountId);
+        }
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
     }
 
     @Override

@@ -15,6 +15,7 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.account;
 
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.account.ServiceAccount;
@@ -74,6 +75,9 @@ class ServiceAccountRepositoryImplTest {
 
     @Mock
     private DuplicateKeyException duplicateKeyException;
+
+    @Mock
+    private DeleteResult deleteResult;
 
     @BeforeEach
     void setUp() {
@@ -149,5 +153,14 @@ class ServiceAccountRepositoryImplTest {
         assertThat(repository.findParentLabelIdByAccountId(ACTIVE_KEY_ID), equalTo(Optional.of(ACCOUNT_ID)));
         verify(template).findOne(queryArgumentCaptor.capture(), eq(ServiceAccount.class), eq(COLLECTION));
         assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"accountId\" : \"activeKeyId\"}, Fields: { \"parentLabelId\" : 1}, Sort: {}"));
+    }
+
+    @Test
+    void delete() {
+        when(template.remove(any(Query.class), eq(ServiceAccount.class), eq(COLLECTION))).thenReturn(deleteResult);
+        when(deleteResult.getDeletedCount()).thenReturn(1L);
+        assertThat(repository.delete(ACCOUNT_ID), is(true));
+        verify(template).remove(queryArgumentCaptor.capture(), eq(ServiceAccount.class), eq(COLLECTION));
+        assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"accountId\" : \"accountId\"}, Fields: {}, Sort: {}"));
     }
 }

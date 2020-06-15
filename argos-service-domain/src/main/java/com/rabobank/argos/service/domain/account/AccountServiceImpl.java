@@ -17,9 +17,9 @@ package com.rabobank.argos.service.domain.account;
 
 import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.account.Account;
+import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.domain.account.ServiceAccount;
 import com.rabobank.argos.domain.account.ServiceAccountKeyPair;
-import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.domain.key.KeyPair;
 import com.rabobank.argos.domain.permission.LocalPermissions;
 import com.rabobank.argos.domain.permission.Role;
@@ -165,6 +165,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void save(ServiceAccount serviceAccount) {
         serviceAccountRepository.save(serviceAccount);
+    }
+
+    @Override
+    public boolean deleteServiceAccount(String accountId) {
+        return serviceAccountRepository.delete(accountId);
     }
 
     @Override
