@@ -701,6 +701,30 @@ paths:
                 $ref: "#/components/schemas/PersonalAccount"
         '500':
           $ref: '#/components/responses/Error'
+  /personalaccount/{accountId}/key:
+    get:
+      summary: get active key bij personal account id
+      operationId: getPersonalAccountKeyById
+      tags:
+        - personal account
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}?$'
+      responses:
+        '200':
+          description: key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicKey"
+        '404':
+          description: no active key exists
+        '500':
+          $ref: '#/components/responses/Error'
   /personalaccount/{accountId}/role:
     put:
       summary: update personal account roles by id

@@ -28,6 +28,7 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestLocalPermissions
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestPermission;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestPersonalAccount;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestProfile;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestPublicKey;
 import com.rabobank.argos.service.domain.account.AccountSearchParams;
 import com.rabobank.argos.service.domain.account.AccountService;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
@@ -85,6 +86,14 @@ public class PersonalAccountRestService implements PersonalAccountApi {
         return accountService.getPersonalAccountById(accountId)
                 .map(personalAccountMapper::convertToRestPersonalAccount)
                 .map(ResponseEntity::ok).orElseThrow(this::accountNotFound);
+    }
+
+    @Override
+    @PermissionCheck(permissions = {Permission.PERSONAL_ACCOUNT_READ})
+    public ResponseEntity<RestPublicKey> getPersonalAccountKeyById(String accountId) {
+        PersonalAccount account = accountService.getPersonalAccountById(accountId).orElseThrow(this::accountNotFound);
+        return ResponseEntity.ok(Optional.ofNullable(account.getActiveKeyPair()).map(keyPairMapper::convertToRestPublicKey)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "no active keypair found for account: " + account.getName())));
     }
 
     @Override
