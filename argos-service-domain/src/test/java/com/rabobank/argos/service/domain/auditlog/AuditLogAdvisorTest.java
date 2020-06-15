@@ -1,0 +1,88 @@
+package com.rabobank.argos.service.domain.auditlog;
+
+import com.rabobank.argos.service.domain.util.reflection.ParameterData;
+import com.rabobank.argos.service.domain.util.reflection.ReflectionHelper;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
+
+import java.lang.reflect.Method;
+import java.util.stream.Stream;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class AuditLogAdvisorTest {
+    private static final String STRING_ARGUMENT_VALUE = "argumentValue";
+    private static final String ARGUMENT_NAME = "argumentName";
+    private static final String BEAN_NAME = "beanName";
+    private static final String METHOD_NAME = "methodName";
+    private static final String STRING_RETURN_VALUE = "stringReturnValue";
+    @Mock
+    private ApplicationContext applicationContext;
+    @Mock
+    private ReflectionHelper reflectionHelper;
+
+    @Mock(lenient = true)
+    private JoinPoint joinPoint;
+
+    @Mock
+    private MethodSignature signature;
+
+    @Mock
+    private Method method;
+    @Mock
+    private ArgumentSerializer argumentSerializer;
+
+    @Mock
+    private AuditLog auditLog;
+
+    @Mock
+    private AuditParam auditParam;
+
+
+    @Captor
+    private ArgumentCaptor<AuditLogData> serializerArgumentCaptor;
+
+    private AuditLogAdvisor auditLogAdvisor;
+    private static final Object[] STRING_ARGUMENT_VALUES = {STRING_ARGUMENT_VALUE};
+    @Mock
+    private ParameterData<AuditParam, Object> parameterData;
+
+    @BeforeEach
+    void setup() {
+        auditLogAdvisor = new AuditLogAdvisor(applicationContext, reflectionHelper);
+        when(joinPoint.getSignature()).thenReturn(signature);
+        when(joinPoint.getArgs()).thenReturn(STRING_ARGUMENT_VALUES);
+    }
+
+    @Test
+    void auditLogWithStringArgument() {
+        when(auditParam.value()).thenReturn(ARGUMENT_NAME);
+        when(auditLog.argumentSerializerBeanName()).thenReturn(BEAN_NAME);
+        when(applicationContext.getBean(BEAN_NAME, ArgumentSerializer.class)).thenReturn(argumentSerializer);
+        when(parameterData.getAnnotation()).thenReturn(auditParam);
+        when(parameterData.getValue()).thenReturn(STRING_ARGUMENT_VALUE);
+        when(signature.getMethod()).thenReturn(method);
+        when(method.getName()).thenReturn(METHOD_NAME);
+        when(reflectionHelper.getParameterDataByAnnotation(method, AuditParam.class, STRING_ARGUMENT_VALUES)).thenReturn(Stream.of(parameterData));
+        auditLogAdvisor.auditLog(joinPoint, auditLog, STRING_RETURN_VALUE);
+        verify(argumentSerializer, times(1)).serialize(serializerArgumentCaptor.capture());
+        AuditLogData auditLogData = serializerArgumentCaptor.getValue();
+        assertThat(auditLogData.getMethodName(), is(METHOD_NAME));
+        assertThat(auditLogData.getReturnValue(), is(STRING_RETURN_VALUE));
+        assertThat(auditLogData.getArgumentData().isEmpty(), is(false));
+        assertThat(auditLogData.getArgumentData().get(ARGUMENT_NAME), is(STRING_ARGUMENT_VALUE));
+    }
+}

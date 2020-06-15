@@ -53,11 +53,12 @@ public class AuditLogAdvisor {
         Object[] argumentvalues = joinPoint.getArgs();
         String serializedReturnValue = serializeValue(returnValue, argumentSerializer);
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
-        Map<String, String> argumentValues = reflectionHelper.getParameterDataByAnnotation(method, AuditParam.class, argumentvalues).collect(Collectors
-                .toMap(p -> p.getAnnotation().value(),
-                        p -> serializeValue(p.getValue(), argumentSerializer)
-                )
-        );
+        Map<String, String> argumentValues = reflectionHelper.getParameterDataByAnnotation(method, AuditParam.class, argumentvalues)
+                .collect(Collectors
+                        .toMap(p -> p.getAnnotation().value(),
+                                p -> serializeValue(p.getValue(), argumentSerializer)
+                        )
+                );
         AuditLogData auditLogData = AuditLogData.builder()
                 .argumentData(argumentValues)
                 .methodName(method.getName())
