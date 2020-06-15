@@ -15,6 +15,16 @@
  */
 package com.rabobank.argos.service.domain.auditlog;
 
-public interface ArgumentBodySerializer {
-    <T> String serialize(T arg);
+import lombok.Builder;
+import lombok.Data;
+
+import java.util.Map;
+
+@Data
+@Builder
+public class AuditLogData {
+    private String methodName;
+    private Map<String, String> argumentData;
+    private String path;
+    private String returnValue;
 }

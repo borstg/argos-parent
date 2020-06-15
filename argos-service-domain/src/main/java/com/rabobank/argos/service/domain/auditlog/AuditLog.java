@@ -26,5 +26,5 @@ import java.lang.annotation.Target;
 @Documented
 public @interface AuditLog {
 
-    String bodyArgumentSerializerBeanName() default "JsonArgumentSerializer";
+    String argumentSerializerBeanName() default "JsonArgumentSerializer";
 }

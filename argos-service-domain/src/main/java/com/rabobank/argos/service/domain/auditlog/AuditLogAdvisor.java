@@ -19,8 +19,8 @@ import com.rabobank.argos.service.domain.util.reflection.ReflectionHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.MDC;
@@ -47,27 +47,32 @@ public class AuditLogAdvisor {
         //This is an AspectJ pointcut implemented as method
     }
 
-    @Before(value = "auditLogPointCut(auditLog)", argNames = "joinPoint,auditLog")
-    public void auditLog(JoinPoint joinPoint, AuditLog auditLog) {
+    @AfterReturning(value = "auditLogPointCut(auditLog)", argNames = "joinPoint,auditLog,returnValue", returning = "returnValue")
+    public void auditLog(JoinPoint joinPoint, AuditLog auditLog, Object returnValue) {
+        ArgumentSerializer argumentSerializer = applicationContext
+                .getBean(auditLog.argumentSerializerBeanName(), ArgumentSerializer.class);
         Object[] argumentvalues = joinPoint.getArgs();
+        String serializedReturnValue = serializeValue(returnValue, argumentSerializer);
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
-        ArgumentBodySerializer argumentBodySerializer = applicationContext
-                .getBean(auditLog.bodyArgumentSerializerBeanName(), ArgumentBodySerializer.class);
         Map<String, String> argumentValues = reflectionHelper.getParameterDataByAnnotation(method, AuditParam.class, argumentvalues).collect(Collectors
                 .toMap(p -> p.getAnnotation().value(),
-                        p -> serializeValue(p.getValue(), argumentBodySerializer, auditLog)
+                        p -> serializeValue(p.getValue(), argumentSerializer)
                 )
         );
-        MDC.put("methodName", method.getName());
-        MDC.put("arguments", argumentBodySerializer.serialize(argumentValues));
-        log.trace("auditlog created");
+        AuditLogData auditLogData = AuditLogData.builder()
+                .argumentData(argumentValues)
+                .methodName(method.getName())
+                .path(MDC.get("path"))
+                .returnValue(serializedReturnValue)
+                .build();
+        log.info("AuditLog: {}", argumentSerializer.serialize(auditLogData));
     }
 
-    private String serializeValue(Object argumentValue, ArgumentBodySerializer argumentBodySerializer, AuditLog auditLog) {
+    private String serializeValue(Object argumentValue, ArgumentSerializer argumentSerializer) {
         if (argumentValue instanceof String) {
             return (String) argumentValue;
         } else {
-            return argumentBodySerializer.serialize(argumentValue);
+            return argumentSerializer.serialize(argumentValue);
 
         }
     }

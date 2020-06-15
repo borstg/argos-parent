@@ -20,7 +20,7 @@ import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 
 @Component("JsonArgumentSerializer")
-public class JsonArgumentSerializer implements ArgumentBodySerializer {
+public class JsonArgumentSerializer implements ArgumentSerializer {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @SneakyThrows
