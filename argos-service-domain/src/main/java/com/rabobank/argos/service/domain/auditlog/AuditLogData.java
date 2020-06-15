@@ -25,6 +25,5 @@ import java.util.Map;
 public class AuditLogData {
     private String methodName;
     private Map<String, String> argumentData;
-    private String path;
     private String returnValue;
 }

@@ -23,7 +23,6 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.slf4j.MDC;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -62,7 +61,6 @@ public class AuditLogAdvisor {
         AuditLogData auditLogData = AuditLogData.builder()
                 .argumentData(argumentValues)
                 .methodName(method.getName())
-                .path(MDC.get("path"))
                 .returnValue(serializedReturnValue)
                 .build();
         log.info("AuditLog: {}", argumentSerializer.serialize(auditLogData));
