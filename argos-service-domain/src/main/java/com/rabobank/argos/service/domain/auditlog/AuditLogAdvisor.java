@@ -75,7 +75,7 @@ public class AuditLogAdvisor {
             if (hasObjectArgumentFilter(auditParam)) {
                 ObjectArgumentFilter<Object> objectArgumentFilter = applicationContext
                         .getBean(auditParam.objectArgumentFilterBeanName(), ObjectArgumentFilter.class);
-                return argumentSerializer.serialize(objectArgumentFilter.filterObjectArguments(argumentValue, argumentSerializer, auditParam));
+                return argumentSerializer.serialize(objectArgumentFilter.filterObjectArguments(argumentValue, auditParam));
             } else {
                 return argumentSerializer.serialize(argumentValue);
             }
