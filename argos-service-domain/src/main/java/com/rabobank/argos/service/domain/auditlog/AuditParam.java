@@ -24,4 +24,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AuditParam {
 	String value();
+
+	String objectArgumentFilterBeanName() default "";
+
 }

@@ -25,6 +25,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -51,12 +52,12 @@ public class AuditLogAdvisor {
         ArgumentSerializer argumentSerializer = applicationContext
                 .getBean(auditLog.argumentSerializerBeanName(), ArgumentSerializer.class);
         Object[] argumentvalues = joinPoint.getArgs();
-        String serializedReturnValue = serializeValue(returnValue, argumentSerializer);
+        String serializedReturnValue = serializeValue(returnValue, argumentSerializer, null);
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         Map<String, String> argumentValues = reflectionHelper.getParameterDataByAnnotation(method, AuditParam.class, argumentvalues)
                 .collect(Collectors
                         .toMap(p -> p.getAnnotation().value(),
-                                p -> serializeValue(p.getValue(), argumentSerializer)
+                                p -> serializeValue(p.getValue(), argumentSerializer, p.getAnnotation())
                         )
                 );
         AuditLogData auditLogData = AuditLogData.builder()
@@ -67,12 +68,22 @@ public class AuditLogAdvisor {
         log.info("AuditLog: {}", argumentSerializer.serialize(auditLogData));
     }
 
-    private String serializeValue(Object argumentValue, ArgumentSerializer argumentSerializer) {
+    private String serializeValue(Object argumentValue, ArgumentSerializer argumentSerializer, @Nullable AuditParam auditParam) {
         if (argumentValue instanceof String) {
             return (String) argumentValue;
         } else {
-            return argumentSerializer.serialize(argumentValue);
+            if (hasObjectArgumentFilter(auditParam)) {
+                ObjectArgumentFilter<Object> objectArgumentFilter = applicationContext
+                        .getBean(auditParam.objectArgumentFilterBeanName(), ObjectArgumentFilter.class);
+                return argumentSerializer.serialize(objectArgumentFilter.filterObjectArguments(argumentValue, argumentSerializer, auditParam));
+            } else {
+                return argumentSerializer.serialize(argumentValue);
+            }
 
         }
+    }
+
+    private boolean hasObjectArgumentFilter(@Nullable AuditParam auditParam) {
+        return auditParam != null && !"".equals(auditParam.objectArgumentFilterBeanName());
     }
 }
