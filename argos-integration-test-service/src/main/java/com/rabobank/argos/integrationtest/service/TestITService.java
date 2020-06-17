@@ -33,6 +33,7 @@ import com.rabobank.argos.integrationtest.service.layout.LayoutMetaBlockMapper;
 import com.rabobank.argos.integrationtest.service.link.LinkMetaBlockMapper;
 import com.rabobank.argos.service.domain.account.AccountService;
 import com.rabobank.argos.service.domain.account.PersonalAccountRepository;
+import com.rabobank.argos.service.domain.auditlog.AuditLogRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -102,6 +103,8 @@ public class TestITService implements IntegrationTestServiceApi {
 
     private final AccountMapper accountMapper;
 
+    private final AuditLogRepository audiLogRepository;
+
     @PostConstruct
     public void init() {
         Security.addProvider(new BouncyCastleProvider());
@@ -149,6 +152,11 @@ public class TestITService implements IntegrationTestServiceApi {
         linkMetaBlock.setSignature(Signature.builder().signature(signature).keyId(keyId).build());
         return ResponseEntity.ok(linkMetaBlockMapper.convertToRestLinkMetaBlock(linkMetaBlock));
 
+    }
+
+    @Override
+    public ResponseEntity<String> auditLogGet() {
+        return ResponseEntity.ok(audiLogRepository.getAuditLogs());
     }
 
     @Override

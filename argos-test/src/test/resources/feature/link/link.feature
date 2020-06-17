@@ -25,8 +25,13 @@ Feature: Link
     * def linkPath = '/api/supplychain/'+ supplyChain.response.id + '/link'
     * def validLink = 'classpath:testmessages/link/valid-link.json'
 
-  Scenario: store link with valid specifications should return a 204
+  Scenario: store link with valid specifications should return a 204 and commit audit log
     * call read('create-link.feature') {supplyChainId:#(supplyChain.response.id), json:#(validLink), keyNumber:1}
+    * url karate.properties['server.integration-test-service.baseurl']
+    Given path '/integration-test/audit-log'
+    When method GET
+    Then status 200
+    And match response contains "createLink"
 
   Scenario: SERVICE_ACCOUNT can store a link with valid specifications and should return a 204
     * def childLabelResult = call read('classpath:feature/label/create-label.feature') {name: child_label, parentLabelId: #(supplyChain.response.parentLabelId)}
