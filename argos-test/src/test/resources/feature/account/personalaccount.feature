@@ -277,3 +277,17 @@ Feature: Personal Account
     When method GET
     Then status 403
     And match response == {"message":"Access denied"}
+
+  Scenario: get account by id should return a 200
+    Given path '/api/personalaccount/'+defaultTestData.personalAccounts['default-pa1'].accountId+'/key'
+    When method GET
+    Then status 200
+    Then match response == {id: #(defaultTestData.personalAccounts['default-pa1'].keyId), key: #(defaultTestData.personalAccounts['default-pa1'].publicKey)}
+
+  Scenario: search personal account without PERSONAL_ACCOUNT_READ should return a 403
+    * def extraAccount = call read('classpath:feature/account/create-personal-account.feature') {name: 'Extra Person', email: 'extra@extra.go'}
+    * configure headers = call read('classpath:headers.js') { token: #(extraAccount.response.token)}
+    Given path '/api/personalaccount/'+defaultTestData.personalAccounts['default-pa1'].accountId+'/key'
+    When method GET
+    Then status 403
+    And match response == {"message":"Access denied"}
