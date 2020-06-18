@@ -23,6 +23,7 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,7 @@ import static java.util.Arrays.asList;
 @Component
 @Slf4j
 @RequiredArgsConstructor
+@Order(value = 1)
 public class PermissionCheckAdvisor {
 
     private final AccountSecurityContext accountSecurityContext;

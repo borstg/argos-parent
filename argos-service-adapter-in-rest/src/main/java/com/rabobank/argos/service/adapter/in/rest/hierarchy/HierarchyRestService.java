@@ -22,6 +22,8 @@ import com.rabobank.argos.service.adapter.in.rest.api.handler.HierarchyApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestHierarchyMode;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLabel;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestTreeNode;
+import com.rabobank.argos.service.domain.auditlog.AuditLog;
+import com.rabobank.argos.service.domain.auditlog.AuditParam;
 import com.rabobank.argos.service.domain.hierarchy.HierarchyService;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
 import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
@@ -55,8 +57,9 @@ public class HierarchyRestService implements HierarchyApi {
     private final TreeNodeMapper treeNodeMapper;
 
     @Override
+    @AuditLog
     @PermissionCheck(permissions = Permission.TREE_EDIT)
-    public ResponseEntity<RestLabel> createLabel(@LabelIdCheckParam(propertyPath = "parentLabelId") RestLabel restLabel) {
+    public ResponseEntity<RestLabel> createLabel(@LabelIdCheckParam(propertyPath = "parentLabelId") @AuditParam("label") RestLabel restLabel) {
         verifyParentLabelExists(restLabel.getParentLabelId());
         Label label = labelMapper.convertFromRestLabel(restLabel);
         labelRepository.save(label);
@@ -77,8 +80,9 @@ public class HierarchyRestService implements HierarchyApi {
     }
 
     @Override
+    @AuditLog
     @PermissionCheck(permissions = Permission.TREE_EDIT)
-    public ResponseEntity<Void> deleteLabelById(@LabelIdCheckParam String labelId) {
+    public ResponseEntity<Void> deleteLabelById(@LabelIdCheckParam @AuditParam("labelId") String labelId) {
         if (labelRepository.deleteById(labelId)) {
             return ResponseEntity.noContent().build();
         } else {
@@ -95,8 +99,9 @@ public class HierarchyRestService implements HierarchyApi {
 
 
     @Override
+    @AuditLog
     @PermissionCheck(permissions = Permission.TREE_EDIT)
-    public ResponseEntity<RestLabel> updateLabelById(@LabelIdCheckParam String labelId, @LabelIdCheckParam(propertyPath = "parentLabelId") RestLabel restLabel) {
+    public ResponseEntity<RestLabel> updateLabelById(@LabelIdCheckParam @AuditParam("labelId") String labelId, @LabelIdCheckParam(propertyPath = "parentLabelId") @AuditParam("label") RestLabel restLabel) {
         verifyParentLabelIsDifferent(labelId, restLabel.getParentLabelId());
         verifyParentLabelExists(restLabel.getParentLabelId());
         Label label = labelMapper.convertFromRestLabel(restLabel);

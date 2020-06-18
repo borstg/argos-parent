@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.Set;
 
 import static com.rabobank.argos.domain.permission.Permission.LOCAL_PERMISSION_EDIT;
-import static com.rabobank.argos.domain.permission.Permission.SERVICE_ACCOUNT_EDIT;
 import static com.rabobank.argos.domain.permission.Permission.READ;
+import static com.rabobank.argos.domain.permission.Permission.SERVICE_ACCOUNT_EDIT;
 import static com.rabobank.argos.domain.permission.Permission.TREE_EDIT;
 import static com.rabobank.argos.service.domain.security.DefaultLocalPermissionCheckStrategy.DEFAULT_LOCAL_PERMISSION_CHECK_STRATEGY_BEAN_NAME;
 import static java.util.Objects.requireNonNull;
