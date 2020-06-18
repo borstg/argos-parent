@@ -38,7 +38,7 @@ Feature: Label
     When method POST
     Then status 403
 
-  Scenario: store a root label with invalid name should return a 400 and no audit log
+  Scenario: store a root label with invalid name should return a 400
     Given path '/api/label'
     And request { name: '1label'}
     When method POST
