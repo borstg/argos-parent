@@ -18,6 +18,7 @@ package com.rabobank.argos.service.adapter.in.rest.account;
 import com.rabobank.argos.domain.account.ServiceAccountKeyPair;
 import com.rabobank.argos.domain.key.KeyPair;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestKeyPair;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestPublicKey;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestServiceAccountKeyPair;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -46,6 +47,10 @@ public abstract class AccountKeyPairMapper {
     public abstract KeyPair convertFromRestKeyPair(RestKeyPair restKeyPair);
 
     public abstract RestKeyPair convertToRestKeyPair(KeyPair keyPair);
+
+    @Mapping(source = "keyId", target = "id")
+    @Mapping(source = "publicKey", target = "key")
+    public abstract RestPublicKey convertToRestPublicKey(KeyPair keyPair);
 
     @Named("encryptHashedKeyPassphrase")
     public String encryptHashedKeyPassphrase(String hashedKeyPassphrase) {

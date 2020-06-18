@@ -25,6 +25,7 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestLocalPermissions
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestPermission;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestPersonalAccount;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestProfile;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestPublicKey;
 import com.rabobank.argos.service.domain.account.AccountSearchParams;
 import com.rabobank.argos.service.domain.account.AccountService;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
@@ -64,6 +65,8 @@ class PersonalAccountRestServiceTest {
     private static final String ROLE_NAME = "roleName";
     private static final String LABEL_ID = "labelId";
     private static final String ROLE_ID = "roleId";
+    private static final String KEY1 = "key1";
+    private static final String KEY2 = "key2";
 
     private PersonalAccountRestService service;
     @Mock
@@ -105,6 +108,9 @@ class PersonalAccountRestServiceTest {
 
     @Mock
     private LabelRepository labelRepository;
+
+    @Mock
+    private RestPublicKey restPublicKey;
 
     @BeforeEach
     void setUp() {
@@ -200,7 +206,7 @@ class PersonalAccountRestServiceTest {
         when(personalAccountMapper.convertToRoleId(ROLE_NAME)).thenReturn(ROLE_ID);
         when(accountService.searchPersonalAccounts(any(AccountSearchParams.class))).thenReturn(List.of(personalAccount));
         when(personalAccountMapper.convertToRestPersonalAccountWithoutRoles(personalAccount)).thenReturn(restPersonalAccount);
-        ResponseEntity<List<RestPersonalAccount>> response = service.searchPersonalAccounts(ROLE_NAME, LABEL_ID, NAME);
+        ResponseEntity<List<RestPersonalAccount>> response = service.searchPersonalAccounts(ROLE_NAME, LABEL_ID, NAME, List.of(KEY1), List.of(KEY2));
         assertThat(response.getBody(), contains(restPersonalAccount));
         assertThat(response.getStatusCodeValue(), Matchers.is(200));
         verify(accountService).searchPersonalAccounts(searchParamsArgumentCaptor.capture());
@@ -208,6 +214,8 @@ class PersonalAccountRestServiceTest {
         assertThat(searchParams.getLocalPermissionsLabelId(), is(Optional.of(LABEL_ID)));
         assertThat(searchParams.getRoleId(), is(Optional.of(ROLE_ID)));
         assertThat(searchParams.getName(), is(Optional.of(NAME)));
+        assertThat(searchParams.getActiveKeyIds().get(), contains(KEY1));
+        assertThat(searchParams.getInActiveKeyIds().get(), contains(KEY2));
     }
 
     @Test
@@ -291,5 +299,31 @@ class PersonalAccountRestServiceTest {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.updateLocalPermissionsForLabel(ACCOUNT_ID, LABEL_ID, List.of(RestPermission.READ)));
         assertThat(exception.getStatus().value(), is(400));
         assertThat(exception.getMessage(), is("400 BAD_REQUEST \"label not found : labelId\""));
+    }
+
+    @Test
+    void getPersonalAccountKeyById() {
+        when(accountService.getPersonalAccountById(ACCOUNT_ID)).thenReturn(Optional.of(personalAccount));
+        when(personalAccount.getActiveKeyPair()).thenReturn(keyPair);
+        when(keyPairMapper.convertToRestPublicKey(keyPair)).thenReturn(restPublicKey);
+        ResponseEntity<RestPublicKey> response = service.getPersonalAccountKeyById(ACCOUNT_ID);
+        assertThat(response.getStatusCodeValue(), is(200));
+        assertThat(response.getBody(), is(restPublicKey));
+    }
+
+    @Test
+    void getPersonalAccountKeyByIdNoAccount() {
+        when(accountService.getPersonalAccountById(ACCOUNT_ID)).thenReturn(Optional.empty());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.getPersonalAccountKeyById(ACCOUNT_ID));
+        assertThat(exception.getMessage(), is("404 NOT_FOUND \"personal account not found\""));
+    }
+
+    @Test
+    void getPersonalAccountKeyByIdNoActiveKey() {
+        when(personalAccount.getName()).thenReturn("name");
+        when(accountService.getPersonalAccountById(ACCOUNT_ID)).thenReturn(Optional.of(personalAccount));
+        when(personalAccount.getActiveKeyPair()).thenReturn(null);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.getPersonalAccountKeyById(ACCOUNT_ID));
+        assertThat(exception.getMessage(), is("404 NOT_FOUND \"no active keypair found for account: name\""));
     }
 }

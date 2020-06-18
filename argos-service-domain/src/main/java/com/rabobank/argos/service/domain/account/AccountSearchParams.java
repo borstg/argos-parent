@@ -17,6 +17,7 @@ package com.rabobank.argos.service.domain.account;
 
 import lombok.Builder;
 
+import java.util.List;
 import java.util.Optional;
 
 @Builder
@@ -24,6 +25,8 @@ public class AccountSearchParams {
     private final String roleId;
     private final String localPermissionsLabelId;
     private final String name;
+    private final List<String> activeKeyIds;
+    private final List<String> inActiveKeyIds;
 
     public Optional<String> getRoleId() {
         return Optional.ofNullable(roleId);
@@ -35,5 +38,13 @@ public class AccountSearchParams {
 
     public Optional<String> getName() {
         return Optional.ofNullable(name);
+    }
+
+    public Optional<List<String>> getActiveKeyIds() {
+        return Optional.ofNullable(activeKeyIds);
+    }
+
+    public Optional<List<String>> getInActiveKeyIds() {
+        return Optional.ofNullable(inActiveKeyIds);
     }
 }
