@@ -22,9 +22,13 @@ Feature: Label
     * def defaultTestData = call read('classpath:default-test-data.js')
     * configure headers = call read('classpath:headers.js') { token: #(defaultTestData.adminToken)}
 
-  Scenario: store a root label with valid name should return a 201
+  Scenario: store a root label with valid name should return a 201 and commit to auditlog
     * def result = call read('create-label.feature') { name: 'label1'}
     * match result.response == { name: 'label1', id: '#uuid' }
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'createLabel'
+    And match stringResponse contains 'label'
 
   Scenario: store a root label without TREE_EDIT permission name should return a 403
     * def userWithoutPermissions = defaultTestData.personalAccounts['default-pa1']
@@ -34,7 +38,7 @@ Feature: Label
     When method POST
     Then status 403
 
-  Scenario: store a root label with invalid name should return a 400
+  Scenario: store a root label with invalid name should return a 400 and no audit log
     Given path '/api/label'
     And request { name: '1label'}
     When method POST
@@ -56,6 +60,7 @@ Feature: Label
     When method POST
     Then status 400
     And match response.messages[0].message == 'label with name: label1 and parentLabelId: null already exists'
+
 
   Scenario: retrieve root label should return a 200
     * def result = call read('create-label.feature') { name: 'label2'}
@@ -82,7 +87,7 @@ Feature: Label
     When method GET
     Then status 401
 
-  Scenario: update a root label should return a 200
+  Scenario: update a root label should return a 200 and commit to audit log
     * def createResult = call read('create-label.feature') { name: 'label3'}
     * def labelId = createResult.response.id
     * def restPath = '/api/label/'+labelId
@@ -91,6 +96,12 @@ Feature: Label
     When method PUT
     Then status 200
     And match response == { name: 'label4', id: '#(labelId)' }
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'updateLabelById'
+    And match stringResponse contains 'label'
+    And match stringResponse contains 'labelId'
+
 
   Scenario: update a label without authorization should return a 401 error
     * def createResult = call read('create-label.feature') { name: 'label3'}

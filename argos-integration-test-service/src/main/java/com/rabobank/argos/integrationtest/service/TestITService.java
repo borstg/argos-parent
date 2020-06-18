@@ -33,7 +33,6 @@ import com.rabobank.argos.integrationtest.service.layout.LayoutMetaBlockMapper;
 import com.rabobank.argos.integrationtest.service.link.LinkMetaBlockMapper;
 import com.rabobank.argos.service.domain.account.AccountService;
 import com.rabobank.argos.service.domain.account.PersonalAccountRepository;
-import com.rabobank.argos.service.domain.auditlog.AuditLogRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -48,7 +47,9 @@ import org.bouncycastle.operator.InputDecryptorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
 import org.bouncycastle.pkcs.PKCSException;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -78,6 +79,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RequestMapping("/integration-test")
 @RestController
@@ -102,8 +104,7 @@ public class TestITService implements IntegrationTestServiceApi {
     private SecretKey secretKey;
 
     private final AccountMapper accountMapper;
-
-    private final AuditLogRepository audiLogRepository;
+    private final MongoTemplate template;
 
     @PostConstruct
     public void init() {
@@ -156,7 +157,10 @@ public class TestITService implements IntegrationTestServiceApi {
 
     @Override
     public ResponseEntity<String> auditLogGet() {
-        return ResponseEntity.ok(audiLogRepository.getAuditLogs());
+        List<Document> logs = template.findAll(Document.class, "auditlogs");
+        String logsAsString = logs.stream().map(Document::toJson)
+                .collect(Collectors.joining(","));
+        return ResponseEntity.ok("[" + logsAsString + "]");
     }
 
     @Override

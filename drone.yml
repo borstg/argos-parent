@@ -134,6 +134,7 @@ steps:
     spring.security.oauth2.client.provider.azure.userInfoUri: http://argos-integration-test-stub:8080/v1.0/me
     spring.security.oauth2.client.registration.azure.clientId: client-id
     spring.security.oauth2.client.registration.azure.clientSecret: client-secret
+    spring.profiles.active: integration-test
   depends_on:
   - mongodb
   - build argos service image

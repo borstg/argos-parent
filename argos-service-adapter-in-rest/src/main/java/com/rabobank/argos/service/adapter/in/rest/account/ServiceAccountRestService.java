@@ -22,6 +22,7 @@ import com.rabobank.argos.service.adapter.in.rest.api.handler.ServiceAccountApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestServiceAccount;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestServiceAccountKeyPair;
 import com.rabobank.argos.service.domain.account.AccountService;
+import com.rabobank.argos.service.domain.auditlog.AuditLog;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
 import com.rabobank.argos.service.domain.security.AccountSecurityContext;
 import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
@@ -60,6 +61,7 @@ public class ServiceAccountRestService implements ServiceAccountApi {
 
     @Override
     @PermissionCheck(permissions = SERVICE_ACCOUNT_EDIT)
+    @AuditLog
     public ResponseEntity<RestServiceAccount> createServiceAccount(@LabelIdCheckParam(propertyPath = "parentLabelId") RestServiceAccount restServiceAccount) {
         verifyParentLabelExists(restServiceAccount.getParentLabelId());
         ServiceAccount serviceAccount = accountMapper.convertFromRestServiceAccount(restServiceAccount);
