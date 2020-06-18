@@ -26,4 +26,5 @@ public class AuditLogData {
     private String methodName;
     private Map<String, String> argumentData;
     private String returnValue;
+    private String path;
 }

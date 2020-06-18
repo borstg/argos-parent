@@ -27,13 +27,12 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class MongoDBAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
-    final static String COLLECTION = "auditlogs";
-    private final MongoTemplate mongoTemplate;
 
+    private final MongoTemplate mongoTemplate;
+    final static String COLLECTION = "auditlogs";
     @Override
     protected void append(ILoggingEvent eventObject) {
         Document logEntry = new Document();
-        logEntry.append("thread", eventObject.getThreadName());
         logEntry.append("timestamp", new Date(eventObject.getTimeStamp()));
         logEntry.append("message", eventObject.getFormattedMessage());
         eventObject.getMDCPropertyMap()
@@ -43,5 +42,6 @@ public class MongoDBAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
                 .forEach(logEntry::append);
         mongoTemplate.insert(logEntry, COLLECTION);
     }
+
 
 }
