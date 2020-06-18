@@ -63,4 +63,11 @@ class PersonalAccountDatabaseChangelogTest {
         new PersonalAccountDatabaseChangelog().addIndexToLocalPermissionLabelId(template);
         verify(template, times(1)).indexOps(COLLECTION);
     }
+
+    @Test
+    void addInActiveKeyIndex() {
+        when(template.indexOps(COLLECTION)).thenReturn(indexOperations);
+        new PersonalAccountDatabaseChangelog().addInActiveKeyIndex(template);
+        verify(template, times(1)).indexOps(COLLECTION);
+    }
 }

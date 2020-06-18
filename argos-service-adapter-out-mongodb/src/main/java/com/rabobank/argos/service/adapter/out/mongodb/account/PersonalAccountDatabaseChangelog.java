@@ -26,6 +26,7 @@ import static com.rabobank.argos.service.adapter.out.mongodb.account.PersonalAcc
 import static com.rabobank.argos.service.adapter.out.mongodb.account.PersonalAccountRepositoryImpl.ACTIVE_KEY_ID_FIELD;
 import static com.rabobank.argos.service.adapter.out.mongodb.account.PersonalAccountRepositoryImpl.COLLECTION;
 import static com.rabobank.argos.service.adapter.out.mongodb.account.PersonalAccountRepositoryImpl.EMAIL;
+import static com.rabobank.argos.service.adapter.out.mongodb.account.PersonalAccountRepositoryImpl.IN_ACTIVE_KEY_ID_FIELD;
 import static com.rabobank.argos.service.adapter.out.mongodb.account.PersonalAccountRepositoryImpl.NAME_FIELD;
 import static com.rabobank.argos.service.adapter.out.mongodb.account.PersonalAccountRepositoryImpl.PERMISSIONS_LABEL_ID_FIELD;
 import static org.springframework.data.domain.Sort.Direction.ASC;
@@ -54,6 +55,12 @@ public class PersonalAccountDatabaseChangelog {
     @ChangeSet(order = "004", id = "PersonalAccountDatabaseChangelog-4", author = "bart")
     public void addIndexToLocalPermissionLabelId(MongoTemplate template) {
         template.indexOps(COLLECTION).ensureIndex(new Index(PERMISSIONS_LABEL_ID_FIELD, ASC));
+    }
+
+    @ChangeSet(order = "005", id = "PersonalAccountDatabaseChangelog-5", author = "bart")
+    public void addInActiveKeyIndex(MongoTemplate template) {
+        template.indexOps(COLLECTION).ensureIndex(new Index(IN_ACTIVE_KEY_ID_FIELD, ASC)
+                .partial(PartialIndexFilter.of(new Criteria(IN_ACTIVE_KEY_ID_FIELD).exists(true))).unique());
     }
 
 }

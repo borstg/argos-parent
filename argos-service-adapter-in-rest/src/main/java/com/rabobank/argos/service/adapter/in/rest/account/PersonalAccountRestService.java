@@ -28,6 +28,7 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestLocalPermissions
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestPermission;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestPersonalAccount;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestProfile;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestPublicKey;
 import com.rabobank.argos.service.domain.account.AccountSearchParams;
 import com.rabobank.argos.service.domain.account.AccountService;
 import com.rabobank.argos.service.domain.auditlog.AuditLog;
@@ -92,11 +93,21 @@ public class PersonalAccountRestService implements PersonalAccountApi {
 
     @Override
     @PermissionCheck(permissions = {Permission.PERSONAL_ACCOUNT_READ})
-    public ResponseEntity<List<RestPersonalAccount>> searchPersonalAccounts(String roleName, String localPermissionsLabelId, String name) {
+    public ResponseEntity<RestPublicKey> getPersonalAccountKeyById(String accountId) {
+        PersonalAccount account = accountService.getPersonalAccountById(accountId).orElseThrow(this::accountNotFound);
+        return ResponseEntity.ok(Optional.ofNullable(account.getActiveKeyPair()).map(keyPairMapper::convertToRestPublicKey)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "no active keypair found for account: " + account.getName())));
+    }
+
+    @Override
+    @PermissionCheck(permissions = {Permission.PERSONAL_ACCOUNT_READ})
+    public ResponseEntity<List<RestPersonalAccount>> searchPersonalAccounts(String roleName, String localPermissionsLabelId, String name, List<String> activeKeyIds, List<String> inActiveKeyIds) {
         return ResponseEntity.ok(accountService.searchPersonalAccounts(AccountSearchParams.builder()
                 .roleId(personalAccountMapper.convertToRoleId(roleName))
                 .localPermissionsLabelId(localPermissionsLabelId)
                 .name(name)
+                .activeKeyIds(activeKeyIds)
+                .inActiveKeyIds(inActiveKeyIds)
                 .build()).stream()
                 .map(personalAccountMapper::convertToRestPersonalAccountWithoutRoles).collect(Collectors.toList()));
     }

@@ -42,6 +42,8 @@ public class PersonalAccountRepositoryImpl implements PersonalAccountRepository 
     static final String COLLECTION = "personalaccounts";
     static final String ACCOUNT_ID = "accountId";
     static final String ACTIVE_KEY_ID_FIELD = "activeKeyPair.keyId";
+    static final String IN_ACTIVE_KEY_ID_FIELD = "inactiveKeyPairs.keyId";
+
     static final String EMAIL = "email";
     static final String NAME_FIELD = "name";
     static final String ROLE_ID_FIELD = "roleIds";
@@ -88,10 +90,19 @@ public class PersonalAccountRepositoryImpl implements PersonalAccountRepository 
                 .map(this::roleIdQuery).orElseGet(() ->
                         params.getLocalPermissionsLabelId().map(this::labelIdQuery)
                                 .orElseGet(() -> params.getName().map(this::nameQuery)
-                                        .orElseGet(Query::new)
-                                ));
+                                        .orElseGet(() -> params.getActiveKeyIds().map(this::activeKeyIdsQuery)
+                                                .orElseGet(() -> params.getInActiveKeyIds().map(this::inActiveKeyIdsQuery).orElseGet(Query::new))
+                                        )));
         query.fields().include(ACCOUNT_ID).include(EMAIL).include(NAME_FIELD);
         return template.find(query.with(Sort.by(NAME_FIELD)), PersonalAccount.class, COLLECTION);
+    }
+
+    private Query activeKeyIdsQuery(List<String> keyIds) {
+        return new Query(Criteria.where(ACTIVE_KEY_ID_FIELD).in(keyIds));
+    }
+
+    private Query inActiveKeyIdsQuery(List<String> keyIds) {
+        return new Query(Criteria.where(IN_ACTIVE_KEY_ID_FIELD).in(keyIds));
     }
 
     private Query nameQuery(String name) {

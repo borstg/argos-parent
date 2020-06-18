@@ -114,6 +114,22 @@ Feature: Personal Account
     Then status 200
     And match response == [{"id":"#uuid","name":"Luke Skywalker"}]
 
+  Scenario: search personal account by active key id should return 200
+    * configure headers = call read('classpath:headers.js') { token: #(defaultUsertoken)}
+    Given path '/api/personalaccount'
+    And param activeKeyIds = 'c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254'
+    When method GET
+    Then status 200
+    And match response == [{"id":"#uuid","name":"Default User"}]
+
+  Scenario: search personal account by inactive key id should return 200
+    * configure headers = call read('classpath:headers.js') { token: #(defaultUsertoken)}
+    Given path '/api/personalaccount'
+    And param inactiveKeyIds = 'c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254'
+    When method GET
+    Then status 200
+    And match response == []
+
   Scenario: search all personal account 200
     * def extraAccount = call read('classpath:feature/account/create-personal-account.feature') {name: 'Extra Person', email: 'extra@extra.go'}
     * def expectedResponse = read('classpath:testmessages/personal-account/account-search-all-response.json')
@@ -258,6 +274,20 @@ Feature: Personal Account
     And match response == {"message":"Access denied"}
 
     Given path '/api/personalaccount/'+anotherAccount.response.id+'/localpermission'
+    When method GET
+    Then status 403
+    And match response == {"message":"Access denied"}
+
+  Scenario: get account by id should return a 200
+    Given path '/api/personalaccount/'+defaultTestData.personalAccounts['default-pa1'].accountId+'/key'
+    When method GET
+    Then status 200
+    Then match response == {id: #(defaultTestData.personalAccounts['default-pa1'].keyId), key: #(defaultTestData.personalAccounts['default-pa1'].publicKey)}
+
+  Scenario: search personal account without PERSONAL_ACCOUNT_READ should return a 403
+    * def extraAccount = call read('classpath:feature/account/create-personal-account.feature') {name: 'Extra Person', email: 'extra@extra.go'}
+    * configure headers = call read('classpath:headers.js') { token: #(extraAccount.response.token)}
+    Given path '/api/personalaccount/'+defaultTestData.personalAccounts['default-pa1'].accountId+'/key'
     When method GET
     Then status 403
     And match response == {"message":"Access denied"}
