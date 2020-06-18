@@ -121,7 +121,9 @@ public class SupplyChainRestService implements SupplychainApi {
 
     @Override
     @PermissionCheck(permissions = Permission.TREE_EDIT)
-    public ResponseEntity<Void> deleteSupplyChainById(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId) {
+    @AuditLog
+    public ResponseEntity<Void> deleteSupplyChainById(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR)
+                                                      @AuditParam("supplyChainId") String supplyChainId) {
         layoutRepository.deleteBySupplyChainId(supplyChainId);
         linkMetaBlockRepository.deleteBySupplyChainId(supplyChainId);
         approvalConfigurationRepository.deleteBySupplyChainId(supplyChainId);

@@ -23,15 +23,19 @@ Feature: Verification
     * def defaultTestData = call read('classpath:default-test-data.js')
     * configure headers = call read('classpath:headers.js') { token: #(defaultTestData.adminToken)}
 
-  Scenario: happy flow all rules
+  Scenario: happy flow all rules and commit to audit log
     * def resp = call read('classpath:feature/verification/verification-template.feature') { verificationRequest:#(defaultVerificationRequest) ,testDir: 'happy-flow',steps:#(defaultSteps),layoutSigningKey:1}
     And match resp.response == {"runIsValid":true}
-  
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'performVerification'
+    And match stringResponse contains 'verifyCommand'
+
   Scenario: products to verify wrong hash
     * def verificationRequest = {expectedProducts: [{uri: 'target/argos-test-0.0.1-SNAPSHOT.jar',hash: '0123456789012345678901234567890012345678901234567890123456789012'}] }
     * def resp = call read('classpath:feature/verification/verification-template.feature') { verificationRequest:#(verificationRequest) ,testDir: 'happy-flow',steps:#(defaultSteps),layoutSigningKey:1}
     And match resp.response == {"runIsValid":false}
-    
+
   Scenario: expected expected end products not matches
     * def verificationRequest = {expectedProducts: [{uri: 'argos-test-0.0.1-SNAPSHOT.jar',hash: '49e73a11c5e689db448d866ce08848ac5886cac8aa31156ea4de37427aca6162'}] }
     * def resp = call read('classpath:feature/verification/verification-template.feature') { verificationRequest:#(verificationRequest) ,testDir: 'happy-flow',steps:#(defaultSteps),layoutSigningKey:1}

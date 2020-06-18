@@ -143,7 +143,7 @@ public class PersonalAccountRestService implements PersonalAccountApi {
     @AuditLog
     public ResponseEntity<RestLocalPermissions> updateLocalPermissionsForLabel(@AuditParam("accountId") String accountId,
                                                                                @LabelIdCheckParam @AuditParam("labelId") String labelId,
-                                                                               @AuditParam("localpermissions") List<RestPermission> restLocalPermission) {
+                                                                               @AuditParam("localPermissions") List<RestPermission> restLocalPermission) {
         verifyParentLabelExists(labelId);
         LocalPermissions newLocalPermissions = LocalPermissions.builder().labelId(labelId).permissions(personalAccountMapper.convertToLocalPermissions(restLocalPermission)).build();
         PersonalAccount personalAccount = accountService.updatePersonalAccountLocalPermissionsById(accountId, newLocalPermissions).orElseThrow(this::accountNotFound);

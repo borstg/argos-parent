@@ -22,12 +22,16 @@ Feature: SupplyChain
     * def defaultTestData = call read('classpath:default-test-data.js')
     * configure headers = call read('classpath:headers.js') { token: #(defaultTestData.adminToken)}
 
-  Scenario: store supplychain with valid name should return a 201
+  Scenario: store supplychain with valid name should return a 201 and commit to audit log
     Given path '/api/supplychain'
     * def supplyChain = call read('classpath:feature/supplychain/create-supplychain.feature') { supplyChainName: 'name', parentLabelId: #(defaultTestData.defaultRootLabel.id)}
     * def locationHeader = supplyChain.responseHeaders['Location'][0]
     * match supplyChain.response == { name: 'name', id: '#uuid', parentLabelId: '#(defaultTestData.defaultRootLabel.id)' }
     * match locationHeader contains 'api/supplychain/'
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'createSupplyChain'
+    And match stringResponse contains 'supplyChain'
 
   Scenario: store supplychain with non unique name should return a 400
     * def supplyChainResponse = call read('create-supplychain-with-label.feature') { supplyChainName: 'name'}
@@ -63,7 +67,7 @@ Feature: SupplyChain
     When method POST
     Then status 403
 
-  Scenario: update supplychain should return a 200
+  Scenario: update supplychain should return a 200 and commit to audit log
     * def supplyChainResponse = call read('create-supplychain-with-label.feature') { supplyChainName: 'name'}
     * def labelResult = call read('classpath:feature/label/create-label.feature') {name: otherlabel}
     Given path '/api/supplychain/'+supplyChainResponse.response.id
@@ -71,6 +75,11 @@ Feature: SupplyChain
     When method PUT
     Then status 200
     And match response == { name: 'supply-chain-name', id: '#(supplyChainResponse.response.id)', parentLabelId: '#(labelResult.response.id)' }
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'updateSupplyChain'
+    And match stringResponse contains 'supplyChainId'
+    And match stringResponse contains 'supplyChain'
 
   Scenario: update supplychain with local permission TREE_EDIT should return a 200
     * def info = call read('classpath:create-local-authorized-account.js') {permissions: ["TREE_EDIT"]}
@@ -244,6 +253,10 @@ Feature: SupplyChain
     Given path restPath
     When method DELETE
     Then status 204
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'deleteSupplyChain'
+    And match stringResponse contains 'supplyChainId'
 
   Scenario: delete supplychain without local permission TREE_EDIT should return a 403
     * def info = call read('classpath:create-local-authorized-account.js') {permissions: ["READ"]}
