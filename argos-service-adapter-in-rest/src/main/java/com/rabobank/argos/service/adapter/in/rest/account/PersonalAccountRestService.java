@@ -45,7 +45,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -75,7 +74,7 @@ public class PersonalAccountRestService implements PersonalAccountApi {
     @PreAuthorize("hasRole('USER')")
     @Override
     @AuditLog
-    public ResponseEntity<Void> createKey(@AuditParam("keyPair") @Valid RestKeyPair restKeyPair) {
+    public ResponseEntity<Void> createKey(@AuditParam("keyPair") RestKeyPair restKeyPair) {
         Account account = accountSecurityContext.getAuthenticatedAccount().orElseThrow(this::accountNotFound);
         KeyPair keyPair = keyPairMapper.convertFromRestKeyPair(restKeyPair);
         validateKeyId(keyPair);

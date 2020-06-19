@@ -21,14 +21,11 @@ import com.rabobank.argos.service.domain.hierarchy.HierarchyRepository;
 import com.rabobank.argos.service.domain.security.LocalPermissionCheckData;
 import com.rabobank.argos.service.domain.security.LocalPermissionCheckDataExtractor;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.emptySet;
 
@@ -42,18 +39,8 @@ public class SupplyChainPathLocalPermissionCheckDataExtractor implements LocalPe
     @Override
     public LocalPermissionCheckData extractLocalPermissionCheckData(Method method, Object[] argumentValues) {
         List<String> pathToRoot = SupplyChainHelper.reversePath((List<String>) argumentValues[1]);
-        Optional<TreeNode> treeNode = hierarchyRepository
-                .findByNamePathToRootAndType((String) argumentValues[0], pathToRoot, TreeNode.Type.SUPPLY_CHAIN);
-        treeNode
-                .ifPresent(t -> {
-                    String path = SupplyChainHelper
-                            .reversePath(t.getPathToRoot())
-                            .stream()
-                            .collect(Collectors.joining("/"));
-
-                    MDC.put("path", path + "/" + t.getName());
-                });
-        return treeNode
+        return hierarchyRepository
+                .findByNamePathToRootAndType((String) argumentValues[0], pathToRoot, TreeNode.Type.SUPPLY_CHAIN)
                 .map(TreeNode::getParentLabelId)
                 .map(parentLabelId -> LocalPermissionCheckData
                         .builder()

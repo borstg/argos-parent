@@ -15,22 +15,18 @@
  */
 package com.rabobank.argos.service.domain.security;
 
-import com.rabobank.argos.domain.SupplyChainHelper;
 import com.rabobank.argos.domain.hierarchy.HierarchyMode;
 import com.rabobank.argos.domain.hierarchy.TreeNode;
 import com.rabobank.argos.domain.permission.Permission;
 import com.rabobank.argos.service.domain.hierarchy.HierarchyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.rabobank.argos.domain.permission.Permission.LOCAL_PERMISSION_EDIT;
 import static com.rabobank.argos.domain.permission.Permission.READ;
@@ -75,22 +71,11 @@ public class DefaultLocalPermissionCheckStrategy implements LocalPermissionCheck
     }
 
     private ArrayList<String> getAllLabelIdsUpTree(String labelId) {
-        Optional<TreeNode> treeNode = hierarchyRepository.getSubTree(labelId, HierarchyMode.NONE, 0);
-        treeNode
-                .ifPresent(t -> {
-                    String path = SupplyChainHelper
-                            .reversePath(t.getPathToRoot())
-                            .stream()
-                            .collect(Collectors.joining("/"));
-
-                    MDC.put("path", path + "/" + t.getName());
-
-                });
-        return treeNode
-                .map(TreeNode::getIdPathToRoot).map(ArrayList::new)
-                .map(labelIds -> {
-                    labelIds.add(labelId);
-                    return labelIds;
-                }).orElse(new ArrayList<>(List.of(labelId)));
+       return hierarchyRepository.getSubTree(labelId, HierarchyMode.NONE, 0)
+               .map(TreeNode::getIdPathToRoot).map(ArrayList::new)
+               .map(labelIds -> {
+                   labelIds.add(labelId);
+                   return labelIds;
+               }).orElse(new ArrayList<>(List.of(labelId)));
     }
 }
