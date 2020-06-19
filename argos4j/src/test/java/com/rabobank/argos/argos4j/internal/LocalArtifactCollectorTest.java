@@ -78,9 +78,7 @@ class LocalArtifactCollectorTest {
 
         File level1Empty = new File(multilevelDir, "level1Empty");
         level1Empty.mkdir();
-        FileUtils.write(new File(level1Empty, "not me.link"), "ignore file", "UTF-8");
-
-
+        
         File level1Gone = new File(multilevelDir, "level1Gone");
         level1Gone.mkdir();
 
@@ -116,10 +114,30 @@ class LocalArtifactCollectorTest {
                 .normalizeLineEndings(true)
                 .build());
         List<Artifact> artifacts = sort(collector.collect());
-        assertThat(artifacts, hasSize(3));
+        assertThat(artifacts, hasSize(4));
         checkLevel2File(artifacts.get(0), "linkdir");
         checkLevel2Zip(artifacts.get(1), "linkdir");
-        checkTextartifact(artifacts.get(2));
+        checkTextartifact(artifacts.get(3));
+    }
+    
+    @Test
+    void collectNotEmptyDir() throws IOException {
+        File notEmptyDir = new File(sharedTempDir, "notEmpty");
+        notEmptyDir.mkdir();
+        FileUtils.write(new File(notEmptyDir, ".gitignore"), "this should be collected", "UTF-8");
+        File gitDir = new File(notEmptyDir, ".git");
+        gitDir.mkdir();
+        FileUtils.write(new File(gitDir, "not me.txt"), "ignore file", "UTF-8");
+        File linkDir = new File(notEmptyDir, "link");
+        linkDir.mkdir();
+        FileUtils.write(new File(linkDir, "text.txt"), "cool dit\r\nan other line", "UTF-8");
+        ArtifactCollector collector = ArtifactCollectorFactory.build(LocalFileCollector.builder()
+                .basePath(notEmptyDir.toPath())
+                .path(notEmptyDir.toPath())
+                .normalizeLineEndings(true)
+                .build());
+        List<Artifact> artifacts = sort(collector.collect());
+        assertThat(artifacts, hasSize(2));
     }
 
     private void checkTextartifact(Artifact artifact) {
@@ -163,8 +181,8 @@ class LocalArtifactCollectorTest {
                 .followSymlinkDirs(false)
                 .build());
         List<Artifact> artifacts = sort(collector.collect());
-        assertThat(artifacts, hasSize(1));
-        checkTextartifact(artifacts.get(0));
+        assertThat(artifacts, hasSize(2));
+        checkTextartifact(artifacts.get(1));
     }
 
     private List<Artifact> sort(List<Artifact> artifacts) {
@@ -182,8 +200,8 @@ class LocalArtifactCollectorTest {
                 .followSymlinkDirs(false)
                 .build());
         List<Artifact> artifacts = sort(collector.collect());
-        assertThat(artifacts, hasSize(1));
-        Artifact artifact = artifacts.get(0);
+        assertThat(artifacts, hasSize(2));
+        Artifact artifact = artifacts.get(1);
         assertThat(artifact.getUri(), is("text.txt"));
         assertThat(artifact.getHash(), is("cb6bdad36690e8024e7df13e6796ae6603f2cb9cf9f989c9ff939b2ecebdcb91"));
     }
@@ -221,8 +239,8 @@ class LocalArtifactCollectorTest {
                 .followSymlinkDirs(false)
                 .build());
         List<Artifact> artifacts = sort(collector.collect());
-        assertThat(artifacts, hasSize(1));
-        Artifact artifact = artifacts.get(0);
+        assertThat(artifacts, hasSize(2));
+        Artifact artifact = artifacts.get(1);
         assertThat(artifact.getUri(), endsWith("on file dir/text.txt"));
         assertThat(artifact.getHash(), is("616e953d8784d4e15a17055a91ac7539bca32350850ac5157efffdda6a719a7b"));
     }
@@ -230,6 +248,7 @@ class LocalArtifactCollectorTest {
     @Test
     void collectOneFileThatIsInTheIgnoreFilter() {
         ArtifactCollector collector = ArtifactCollectorFactory.build(LocalFileCollector.builder()
+                .excludePatterns("**"+ignoredFile.getName())
                 .path(ignoredFile.toPath())
                 .followSymlinkDirs(false)
                 .normalizeLineEndings(true)

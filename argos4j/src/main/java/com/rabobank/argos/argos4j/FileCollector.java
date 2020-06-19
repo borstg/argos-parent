@@ -24,7 +24,7 @@ import java.util.Optional;
 @Getter
 public abstract class FileCollector {
 
-    public static final String DEFAULT_EXCLUDE_PATTERNS = "**.{git,link}**";
+    public static final String DEFAULT_EXCLUDE_PATTERNS = "{**.git/**,**.git\\**}";
 
     private final String excludePatterns;
 
