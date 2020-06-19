@@ -28,9 +28,11 @@ public interface ServiceAccountRepository {
 
     void update(ServiceAccount serviceAccount);
 
-    boolean delete(String accountId);
+    void delete(String accountId);
 
     boolean activeKeyExists(String activeKeyId);
 
     Optional<String> findParentLabelIdByAccountId(String accountId);
+
+    boolean exists(String serviceAccountId);
 }

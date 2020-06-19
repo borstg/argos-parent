@@ -157,10 +157,8 @@ class ServiceAccountRepositoryImplTest {
 
     @Test
     void delete() {
-        when(template.remove(any(Query.class), eq(ServiceAccount.class), eq(COLLECTION))).thenReturn(deleteResult);
-        when(deleteResult.getDeletedCount()).thenReturn(1L);
-        assertThat(repository.delete(ACCOUNT_ID), is(true));
-        verify(template).remove(queryArgumentCaptor.capture(), eq(ServiceAccount.class), eq(COLLECTION));
+        repository.delete(ACCOUNT_ID);
+        verify(template).remove(queryArgumentCaptor.capture(), eq(COLLECTION));
         assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"accountId\" : \"accountId\"}, Fields: {}, Sort: {}"));
     }
 }

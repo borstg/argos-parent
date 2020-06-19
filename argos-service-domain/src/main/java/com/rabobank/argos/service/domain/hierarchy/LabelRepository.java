@@ -25,7 +25,7 @@ public interface LabelRepository {
 
     Optional<Label> findById(String id);
 
-    boolean deleteById(String id);
+    void deleteById(String id);
 
     Optional<Label> update(String id, Label label);
 

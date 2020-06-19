@@ -45,11 +45,11 @@ public interface AccountService {
 
     void save(ServiceAccount serviceAccount);
 
-    boolean deleteServiceAccount(String accountId);
+    void deleteServiceAccount(String accountId);
 
     Optional<ServiceAccount> findServiceAccountById(String accountId);
 
     Optional<ServiceAccount> update(String accountId, ServiceAccount serviceAccount);
 
-
+    boolean serviceAccountExists(String serviceAccountId);
 }

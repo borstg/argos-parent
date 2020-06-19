@@ -18,11 +18,9 @@ package com.rabobank.argos.service.adapter.in.rest.supplychain;
 import com.rabobank.argos.domain.hierarchy.TreeNode;
 import com.rabobank.argos.domain.supplychain.SupplyChain;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestSupplyChain;
+import com.rabobank.argos.service.domain.DeleteService;
 import com.rabobank.argos.service.domain.hierarchy.HierarchyRepository;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
-import com.rabobank.argos.service.domain.layout.ApprovalConfigurationRepository;
-import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
-import com.rabobank.argos.service.domain.link.LinkMetaBlockRepository;
 import com.rabobank.argos.service.domain.supplychain.SupplyChainRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -80,17 +78,11 @@ class SupplyChainRestServiceTest {
     private TreeNode treeNode;
 
     @Mock
-    private LayoutMetaBlockRepository layoutRepository;
-
-    @Mock
-    private LinkMetaBlockRepository linkMetaBlockRepository;
-
-    @Mock
-    private ApprovalConfigurationRepository approvalConfigurationRepository;
+    private DeleteService deleteService;
 
     @BeforeEach
     public void setup() {
-        supplyChainRestService = new SupplyChainRestService(supplyChainRepository, hierarchyRepository, converter, labelRepository, layoutRepository, linkMetaBlockRepository, approvalConfigurationRepository);
+        supplyChainRestService = new SupplyChainRestService(supplyChainRepository, hierarchyRepository, converter, labelRepository, deleteService);
     }
 
     @Test
@@ -199,10 +191,17 @@ class SupplyChainRestServiceTest {
 
     @Test
     void deleteSupplyChainById() {
+        when(supplyChainRepository.exists(SUPPLY_CHAIN_ID)).thenReturn(true);
         assertThat(supplyChainRestService.deleteSupplyChainById(SUPPLY_CHAIN_ID).getStatusCodeValue(), is(204));
-        verify(approvalConfigurationRepository).deleteBySupplyChainId(SUPPLY_CHAIN_ID);
-        verify(linkMetaBlockRepository).deleteBySupplyChainId(SUPPLY_CHAIN_ID);
-        verify(supplyChainRepository).delete(SUPPLY_CHAIN_ID);
-        verify(layoutRepository).deleteBySupplyChainId(SUPPLY_CHAIN_ID);
+        verify(deleteService).deleteSupplyChain(SUPPLY_CHAIN_ID);
+    }
+
+    @Test
+    void deleteSupplyChainByIdNotFound() {
+        when(supplyChainRepository.exists(SUPPLY_CHAIN_ID)).thenReturn(false);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> supplyChainRestService.deleteSupplyChainById(SUPPLY_CHAIN_ID));
+        assertThat(exception.getStatus().value(), is(404));
+        assertThat(exception.getMessage(), is("404 NOT_FOUND \"supply chain not found : supplyChainId\""));
+
     }
 }

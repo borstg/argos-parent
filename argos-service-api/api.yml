@@ -973,7 +973,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        '204':
           description: deleted service account
         '404':
           description: the service account is not found

@@ -21,6 +21,7 @@ import com.rabobank.argos.domain.hierarchy.TreeNode;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestHierarchyMode;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLabel;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestTreeNode;
+import com.rabobank.argos.service.domain.DeleteService;
 import com.rabobank.argos.service.domain.hierarchy.HierarchyService;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,9 +83,12 @@ class HierarchyRestServiceTest {
     @Mock
     private HttpServletRequest httpServletRequest;
 
+    @Mock
+    private DeleteService deleteService;
+
     @BeforeEach
     void setUp() {
-        service = new HierarchyRestService(labelRepository, labelMapper, hierarchyService, treeNodeMapper);
+        service = new HierarchyRestService(labelRepository, labelMapper, hierarchyService, treeNodeMapper, deleteService);
     }
 
     @Test
@@ -111,14 +115,15 @@ class HierarchyRestServiceTest {
 
     @Test
     void deleteLabelById() {
-        when(labelRepository.deleteById(LABEL_ID)).thenReturn(true);
+        when(labelRepository.exists(LABEL_ID)).thenReturn(true);
         ResponseEntity<Void> response = service.deleteLabelById(LABEL_ID);
         assertThat(response.getStatusCodeValue(), is(204));
+        verify(deleteService).deleteLabel(LABEL_ID);
     }
 
     @Test
     void deleteLabelByIdNotFound() {
-        when(labelRepository.deleteById(LABEL_ID)).thenReturn(false);
+        when(labelRepository.exists(LABEL_ID)).thenReturn(false);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.deleteLabelById(LABEL_ID));
         assertThat(exception.getMessage(), is("404 NOT_FOUND \"label not found : labelId\""));
     }
