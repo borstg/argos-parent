@@ -55,8 +55,7 @@ class RestLinkMetaBlockTest {
                 .runId("runId")
                 .stepName("step Name")
                 .addProductsItem(new RestArtifact())
-                .addMaterialsItem(new RestArtifact())
-                .addCommandItem("command"))
+                .addMaterialsItem(new RestArtifact()))
                 .signature(new RestSignature()
                         .signature("signature")
                         .keyId("keyId")
@@ -80,8 +79,7 @@ class RestLinkMetaBlockTest {
                 .runId("runId")
                 .stepName("stepName")
                 .addProductsItem(new RestArtifact().hash("hash").uri("\t"))
-                .addMaterialsItem(new RestArtifact().hash(" ").uri("\\\\"))
-                .addCommandItem("command"))
+                .addMaterialsItem(new RestArtifact().hash(" ").uri("\\\\")))
                 .signature(createSignature()
                 )), contains(expectedErrors(
                 "link.materials[0].hash", "must match \"^[0-9a-f]*$\"",
@@ -98,8 +96,7 @@ class RestLinkMetaBlockTest {
                 .runId("runId")
                 .stepName("stepName")
                 .addProductsItem(new RestArtifact().hash("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254").uri("/test.jar"))
-                .addMaterialsItem(new RestArtifact().hash("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254").uri("other.html"))
-                .addCommandItem("command"))
+                .addMaterialsItem(new RestArtifact().hash("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254").uri("other.html")))
                 .signature(createSignature()
                 )), empty());
     }

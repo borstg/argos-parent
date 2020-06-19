@@ -32,7 +32,6 @@ class RestMapperTest {
         LinkMetaBlock linkMetaBlock = LinkMetaBlock.builder().link(Link.builder().build()).build();
         RestLinkMetaBlock metablock = mapper.convertToRestLinkMetaBlock(linkMetaBlock);
 
-        assertNotNull(metablock.getLink().getCommand());
         assertNotNull(metablock.getLink().getMaterials());
         assertNotNull(metablock.getLink().getProducts());
 

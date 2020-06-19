@@ -34,7 +34,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.rabobank.argos.service.domain.link.LinkMetaBlockRepository;
-import com.rabobank.argos.service.domain.verification.ExpectedCommandVerification;
 import com.rabobank.argos.service.domain.verification.LayoutAuthorizedKeyIdVerification;
 import com.rabobank.argos.service.domain.verification.LayoutMetaBlockSignatureVerification;
 import com.rabobank.argos.service.domain.verification.LinkMetaBlockSignatureVerification;
@@ -122,7 +121,6 @@ class VerificationTest {
                 new RequireRuleVerification()));
         rulesVerification.init();
         verifications = Arrays.asList(
-                new ExpectedCommandVerification(),
                 new LayoutAuthorizedKeyIdVerification(),
                 new LayoutMetaBlockSignatureVerification(new SignatureValidator()),
                 new LinkMetaBlockSignatureVerification(new SignatureValidator()),
@@ -145,18 +143,14 @@ class VerificationTest {
     
         segment1Step1LinkBuilder = Link.builder()
                 .layoutSegmentName("segment1")
-                .stepName("step1")
-                .command(List.of("command1"));
+                .stepName("step1");
         segment1Step1Builder = Step.builder()
-                .name("step1")
-                .expectedCommand(List.of("command1"));
+                .name("step1");
         segment2Step1LinkBuilder = Link.builder()
                 .layoutSegmentName("segment2")
-                .stepName("step1")
-                .command(List.of("command1"));
+                .stepName("step1");
         segment2Step1Builder = Step.builder()
-                .name("step1")
-                .expectedCommand(List.of("command1"));
+                .name("step1");
     }
 
     @Test

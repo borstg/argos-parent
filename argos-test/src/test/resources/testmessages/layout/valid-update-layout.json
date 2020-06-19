@@ -31,10 +31,6 @@
               "5ac47ccc386678d0eb76efcdbc0720474586ff12e673d5d0f52537c2a722438c"
             ],
             "requiredNumberOfLinks": 3,
-            "expectedCommand": [
-              "expectedCommand 1",
-              "expectedCommand 2"
-            ],
             "expectedMaterials": [
               {
                 "ruleType": "MATCH",

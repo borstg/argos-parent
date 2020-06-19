@@ -34,8 +34,6 @@ public class Link {
     private String layoutSegmentName;
     private String stepName;
     @Builder.Default
-    private List<String> command = new ArrayList<>();
-    @Builder.Default
     private List<Artifact> materials = new ArrayList<>();
     @Builder.Default
     private List<Artifact> products = new ArrayList<>();

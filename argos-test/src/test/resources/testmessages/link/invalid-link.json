@@ -6,10 +6,6 @@
   "link": {
     "runId": "69af2dd",
     "layoutSegmentName": "segment1",
-    "command": [
-      "command1",
-      "command2"
-    ],
     "materials": [
       {
         "uri": "materialsUri1",

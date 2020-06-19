@@ -39,10 +39,6 @@
               "stepName1 authorizedKeyId 2"
             ],
             "requiredNumberOfLinks": 3,
-            "expectedCommand": [
-              "expectedCommand 1",
-              "expectedCommand 2"
-            ],
             "expectedMaterials": [
               {
                 "ruleType": "MATCH",
@@ -79,9 +75,6 @@
               "stepName2 authorizedKeyId"
             ],
             "requiredNumberOfLinks": 45,
-            "expectedCommand": [
-              "stepName2 expectedCommand"
-            ],
             "expectedMaterials": [
               {
                 "ruleType": "MATCH",

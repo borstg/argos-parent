@@ -37,10 +37,6 @@
               "stepName1 authorizedKeyId 2"
             ],
             "requiredSignatures": 3,
-            "expectedCommand": [
-              "expectedCommand 1",
-              "expectedCommand 2"
-            ],
             "expectedMaterials": [
               {
                 "ruleType": "MATCH",
@@ -77,9 +73,6 @@
               "stepName2 authorizedKeyId"
             ],
             "requiredSignatures": 45,
-            "expectedCommand": [
-              "stepName2 expectedCommand"
-            ],
             "expectedMaterials": [
               {
                 "ruleType": "MATCH",

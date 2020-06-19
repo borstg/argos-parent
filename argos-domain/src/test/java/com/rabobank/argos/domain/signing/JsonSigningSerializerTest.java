@@ -55,7 +55,6 @@ class JsonSigningSerializerTest {
                 .products(Arrays.asList(
                         Artifact.builder().uri("_bc.jar").hash("hash3").build(),
                         Artifact.builder().uri("_abc.jar").hash("hash4").build()))
-                .command(Arrays.asList("z", "a"))
                 .build());
         assertThat(serialized, is(getExpectedJson("/expectedLinkSigning.json")));
     }
@@ -92,7 +91,6 @@ class JsonSigningSerializerTest {
                                         .name("stepa")
                                         .authorizedKeyIds(Arrays.asList("step a key 2", "step a key 1"))
                                         .requiredNumberOfLinks(23)
-                                        .expectedCommand(Arrays.asList("3", "2", "1"))
                                         .expectedProducts(Arrays.asList(
                                                 new Rule(RuleType.DISALLOW, "DisAllowRule"),
                                                 MatchRule.builder().pattern("MatchRule")
