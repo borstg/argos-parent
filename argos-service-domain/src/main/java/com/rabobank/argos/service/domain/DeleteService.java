@@ -16,7 +16,7 @@
 package com.rabobank.argos.service.domain;
 
 import com.rabobank.argos.domain.hierarchy.HierarchyMode;
-import com.rabobank.argos.service.domain.account.ServiceAccountRepository;
+import com.rabobank.argos.service.domain.account.AccountService;
 import com.rabobank.argos.service.domain.hierarchy.HierarchyService;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
 import com.rabobank.argos.service.domain.layout.ApprovalConfigurationRepository;
@@ -36,10 +36,10 @@ public class DeleteService {
     private final ApprovalConfigurationRepository approvalConfigurationRepository;
     private final SupplyChainRepository supplyChainRepository;
     private final HierarchyService hierarchyService;
-    private final ServiceAccountRepository serviceAccountRepository;
+    private final AccountService accountService;
 
     public void deleteLabel(String labelId) {
-        hierarchyService.getSubTree(labelId, HierarchyMode.ALL, null).ifPresent(
+        hierarchyService.getSubTree(labelId, HierarchyMode.ALL, -1).ifPresent(
                 treeNode -> treeNode.accept(child -> {
                     switch (child.getType()) {
                         case LABEL:
@@ -51,6 +51,8 @@ public class DeleteService {
                         case SERVICE_ACCOUNT:
                             deleteServiceAccount(child.getReferenceId());
                             break;
+                        default:
+                            throw new IllegalArgumentException(child.getType() + "not implemented");
                     }
                     return true;
                 })
@@ -65,6 +67,6 @@ public class DeleteService {
     }
 
     public void deleteServiceAccount(String serviceAccountId) {
-        serviceAccountRepository.delete(serviceAccountId);
+        accountService.deleteServiceAccount(serviceAccountId);
     }
 }
