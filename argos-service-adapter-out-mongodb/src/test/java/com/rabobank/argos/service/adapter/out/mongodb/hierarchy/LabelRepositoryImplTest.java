@@ -116,7 +116,6 @@ class LabelRepositoryImplTest {
         repository.deleteById(LABEL_ID);
         verify(template).remove(queryArgumentCaptor.capture(), eq(COLLECTION));
         assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"labelId\" : \"labelId\"}, Fields: {}, Sort: {}"));
-
     }
 
     @Test

@@ -21,9 +21,9 @@ import com.rabobank.argos.domain.permission.Permission;
 import com.rabobank.argos.domain.supplychain.SupplyChain;
 import com.rabobank.argos.service.adapter.in.rest.api.handler.SupplychainApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestSupplyChain;
+import com.rabobank.argos.service.domain.DeleteService;
 import com.rabobank.argos.service.domain.auditlog.AuditLog;
 import com.rabobank.argos.service.domain.auditlog.AuditParam;
-import com.rabobank.argos.service.domain.DeleteService;
 import com.rabobank.argos.service.domain.hierarchy.HierarchyRepository;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
 import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
@@ -120,12 +120,6 @@ public class SupplyChainRestService implements SupplychainApi {
     @AuditLog
     public ResponseEntity<Void> deleteSupplyChainById(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR)
                                                       @AuditParam("supplyChainId") String supplyChainId) {
-        layoutRepository.deleteBySupplyChainId(supplyChainId);
-        linkMetaBlockRepository.deleteBySupplyChainId(supplyChainId);
-        approvalConfigurationRepository.deleteBySupplyChainId(supplyChainId);
-        supplyChainRepository.delete(supplyChainId);
-        return ResponseEntity.noContent().build();
-    public ResponseEntity<Void> deleteSupplyChainById(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId) {
         if (supplyChainRepository.exists(supplyChainId)) {
             deleteService.deleteSupplyChain(supplyChainId);
             return ResponseEntity.noContent().build();

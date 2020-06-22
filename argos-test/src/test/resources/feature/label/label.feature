@@ -119,6 +119,46 @@ Feature: Label
     * def childLabelResponse = call read('create-label.feature') { name: 'child', parentLabelId: '#(rootId)'}
     * match childLabelResponse.response == { name: 'child', id: '#uuid', parentLabelId: '#(rootId)'}
 
+  Scenario: delete a child label should return a 204
+    * def rootLabelResponse = call read('create-label.feature') { name: 'parent'}
+    * def rootId = rootLabelResponse.response.id
+    * def childLabelResponse = call read('create-label.feature') { name: 'child', parentLabelId: '#(rootId)'}
+    * def childId = childLabelResponse.response.id
+    * def restPath = '/api/label/'+childId
+    Given path restPath
+    When method DELETE
+    Then status 204
+
+  Scenario: delete a root label should return a 204
+    * def rootLabelResponse = call read('create-label.feature') { name: 'parent'}
+    * def rootId = rootLabelResponse.response.id
+    * def childLabelResponse = call read('create-label.feature') { name: 'child', parentLabelId: '#(rootId)'}
+    * def rootRestPath = '/api/label/'+rootId
+    Given path rootRestPath
+    When method DELETE
+    Then status 204
+    * def childRestPath = '/api/label/'+childLabelResponse.response.id
+    Given path childRestPath
+    When method DELETE
+    Then status 404
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    * print stringResponse
+    And match stringResponse contains 'deleteLabelById'
+    And match stringResponse contains 'label'
+
+  Scenario: delete a child label without TREE_EDIT local permission should return a 403
+    * def rootLabelResponse = call read('create-label.feature') { name: 'parent'}
+    * def rootId = rootLabelResponse.response.id
+    * def childLabelResponse = call read('create-label.feature') { name: 'child', parentLabelId: '#(rootId)'}
+    * def childId = childLabelResponse.response.id
+    * def restPath = '/api/label/'+childId
+    * def userWithoutPermissions = defaultTestData.personalAccounts['default-pa1']
+    * configure headers = call read('classpath:headers.js') { token: #(userWithoutPermissions.token)}
+    Given path restPath
+    When method DELETE
+    Then status 403
+
   Scenario: retrieve child label should return a 200
     * def rootLabelResponse = call read('create-label.feature') { name: 'parent'}
     * def rootId = rootLabelResponse.response.id

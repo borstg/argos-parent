@@ -120,9 +120,6 @@ public class ServiceAccountRestService implements ServiceAccountApi {
     @AuditLog
     public ResponseEntity<Void> deleteServiceAccount(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR)
                                                      @AuditParam("serviceAccountId") String serviceAccountId) {
-        boolean isDeleted = accountService.deleteServiceAccount(serviceAccountId);
-        if (!isDeleted) {
-    public ResponseEntity<Void> deleteServiceAccount(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR) String serviceAccountId) {
         if (accountService.serviceAccountExists(serviceAccountId)) {
             deleteService.deleteServiceAccount(serviceAccountId);
             return ResponseEntity.noContent().build();
