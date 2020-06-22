@@ -68,7 +68,8 @@ services:
       - mongodb
 
   mongodb:
-    image: mongo:4.2.1-bionic
+    build:
+      context: mongo
     ports:
       - 27017:27017
 

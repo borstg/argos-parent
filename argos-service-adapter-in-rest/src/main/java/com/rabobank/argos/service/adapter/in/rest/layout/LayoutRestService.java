@@ -40,6 +40,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -85,6 +86,7 @@ public class LayoutRestService implements LayoutApi {
     @Override
     @PermissionCheck(permissions = Permission.LAYOUT_ADD)
     @AuditLog
+    @Transactional
     public ResponseEntity<RestLayoutMetaBlock> createOrUpdateLayout(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) @AuditParam("supplyChainId") String supplyChainId, @AuditParam("layout") RestLayoutMetaBlock restLayoutMetaBlock) {
         log.info("createLayout for supplyChainId {}", supplyChainId);
         LayoutMetaBlock layoutMetaBlock = layoutMetaBlockConverter.convertFromRestLayoutMetaBlock(restLayoutMetaBlock);
@@ -104,6 +106,7 @@ public class LayoutRestService implements LayoutApi {
     }
 
     @Override
+    @Transactional
     @PermissionCheck(permissions = Permission.LAYOUT_ADD)
     public ResponseEntity<List<RestApprovalConfiguration>> createApprovalConfigurations(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId, List<RestApprovalConfiguration> restApprovalConfigurations) {
         List<ApprovalConfiguration> approvalConfigurations = restApprovalConfigurations.stream()

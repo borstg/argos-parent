@@ -113,13 +113,24 @@ steps:
   depends_on:
   - pitest
   - sonar
+
+- name: build mongo
+  image: plugins/docker
+  settings:
+    context: argos-docker/mongo
+    dockerfile: argos-docker/mongo/Dockerfile
+    password:
+      from_secret: docker_login_token
+    repo: argosnotary/argos-mongo-test
+    tags: ${DRONE_TAG:-${DRONE_BRANCH//\//_}}
+    username:
+      from_secret: docker_login_user
   
 - name: mongodb
-  image: mongo:4.2.1-bionic
+  image: argosnotary/argos-mongo-test:${DRONE_TAG:-${DRONE_BRANCH//\//_}}
   detach: true
   depends_on:
-  - pitest
-  - sonar
+  - build mongo
   
 - name: argos-service
   image: argosnotary/argos-service-snapshot:${DRONE_TAG:-${DRONE_BRANCH//\//_}}

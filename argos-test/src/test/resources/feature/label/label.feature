@@ -143,7 +143,6 @@ Feature: Label
     Then status 404
     * def auditlog = call read('classpath:feature/auditlog.feature')
     * string stringResponse = auditlog.response
-    * print stringResponse
     And match stringResponse contains 'deleteLabelById'
     And match stringResponse contains 'label'
 

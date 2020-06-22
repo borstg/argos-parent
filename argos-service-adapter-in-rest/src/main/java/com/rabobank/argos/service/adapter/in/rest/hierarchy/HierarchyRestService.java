@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -62,6 +63,7 @@ public class HierarchyRestService implements HierarchyApi {
     @Override
     @AuditLog
     @PermissionCheck(permissions = Permission.TREE_EDIT)
+    @Transactional
     public ResponseEntity<RestLabel> createLabel(@LabelIdCheckParam(propertyPath = "parentLabelId") @AuditParam("label") RestLabel restLabel) {
         verifyParentLabelExists(restLabel.getParentLabelId());
         Label label = labelMapper.convertFromRestLabel(restLabel);
@@ -85,6 +87,7 @@ public class HierarchyRestService implements HierarchyApi {
     @Override
     @AuditLog
     @PermissionCheck(permissions = Permission.TREE_EDIT)
+    @Transactional
     public ResponseEntity<Void> deleteLabelById(@LabelIdCheckParam @AuditParam("labelId") String labelId) {
         if (labelRepository.exists(labelId)) {
             deleteService.deleteLabel(labelId);
@@ -106,6 +109,7 @@ public class HierarchyRestService implements HierarchyApi {
     @Override
     @AuditLog
     @PermissionCheck(permissions = Permission.TREE_EDIT)
+    @Transactional
     public ResponseEntity<RestLabel> updateLabelById(@LabelIdCheckParam @AuditParam("labelId") String labelId, @LabelIdCheckParam(propertyPath = "parentLabelId") @AuditParam("label") RestLabel restLabel) {
         verifyParentLabelIsDifferent(labelId, restLabel.getParentLabelId());
         verifyParentLabelExists(restLabel.getParentLabelId());

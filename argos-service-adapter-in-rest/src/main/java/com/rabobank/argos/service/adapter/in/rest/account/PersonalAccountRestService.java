@@ -41,6 +41,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -74,6 +75,7 @@ public class PersonalAccountRestService implements PersonalAccountApi {
     @PreAuthorize("hasRole('USER')")
     @Override
     @AuditLog
+    @Transactional
     public ResponseEntity<Void> createKey(@AuditParam("keyPair") RestKeyPair restKeyPair) {
         Account account = accountSecurityContext.getAuthenticatedAccount().orElseThrow(this::accountNotFound);
         KeyPair keyPair = keyPairMapper.convertFromRestKeyPair(restKeyPair);
@@ -114,6 +116,7 @@ public class PersonalAccountRestService implements PersonalAccountApi {
     @Override
     @PermissionCheck(permissions = {Permission.ASSIGN_ROLE})
     @AuditLog
+    @Transactional
     public ResponseEntity<RestPersonalAccount> updatePersonalAccountRolesById(@AuditParam("accountId") String accountId, @AuditParam("roleNames") List<String> roleNames) {
         return accountService.updatePersonalAccountRolesById(accountId, roleNames)
                 .map(personalAccountMapper::convertToRestPersonalAccount)
@@ -140,6 +143,7 @@ public class PersonalAccountRestService implements PersonalAccountApi {
     @Override
     @PermissionCheck(permissions = {Permission.LOCAL_PERMISSION_EDIT})
     @AuditLog
+    @Transactional
     public ResponseEntity<RestLocalPermissions> updateLocalPermissionsForLabel(@AuditParam("accountId") String accountId,
                                                                                @LabelIdCheckParam @AuditParam("labelId") String labelId,
                                                                                @AuditParam("localPermissions") List<RestPermission> restLocalPermission) {
