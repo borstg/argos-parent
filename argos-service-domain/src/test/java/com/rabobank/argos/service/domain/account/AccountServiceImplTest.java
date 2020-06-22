@@ -295,7 +295,8 @@ class AccountServiceImplTest {
         when(roleRepository.findByName(ADMINISTRATOR_ROLE_NAME)).thenReturn(Optional.of(adminRole));
         when(personalAccountRepository.findByAccountId(ACCOUNT_ID)).thenReturn(Optional.of(account));
         when(account.getRoleIds()).thenReturn(List.of(ADMIN_ROLE_ID));
-        ArgosError exception = assertThrows(ArgosError.class, () -> accountService.updatePersonalAccountRolesById(ACCOUNT_ID, List.of(ROLE_NAME)));
+        List<String> roles = List.of(ROLE_NAME);
+        ArgosError exception = assertThrows(ArgosError.class, () -> accountService.updatePersonalAccountRolesById(ACCOUNT_ID, roles));
         assertThat(exception.getMessage(), is("administrators can not unassign there own administrator role"));
         assertThat(exception.getLevel(), is(ArgosError.Level.WARNING));
     }
@@ -307,7 +308,8 @@ class AccountServiceImplTest {
         when(roleRepository.findByName(ADMINISTRATOR_ROLE_NAME)).thenReturn(Optional.empty());
         when(personalAccountRepository.findByAccountId(ACCOUNT_ID)).thenReturn(Optional.of(account));
         when(account.getRoleIds()).thenReturn(List.of(ADMIN_ROLE_ID));
-        ArgosError exception = assertThrows(ArgosError.class, () -> accountService.updatePersonalAccountRolesById(ACCOUNT_ID, List.of(ROLE_NAME)));
+        List<String> roles = List.of(ROLE_NAME);
+        ArgosError exception = assertThrows(ArgosError.class, () -> accountService.updatePersonalAccountRolesById(ACCOUNT_ID, roles));
         assertThat(exception.getMessage(), is("administrator role not found"));
         assertThat(exception.getLevel(), is(ArgosError.Level.ERROR));
     }
@@ -317,7 +319,8 @@ class AccountServiceImplTest {
 
         when(accountSecurityContext.getAuthenticatedAccount()).thenReturn(Optional.empty());
         when(personalAccountRepository.findByAccountId(ACCOUNT_ID)).thenReturn(Optional.of(account));
-        ArgosError exception = assertThrows(ArgosError.class, () -> accountService.updatePersonalAccountRolesById(ACCOUNT_ID, List.of(ROLE_NAME)));
+        List<String> roles = List.of(ROLE_NAME);
+        ArgosError exception = assertThrows(ArgosError.class, () -> accountService.updatePersonalAccountRolesById(ACCOUNT_ID, roles));
         assertThat(exception.getMessage(), is("no authenticated account"));
         assertThat(exception.getLevel(), is(ArgosError.Level.ERROR));
     }

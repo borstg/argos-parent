@@ -200,7 +200,7 @@ public class LayoutValidatorService {
 
     @Getter
     public static class LayoutValidationReport {
-        private List<RestValidationMessage> validationMessages = new ArrayList();
+        private List<RestValidationMessage> validationMessages = new ArrayList<>();
         private void addValidationMessage(String field, String message) {
             validationMessages.add(new RestValidationMessage()
                     .type(MODEL_CONSISTENCY)

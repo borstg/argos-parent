@@ -53,7 +53,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class LinkMetablockRepositoryIT {
+class LinkMetablockRepositoryIT {
 
     private static final String STEP_NAME = "stepName";
     private static final String SUPPLYCHAIN = "supplychain";

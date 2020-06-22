@@ -27,6 +27,7 @@ import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 
@@ -91,8 +92,11 @@ class SignatureValidatorTest {
         String signature = "bla";
         LinkMetaBlock linkMetaBlock = LinkMetaBlock.builder()
                 .signature(com.rabobank.argos.domain.Signature.builder().signature(signature).build()).link(link).build();
+        Link link = linkMetaBlock.getLink();
+        String sig = linkMetaBlock.getSignature().getSignature();
+        PublicKey pub = pair.getPublic();
 
-        ArgosError argosError = assertThrows(ArgosError.class, () -> validator.isValid(linkMetaBlock.getLink(), linkMetaBlock.getSignature().getSignature(), pair.getPublic()));
+        ArgosError argosError = assertThrows(ArgosError.class, () -> validator.isValid(link, sig, pub));
         assertThat(argosError.getMessage(), is("Odd number of characters."));
 
     }

@@ -182,7 +182,9 @@ class SupplyChainRestServiceTest {
     @Test
     void getSupplyChainByPathToRootNotFound() {
         when(hierarchyRepository.findByNamePathToRootAndType(SUPPLY_CHAIN_NAME, List.of(LABEL_NAME), TreeNode.Type.SUPPLY_CHAIN)).thenReturn(Optional.empty());
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> supplyChainRestService.getSupplyChainByPath(SUPPLY_CHAIN_NAME, List.of(LABEL_NAME)));
+        List<String> labels = List.of(LABEL_NAME);
+        
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> supplyChainRestService.getSupplyChainByPath(SUPPLY_CHAIN_NAME, labels));
         assertThat(exception.getStatus().value(), is(404));
         assertThat(exception.getMessage(), is("404 NOT_FOUND \"supply chain not found : supplyChainName with path labelName\""));
     }
@@ -192,7 +194,8 @@ class SupplyChainRestServiceTest {
         when(hierarchyRepository.findByNamePathToRootAndType(SUPPLY_CHAIN_NAME, List.of(LABEL_NAME), TreeNode.Type.SUPPLY_CHAIN)).thenReturn(Optional.of(treeNode));
         when(treeNode.getReferenceId()).thenReturn(SUPPLY_CHAIN_ID);
         when(supplyChainRepository.findBySupplyChainId(SUPPLY_CHAIN_ID)).thenReturn(Optional.empty());
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> supplyChainRestService.getSupplyChainByPath(SUPPLY_CHAIN_NAME, List.of(LABEL_NAME)));
+        List<String> labels = List.of(LABEL_NAME);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> supplyChainRestService.getSupplyChainByPath(SUPPLY_CHAIN_NAME, labels));
         assertThat(exception.getStatus().value(), is(404));
         assertThat(exception.getMessage(), is("404 NOT_FOUND \"supply chain not found : supplyChainName with path labelName\""));
     }

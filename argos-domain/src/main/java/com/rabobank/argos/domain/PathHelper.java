@@ -15,8 +15,6 @@
  */
 package com.rabobank.argos.domain;
 
-import java.util.regex.Pattern;
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

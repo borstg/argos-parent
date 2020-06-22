@@ -48,7 +48,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class PersonalAccountRepositoryIT {
+class PersonalAccountRepositoryIT {
 
 
     private static final String PIETJE = "Pietje";

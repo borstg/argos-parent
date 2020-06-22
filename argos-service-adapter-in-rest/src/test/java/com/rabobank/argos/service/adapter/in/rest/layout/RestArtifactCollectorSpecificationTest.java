@@ -26,7 +26,7 @@ import static com.rabobank.argos.service.adapter.in.rest.ValidateHelper.validate
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 
-public class RestArtifactCollectorSpecificationTest {
+class RestArtifactCollectorSpecificationTest {
 
     @Test
     void incorrectName() throws URISyntaxException {

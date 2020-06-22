@@ -59,7 +59,8 @@ class DefaultLabelIdExtractorTest {
     @Test
     void extractLabelFromObjectMethodNotExists() {
         when(checkParam.propertyPath()).thenReturn("other");
-        ArgosError argosError = assertThrows(ArgosError.class, () -> extractor.extractLabelId(checkParam, Label.builder().labelId(VALUE).build()));
+        Label label = Label.builder().labelId(VALUE).build();
+        ArgosError argosError = assertThrows(ArgosError.class, () -> extractor.extractLabelId(checkParam, label));
         assertThat(argosError.getMessage(), is("Unknown property 'other' on class 'class com.rabobank.argos.domain.hierarchy.Label'"));
     }
 

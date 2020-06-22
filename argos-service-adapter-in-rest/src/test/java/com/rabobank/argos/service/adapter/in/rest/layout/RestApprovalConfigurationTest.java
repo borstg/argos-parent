@@ -28,7 +28,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 
-public class RestApprovalConfigurationTest {
+class RestApprovalConfigurationTest {
     @Test
     void emptyRestLayoutMetaBlock() {
         assertThat(validate(new RestApprovalConfiguration()), contains(expectedErrors(
