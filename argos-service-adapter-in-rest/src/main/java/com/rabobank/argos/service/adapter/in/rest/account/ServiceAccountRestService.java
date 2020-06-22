@@ -22,6 +22,8 @@ import com.rabobank.argos.service.adapter.in.rest.api.handler.ServiceAccountApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestServiceAccount;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestServiceAccountKeyPair;
 import com.rabobank.argos.service.domain.account.AccountService;
+import com.rabobank.argos.service.domain.auditlog.AuditLog;
+import com.rabobank.argos.service.domain.auditlog.AuditParam;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
 import com.rabobank.argos.service.domain.security.AccountSecurityContext;
 import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
@@ -60,7 +62,9 @@ public class ServiceAccountRestService implements ServiceAccountApi {
 
     @Override
     @PermissionCheck(permissions = SERVICE_ACCOUNT_EDIT)
-    public ResponseEntity<RestServiceAccount> createServiceAccount(@LabelIdCheckParam(propertyPath = "parentLabelId") RestServiceAccount restServiceAccount) {
+    @AuditLog
+    public ResponseEntity<RestServiceAccount> createServiceAccount(@LabelIdCheckParam(propertyPath = "parentLabelId")
+                                                                   @AuditParam("serviceAccount") RestServiceAccount restServiceAccount) {
         verifyParentLabelExists(restServiceAccount.getParentLabelId());
         ServiceAccount serviceAccount = accountMapper.convertFromRestServiceAccount(restServiceAccount);
         accountService.save(serviceAccount);
@@ -74,7 +78,10 @@ public class ServiceAccountRestService implements ServiceAccountApi {
 
     @Override
     @PermissionCheck(permissions = SERVICE_ACCOUNT_EDIT)
-    public ResponseEntity<RestServiceAccountKeyPair> createServiceAccountKeyById(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR) String serviceAccountId, RestServiceAccountKeyPair restKeyPair) {
+    @AuditLog
+    public ResponseEntity<RestServiceAccountKeyPair> createServiceAccountKeyById(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR)
+                                                                                 @AuditParam("serviceAccountId") String serviceAccountId,
+                                                                                 @AuditParam("keyPair") RestServiceAccountKeyPair restKeyPair) {
         ServiceAccount updatedAccount = accountService.activateNewKey(serviceAccountId, keyPairMapper.convertFromRestKeyPair(restKeyPair))
                 .orElseThrow(() -> accountNotFound(serviceAccountId));
         URI location = ServletUriComponentsBuilder
@@ -107,7 +114,9 @@ public class ServiceAccountRestService implements ServiceAccountApi {
 
     @Override
     @PermissionCheck(permissions = SERVICE_ACCOUNT_EDIT)
-    public ResponseEntity<Void> deleteServiceAccount(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR) String serviceAccountId) {
+    @AuditLog
+    public ResponseEntity<Void> deleteServiceAccount(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR)
+                                                     @AuditParam("serviceAccountId") String serviceAccountId) {
         boolean isDeleted = accountService.deleteServiceAccount(serviceAccountId);
         if (!isDeleted) {
             throw accountNotFound(serviceAccountId);
@@ -119,7 +128,10 @@ public class ServiceAccountRestService implements ServiceAccountApi {
 
     @Override
     @PermissionCheck(permissions = SERVICE_ACCOUNT_EDIT)
-    public ResponseEntity<RestServiceAccount> updateServiceAccountById(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR) String serviceAccountId, RestServiceAccount restServiceAccount) {
+    @AuditLog
+    public ResponseEntity<RestServiceAccount> updateServiceAccountById(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR)
+                                                                       @AuditParam("serviceAccountId") String serviceAccountId,
+                                                                       @AuditParam("serviceAccount") RestServiceAccount restServiceAccount) {
         verifyParentLabelExists(restServiceAccount.getParentLabelId());
         ServiceAccount serviceAccount = accountMapper.convertFromRestServiceAccount(restServiceAccount);
         return accountService.update(serviceAccountId, serviceAccount)

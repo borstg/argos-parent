@@ -15,6 +15,12 @@
  */
 package com.rabobank.argos.service.domain.auditlog;
 
+import com.rabobank.argos.domain.SupplyChainHelper;
+import com.rabobank.argos.domain.hierarchy.HierarchyMode;
+import com.rabobank.argos.service.domain.hierarchy.HierarchyRepository;
+import com.rabobank.argos.service.domain.security.LocalPermissionCheckData;
+import com.rabobank.argos.service.domain.security.LocalPermissionCheckDataExtractor;
+import com.rabobank.argos.service.domain.security.PermissionCheck;
 import com.rabobank.argos.service.domain.util.reflection.ReflectionHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +31,14 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Aspect
@@ -37,9 +47,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Order(value = 2)
 public class AuditLogAdvisor {
+    public static final String ARGOS_AUDIT_LOG = "argos.AuditLog";
     private final ApplicationContext applicationContext;
 
     private final ReflectionHelper reflectionHelper;
+
+    private final HierarchyRepository hierarchyRepository;
 
     @Pointcut("@annotation(auditLog)")
     public void auditLogPointCut(AuditLog auditLog) {
@@ -48,31 +61,61 @@ public class AuditLogAdvisor {
 
     @AfterReturning(value = "auditLogPointCut(auditLog)", argNames = "joinPoint,auditLog,returnValue", returning = "returnValue")
     public void auditLog(JoinPoint joinPoint, AuditLog auditLog, Object returnValue) {
+
         ArgumentSerializer argumentSerializer = applicationContext
                 .getBean(auditLog.argumentSerializerBeanName(), ArgumentSerializer.class);
-        Object[] argumentvalues = joinPoint.getArgs();
-        String serializedReturnValue = serializeValue(returnValue, argumentSerializer);
+        Object[] argumentValues = joinPoint.getArgs();
+        String serializedReturnValue = serializeValue(returnValue, argumentSerializer, null);
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
-        Map<String, String> argumentValues = reflectionHelper.getParameterDataByAnnotation(method, AuditParam.class, argumentvalues)
+        List<String> paths = resolveOptionalPaths(argumentValues, method);
+        Map<String, String> parameterValueMap = reflectionHelper.getParameterDataByAnnotation(method, AuditParam.class, argumentValues)
                 .collect(Collectors
                         .toMap(p -> p.getAnnotation().value(),
-                                p -> serializeValue(p.getValue(), argumentSerializer)
+                                p -> serializeValue(p.getValue(), argumentSerializer, p.getAnnotation())
                         )
                 );
         AuditLogData auditLogData = AuditLogData.builder()
-                .argumentData(argumentValues)
+                .argumentData(parameterValueMap)
                 .methodName(method.getName())
                 .returnValue(serializedReturnValue)
+                .paths(paths)
                 .build();
         log.info("AuditLog: {}", argumentSerializer.serialize(auditLogData));
     }
 
-    private String serializeValue(Object argumentValue, ArgumentSerializer argumentSerializer) {
+    private List<String> resolveOptionalPaths(Object[] argumentValues, Method method) {
+        List<String> paths = new ArrayList<>();
+        Optional<PermissionCheck> optionalPermissionCheck = Optional.ofNullable(method.getAnnotation(PermissionCheck.class));
+        optionalPermissionCheck.ifPresent(permissionCheck -> {
+            LocalPermissionCheckDataExtractor localPermissionCheckDataExtractor = applicationContext
+                    .getBean(permissionCheck.localPermissionDataExtractorBean(), LocalPermissionCheckDataExtractor.class);
+            LocalPermissionCheckData labelCheckData = localPermissionCheckDataExtractor.extractLocalPermissionCheckData(method, argumentValues);
+            labelCheckData.getLabelIds().forEach(labelId -> hierarchyRepository.getSubTree(labelId, HierarchyMode.NONE, 0)
+                    .ifPresent(treeNode -> paths.add(SupplyChainHelper
+                            .reversePath(treeNode.getPathToRoot())
+                            .stream()
+                            .collect(Collectors.joining("/")) + "/" + treeNode.getName())
+                    ));
+        });
+        return paths;
+    }
+
+    private String serializeValue(Object argumentValue, ArgumentSerializer argumentSerializer, @Nullable AuditParam auditParam) {
         if (argumentValue instanceof String) {
             return (String) argumentValue;
         } else {
-            return argumentSerializer.serialize(argumentValue);
+            if (hasObjectArgumentFilter(auditParam)) {
+                ObjectArgumentFilter<Object> objectArgumentFilter = applicationContext
+                        .getBean(auditParam.objectArgumentFilterBeanName(), ObjectArgumentFilter.class);
+                return argumentSerializer.serialize(objectArgumentFilter.filterObjectArguments(argumentValue));
+            } else {
+                return argumentSerializer.serialize(argumentValue);
+            }
 
         }
+    }
+
+    private boolean hasObjectArgumentFilter(@Nullable AuditParam auditParam) {
+        return auditParam != null && !"".equals(auditParam.objectArgumentFilterBeanName());
     }
 }

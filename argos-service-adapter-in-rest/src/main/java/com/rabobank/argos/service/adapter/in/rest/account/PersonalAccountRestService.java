@@ -31,6 +31,8 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestProfile;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestPublicKey;
 import com.rabobank.argos.service.domain.account.AccountSearchParams;
 import com.rabobank.argos.service.domain.account.AccountService;
+import com.rabobank.argos.service.domain.auditlog.AuditLog;
+import com.rabobank.argos.service.domain.auditlog.AuditParam;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
 import com.rabobank.argos.service.domain.security.AccountSecurityContext;
 import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
@@ -43,7 +45,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -72,7 +73,8 @@ public class PersonalAccountRestService implements PersonalAccountApi {
 
     @PreAuthorize("hasRole('USER')")
     @Override
-    public ResponseEntity<Void> createKey(@Valid RestKeyPair restKeyPair) {
+    @AuditLog
+    public ResponseEntity<Void> createKey(@AuditParam("keyPair") RestKeyPair restKeyPair) {
         Account account = accountSecurityContext.getAuthenticatedAccount().orElseThrow(this::accountNotFound);
         KeyPair keyPair = keyPairMapper.convertFromRestKeyPair(restKeyPair);
         validateKeyId(keyPair);
@@ -111,7 +113,8 @@ public class PersonalAccountRestService implements PersonalAccountApi {
 
     @Override
     @PermissionCheck(permissions = {Permission.ASSIGN_ROLE})
-    public ResponseEntity<RestPersonalAccount> updatePersonalAccountRolesById(String accountId, List<String> roleNames) {
+    @AuditLog
+    public ResponseEntity<RestPersonalAccount> updatePersonalAccountRolesById(@AuditParam("accountId") String accountId, @AuditParam("roleNames") List<String> roleNames) {
         return accountService.updatePersonalAccountRolesById(accountId, roleNames)
                 .map(personalAccountMapper::convertToRestPersonalAccount)
                 .map(ResponseEntity::ok).orElseThrow(this::accountNotFound);
@@ -136,7 +139,10 @@ public class PersonalAccountRestService implements PersonalAccountApi {
 
     @Override
     @PermissionCheck(permissions = {Permission.LOCAL_PERMISSION_EDIT})
-    public ResponseEntity<RestLocalPermissions> updateLocalPermissionsForLabel(String accountId, @LabelIdCheckParam String labelId, List<RestPermission> restLocalPermission) {
+    @AuditLog
+    public ResponseEntity<RestLocalPermissions> updateLocalPermissionsForLabel(@AuditParam("accountId") String accountId,
+                                                                               @LabelIdCheckParam @AuditParam("labelId") String labelId,
+                                                                               @AuditParam("localPermissions") List<RestPermission> restLocalPermission) {
         verifyParentLabelExists(labelId);
         LocalPermissions newLocalPermissions = LocalPermissions.builder().labelId(labelId).permissions(personalAccountMapper.convertToLocalPermissions(restLocalPermission)).build();
         PersonalAccount personalAccount = accountService.updatePersonalAccountLocalPermissionsById(accountId, newLocalPermissions).orElseThrow(this::accountNotFound);

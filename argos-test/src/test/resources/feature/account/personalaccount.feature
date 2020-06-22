@@ -31,11 +31,15 @@ Feature: Personal Account
     Then status 200
     Then match response == expectedResponse
 
-  Scenario: createKey should return 204
+  Scenario: createKey should return 204 and commit to audit log
     Given path '/api/personalaccount/me/key'
     And request read('classpath:testmessages/key/personal-keypair.json')
     When method POST
     Then status 204
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'createKey'
+    And match stringResponse contains 'keyPair'
 
   Scenario: createKey with invalid key should return 400
     Given path '/api/personalaccount/me/key'
@@ -72,7 +76,7 @@ Feature: Personal Account
     Then status 403
     And match response == {"message":"Access denied"}
 
-  Scenario: update roles should return 200
+  Scenario: update roles should return 200 and commit to auditlog
     * def extraAccount = call read('classpath:feature/account/create-personal-account.feature') {name: 'Extra Person', email: 'extra@extra.go'}
     Given path '/api/personalaccount/'+extraAccount.response.id+'/role'
     And request ["administrator"]
@@ -83,6 +87,14 @@ Feature: Personal Account
     When method GET
     Then status 200
     Then match response == {"id":"#(extraAccount.response.id)","name":"Extra Person", "roles": [{"id": "#uuid", "name":"administrator", "permissions" : ["READ","LOCAL_PERMISSION_EDIT","TREE_EDIT","VERIFY","ASSIGN_ROLE"] }]}
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'updatePersonalAccountRolesById'
+    And match stringResponse contains 'accountId'
+    And match stringResponse contains 'roleNames'
+
+
+  #updatePersonalAccountRolesById
 
   Scenario: remove administrator role of administrator should return 400
     * def extraAccount = call read('classpath:feature/account/create-personal-account.feature') {name: 'Extra Person', email: 'extra@extra.go'}
@@ -221,6 +233,14 @@ Feature: Personal Account
     When method GET
     Then status 200
     And match response == [{"labelId": "#(label.response.id)", "permissions": ["VERIFY","READ"]}]
+
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'updateLocalPermissionsForLabel'
+    And match stringResponse contains 'accountId'
+    And match stringResponse contains 'labelId'
+    And match stringResponse contains 'localPermissions'
+
 
   Scenario: a user with local permission LOCAL_PERMISSION_EDIT can manage local permissions
     * def extraAccount = call read('classpath:feature/account/create-personal-account.feature') {name: 'Extra Person', email:'local.permissions@extra.go'}

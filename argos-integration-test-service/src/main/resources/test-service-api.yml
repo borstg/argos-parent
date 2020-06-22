@@ -23,6 +23,19 @@ info:
 servers:
   - url: /integration-test
 paths:
+  /audit-log:
+    get:
+      summary: gets the auditlog from mongo db
+      tags:
+        - IntegrationTestService
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+
   /reset-db:
     post:
       summary: resets the database

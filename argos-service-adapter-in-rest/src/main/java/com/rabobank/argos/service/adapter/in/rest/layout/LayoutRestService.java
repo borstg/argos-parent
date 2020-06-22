@@ -29,6 +29,8 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestApprovalConfigur
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestArtifactCollectorSpecification;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayout;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayoutMetaBlock;
+import com.rabobank.argos.service.domain.auditlog.AuditLog;
+import com.rabobank.argos.service.domain.auditlog.AuditParam;
 import com.rabobank.argos.service.domain.layout.ApprovalConfigurationRepository;
 import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
 import com.rabobank.argos.service.domain.security.AccountSecurityContext;
@@ -82,7 +84,8 @@ public class LayoutRestService implements LayoutApi {
 
     @Override
     @PermissionCheck(permissions = Permission.LAYOUT_ADD)
-    public ResponseEntity<RestLayoutMetaBlock> createOrUpdateLayout(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId, RestLayoutMetaBlock restLayoutMetaBlock) {
+    @AuditLog
+    public ResponseEntity<RestLayoutMetaBlock> createOrUpdateLayout(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) @AuditParam("supplyChainId") String supplyChainId, @AuditParam("layout") RestLayoutMetaBlock restLayoutMetaBlock) {
         log.info("createLayout for supplyChainId {}", supplyChainId);
         LayoutMetaBlock layoutMetaBlock = layoutMetaBlockConverter.convertFromRestLayoutMetaBlock(restLayoutMetaBlock);
         layoutMetaBlock.setSupplyChainId(supplyChainId);

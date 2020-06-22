@@ -18,6 +18,7 @@ package com.rabobank.argos.service.domain.auditlog;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -26,4 +27,5 @@ public class AuditLogData {
     private String methodName;
     private Map<String, String> argumentData;
     private String returnValue;
+    private List<String> paths;
 }

@@ -30,8 +30,14 @@ Feature: Layout
     * configure headers = call read('classpath:headers.js') { token: #(accountWithLayoutAddPermission.token)}
     * def tokenWithoutLayoutAddPermissions = defaultTestData.adminToken
 
-  Scenario: store layout with valid specifications should return a 200
+  Scenario: store layout with valid specifications should return a 200 and commit to auditlog
     * call read('create-layout.feature') {supplyChainId:#(supplyChain.response.id), json:#(validLayout), keyNumber:1}
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'createOrUpdateLayout'
+    And match stringResponse contains 'supplyChainId'
+    And match stringResponse contains 'layout'
+
 
   Scenario: store layout with invalid specifications should return a 400 error
     Given path layoutPath

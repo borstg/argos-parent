@@ -90,7 +90,6 @@ class LinkRestServiceTest {
 
         when(linkMetaBlock.getLink()).thenReturn(link);
         when(linkMetaBlock.getSignature()).thenReturn(signature);
-
         when(converter.convertFromRestLinkMetaBlock(restLinkMetaBlock)).thenReturn(linkMetaBlock);
         when(supplyChainRepository.findBySupplyChainId(SUPPLY_CHAIN_ID)).thenReturn(Optional.of(supplyChain));
         assertThat(restService.createLink(SUPPLY_CHAIN_ID, restLinkMetaBlock).getStatusCodeValue(), is(204));
