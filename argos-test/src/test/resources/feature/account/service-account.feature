@@ -25,11 +25,17 @@ Feature: Non Personal Account
     * configure headers = call read('classpath:headers.js') { token: #(keyPair.token)}
 
 
-  Scenario: store a service account with valid name should return a 201
+  Scenario: store a service account with valid name should return a 201 and commit to audit log
     * def result = call read('create-service-account.feature') { name: 'sa 1', parentLabelId: #(rootLabelId)}
     * match result.response == { name: 'sa 1', id: '#uuid', parentLabelId: '#uuid' }
 
-  Scenario: delete service account should return a 200 and get should return a 403
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'createServiceAccount'
+    And match stringResponse contains 'serviceAccount'
+
+
+  Scenario: delete service account should return a 200 and get should return a 403 and commit to audit log
     * def result = call read('create-service-account.feature') { name: 'sa 1', parentLabelId: #(rootLabelId)}
     * def restPath = '/api/serviceaccount/'+result.response.id
     Given path restPath
@@ -38,6 +44,10 @@ Feature: Non Personal Account
     Given path restPath
     When method GET
     Then status 403
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'deleteServiceAccount'
+    And match stringResponse contains 'serviceAccountId'
 
   Scenario: delete service account without SERVICE_ACCOUNT_EDIT permission should return a 403 error
     * def result = call read('create-service-account.feature') { name: 'sa 1', parentLabelId: #(rootLabelId)}
@@ -46,7 +56,6 @@ Feature: Non Personal Account
     Given path restPath
     When method DELETE
     Then status 403
-
 
   Scenario: store a service account without SERVICE_ACCOUNT_EDIT permission should return a 403 error
     * configure headers = call read('classpath:headers.js') { token: #(defaultTestData.adminToken)}
@@ -107,7 +116,7 @@ Feature: Non Personal Account
     Then status 200
     And match response == { name: 'sa 1', id: '#(result.response.id)', parentLabelId: #(info.labelId)}
 
-  Scenario: update a service account should return a 200
+  Scenario: update a service account should return a 200 and commit to audit log
     * def createResult = call read('create-service-account.feature') { name: 'sa 1', parentLabelId: #(rootLabelId)}
     * def accountId = createResult.response.id
     * def restPath = '/api/serviceaccount/'+accountId
@@ -116,6 +125,11 @@ Feature: Non Personal Account
     When method PUT
     Then status 200
     And match response == { name: 'sa 2', id: '#(accountId)', parentLabelId: #(rootLabelId)}
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'updateServiceAccountById'
+    And match stringResponse contains 'serviceAccountId'
+    And match stringResponse contains 'serviceAccount'
 
   Scenario: update a service account without SERVICE_ACCOUNT_EDIT permission should return a 403 error
     * def createResult = call read('create-service-account.feature') { name: 'sa 1', parentLabelId: #(rootLabelId)}
@@ -127,12 +141,17 @@ Feature: Non Personal Account
     When method PUT
     Then status 403
 
-  Scenario: create a service account key should return a 200
+  Scenario: create a service account key should return a 200 and commit to audit log
     * def createResult = call read('create-service-account.feature') { name: 'sa 1', parentLabelId: #(rootLabelId)}
     * def accountId = createResult.response.id
     * def keyPair = read('classpath:testmessages/key/sa-keypair1.json')
     * def result = call read('create-service-account-key.feature') {accountId: #(accountId), key: #(keyPair)}
     * match result.response == {keyId: #(keyPair.keyId), publicKey: #(keyPair.publicKey), encryptedPrivateKey: #(keyPair.encryptedPrivateKey)}
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'createServiceAccountKeyById'
+    And match stringResponse contains 'serviceAccountId'
+    And match stringResponse contains 'keyPair'
 
   Scenario: create a service account key without SERVICE_ACCOUNT_EDIT permission should return a 403 error
     * def createResult = call read('create-service-account.feature') { name: 'sa 1', parentLabelId: #(rootLabelId)}

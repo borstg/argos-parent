@@ -21,6 +21,8 @@ import com.rabobank.argos.domain.permission.Permission;
 import com.rabobank.argos.service.adapter.in.rest.SignatureValidatorService;
 import com.rabobank.argos.service.adapter.in.rest.api.handler.LinkApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLinkMetaBlock;
+import com.rabobank.argos.service.domain.auditlog.AuditLog;
+import com.rabobank.argos.service.domain.auditlog.AuditParam;
 import com.rabobank.argos.service.domain.link.LinkMetaBlockRepository;
 import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
 import com.rabobank.argos.service.domain.security.PermissionCheck;
@@ -55,7 +57,13 @@ public class LinkRestService implements LinkApi {
 
     @Override
     @PermissionCheck(permissions = Permission.LINK_ADD)
-    public ResponseEntity<Void> createLink(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId, RestLinkMetaBlock restLinkMetaBlock) {
+    @AuditLog
+    public ResponseEntity<Void> createLink(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR)
+                                           @AuditParam("supplyChainId") String supplyChainId,
+                                           @AuditParam(
+                                                   value = "signature",
+                                                   objectArgumentFilterBeanName = "auditLogSignatureArgumentFilter")
+                                                   RestLinkMetaBlock restLinkMetaBlock) {
         log.info("createLink supplyChainId : {}", supplyChainId);
         if (supplyChainRepository.findBySupplyChainId(supplyChainId).isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "supply chain not found : " + supplyChainId);

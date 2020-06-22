@@ -71,11 +71,11 @@ public class DefaultLocalPermissionCheckStrategy implements LocalPermissionCheck
     }
 
     private ArrayList<String> getAllLabelIdsUpTree(String labelId) {
-        return hierarchyRepository.getSubTree(labelId, HierarchyMode.NONE, 0)
-                .map(TreeNode::getIdPathToRoot).map(ArrayList::new)
-                .map(labelIds -> {
-                    labelIds.add(labelId);
-                    return labelIds;
-                }).orElse(new ArrayList<>(List.of(labelId)));
+       return hierarchyRepository.getSubTree(labelId, HierarchyMode.NONE, 0)
+               .map(TreeNode::getIdPathToRoot).map(ArrayList::new)
+               .map(labelIds -> {
+                   labelIds.add(labelId);
+                   return labelIds;
+               }).orElse(new ArrayList<>(List.of(labelId)));
     }
 }

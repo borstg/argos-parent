@@ -21,6 +21,8 @@ import com.rabobank.argos.domain.permission.Permission;
 import com.rabobank.argos.domain.supplychain.SupplyChain;
 import com.rabobank.argos.service.adapter.in.rest.api.handler.SupplychainApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestSupplyChain;
+import com.rabobank.argos.service.domain.auditlog.AuditLog;
+import com.rabobank.argos.service.domain.auditlog.AuditParam;
 import com.rabobank.argos.service.domain.DeleteService;
 import com.rabobank.argos.service.domain.hierarchy.HierarchyRepository;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
@@ -56,7 +58,8 @@ public class SupplyChainRestService implements SupplychainApi {
 
     @Override
     @PermissionCheck(permissions = Permission.TREE_EDIT)
-    public ResponseEntity<RestSupplyChain> createSupplyChain(@LabelIdCheckParam(propertyPath = "parentLabelId") RestSupplyChain restSupplyChain) {
+    @AuditLog
+    public ResponseEntity<RestSupplyChain> createSupplyChain(@LabelIdCheckParam(propertyPath = "parentLabelId") @AuditParam("supplyChain") RestSupplyChain restSupplyChain) {
         verifyParentLabelExists(restSupplyChain.getParentLabelId());
         SupplyChain supplyChain = converter.convertFromRestSupplyChainCommand(restSupplyChain);
 
@@ -84,7 +87,7 @@ public class SupplyChainRestService implements SupplychainApi {
     @Override
     @PermissionCheck(permissions = {Permission.READ, Permission.LINK_ADD, Permission.VERIFY}, localPermissionDataExtractorBean = SUPPLY_CHAIN_PATH_LOCAL_DATA_EXTRACTOR)
     public ResponseEntity<RestSupplyChain> getSupplyChainByPath(String name, List<String> path) {
-    	List<String> pathToRoot = SupplyChainHelper.reversePath(path);
+        List<String> pathToRoot = SupplyChainHelper.reversePath(path);
         return hierarchyRepository.findByNamePathToRootAndType(name, pathToRoot, TreeNode.Type.SUPPLY_CHAIN)
                 .map(TreeNode::getReferenceId)
                 .flatMap(supplyChainRepository::findBySupplyChainId)
@@ -95,7 +98,14 @@ public class SupplyChainRestService implements SupplychainApi {
 
     @Override
     @PermissionCheck(permissions = Permission.TREE_EDIT)
-    public ResponseEntity<RestSupplyChain> updateSupplyChain(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId, @LabelIdCheckParam(propertyPath = "parentLabelId") RestSupplyChain restSupplyChain) {
+    @AuditLog
+    public ResponseEntity<RestSupplyChain> updateSupplyChain(
+            @LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR)
+            @AuditParam("supplyChainId")
+                    String supplyChainId,
+            @LabelIdCheckParam(propertyPath = "parentLabelId")
+            @AuditParam("supplyChain")
+                    RestSupplyChain restSupplyChain) {
         verifyParentLabelExists(restSupplyChain.getParentLabelId());
         SupplyChain supplyChain = converter.convertFromRestSupplyChainCommand(restSupplyChain);
         supplyChain.setSupplyChainId(supplyChainId);
@@ -107,6 +117,14 @@ public class SupplyChainRestService implements SupplychainApi {
 
     @Override
     @PermissionCheck(permissions = Permission.TREE_EDIT)
+    @AuditLog
+    public ResponseEntity<Void> deleteSupplyChainById(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR)
+                                                      @AuditParam("supplyChainId") String supplyChainId) {
+        layoutRepository.deleteBySupplyChainId(supplyChainId);
+        linkMetaBlockRepository.deleteBySupplyChainId(supplyChainId);
+        approvalConfigurationRepository.deleteBySupplyChainId(supplyChainId);
+        supplyChainRepository.delete(supplyChainId);
+        return ResponseEntity.noContent().build();
     public ResponseEntity<Void> deleteSupplyChainById(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId) {
         if (supplyChainRepository.exists(supplyChainId)) {
             deleteService.deleteSupplyChain(supplyChainId);

@@ -21,6 +21,8 @@ import com.rabobank.argos.domain.permission.Permission;
 import com.rabobank.argos.service.adapter.in.rest.api.handler.VerificationApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestVerificationResult;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestVerifyCommand;
+import com.rabobank.argos.service.domain.auditlog.AuditLog;
+import com.rabobank.argos.service.domain.auditlog.AuditParam;
 import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
 import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
 import com.rabobank.argos.service.domain.security.PermissionCheck;
@@ -55,7 +57,10 @@ public class VerificationRestService implements VerificationApi {
 
     @Override
     @PermissionCheck(permissions = Permission.VERIFY)
-    public ResponseEntity<RestVerificationResult> performVerification(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId, @Valid RestVerifyCommand restVerifyCommand) {
+    @AuditLog
+    public ResponseEntity<RestVerificationResult> performVerification(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR)
+                                                                      @AuditParam("supplyChainId") String supplyChainId,
+                                                                      @AuditParam("verifyCommand") @Valid RestVerifyCommand restVerifyCommand) {
 
         LayoutMetaBlock layoutMetaBlock = repository.findBySupplyChainId(supplyChainId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "no active layout could be found for supplychain:" + supplyChainId));
