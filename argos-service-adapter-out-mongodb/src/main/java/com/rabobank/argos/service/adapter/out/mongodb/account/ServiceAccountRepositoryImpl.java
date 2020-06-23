@@ -15,7 +15,6 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.account;
 
-import com.mongodb.client.result.DeleteResult;
 import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.account.ServiceAccount;
 import com.rabobank.argos.service.domain.account.ServiceAccountRepository;
@@ -73,9 +72,8 @@ public class ServiceAccountRepositoryImpl implements ServiceAccountRepository {
     }
 
     @Override
-    public boolean delete(String accountId) {
-        DeleteResult result = template.remove(getPrimaryKeyQuery(accountId), ServiceAccount.class, COLLECTION);
-        return result.getDeletedCount() >= 1;
+    public void delete(String accountId) {
+        template.remove(getPrimaryKeyQuery(accountId), COLLECTION);
     }
 
     @Override
@@ -88,6 +86,11 @@ public class ServiceAccountRepositoryImpl implements ServiceAccountRepository {
         Query query = getPrimaryKeyQuery(accountId);
         query.fields().include(PARENT_LABEL_ID_FIELD);
         return Optional.ofNullable(template.findOne(query, ServiceAccount.class, COLLECTION)).map(ServiceAccount::getParentLabelId);
+    }
+
+    @Override
+    public boolean exists(String serviceAccountId) {
+        return template.exists(getPrimaryKeyQuery(serviceAccountId), COLLECTION);
     }
 
     private Query getActiveKeyQuery(String activekeyId) {

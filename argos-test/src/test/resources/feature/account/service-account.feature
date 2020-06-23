@@ -40,7 +40,7 @@ Feature: Non Personal Account
     * def restPath = '/api/serviceaccount/'+result.response.id
     Given path restPath
     When method DELETE
-    Then status 200
+    Then status 204
     Given path restPath
     When method GET
     Then status 403

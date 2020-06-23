@@ -22,6 +22,7 @@ import com.rabobank.argos.service.adapter.in.rest.api.handler.HierarchyApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestHierarchyMode;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLabel;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestTreeNode;
+import com.rabobank.argos.service.domain.DeleteService;
 import com.rabobank.argos.service.domain.auditlog.AuditLog;
 import com.rabobank.argos.service.domain.auditlog.AuditParam;
 import com.rabobank.argos.service.domain.hierarchy.HierarchyService;
@@ -56,6 +57,8 @@ public class HierarchyRestService implements HierarchyApi {
 
     private final TreeNodeMapper treeNodeMapper;
 
+    private final DeleteService deleteService;
+
     @Override
     @AuditLog
     @PermissionCheck(permissions = Permission.TREE_EDIT)
@@ -83,12 +86,14 @@ public class HierarchyRestService implements HierarchyApi {
     @AuditLog
     @PermissionCheck(permissions = Permission.TREE_EDIT)
     public ResponseEntity<Void> deleteLabelById(@LabelIdCheckParam @AuditParam("labelId") String labelId) {
-        if (labelRepository.deleteById(labelId)) {
+        if (labelRepository.exists(labelId)) {
+            deleteService.deleteLabel(labelId);
             return ResponseEntity.noContent().build();
         } else {
             throw labelNotFound(labelId);
         }
     }
+
 
     @Override
     @PermissionCheck(permissions = Permission.READ)

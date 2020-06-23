@@ -21,6 +21,7 @@ import com.rabobank.argos.domain.account.ServiceAccountKeyPair;
 import com.rabobank.argos.service.adapter.in.rest.api.handler.ServiceAccountApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestServiceAccount;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestServiceAccountKeyPair;
+import com.rabobank.argos.service.domain.DeleteService;
 import com.rabobank.argos.service.domain.account.AccountService;
 import com.rabobank.argos.service.domain.auditlog.AuditLog;
 import com.rabobank.argos.service.domain.auditlog.AuditParam;
@@ -59,6 +60,8 @@ public class ServiceAccountRestService implements ServiceAccountApi {
     private final AccountService accountService;
 
     private final AccountSecurityContext accountSecurityContext;
+
+    private final DeleteService deleteService;
 
     @Override
     @PermissionCheck(permissions = SERVICE_ACCOUNT_EDIT)
@@ -117,13 +120,12 @@ public class ServiceAccountRestService implements ServiceAccountApi {
     @AuditLog
     public ResponseEntity<Void> deleteServiceAccount(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR)
                                                      @AuditParam("serviceAccountId") String serviceAccountId) {
-        boolean isDeleted = accountService.deleteServiceAccount(serviceAccountId);
-        if (!isDeleted) {
+        if (accountService.serviceAccountExists(serviceAccountId)) {
+            deleteService.deleteServiceAccount(serviceAccountId);
+            return ResponseEntity.noContent().build();
+        } else {
             throw accountNotFound(serviceAccountId);
         }
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .build();
     }
 
     @Override

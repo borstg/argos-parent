@@ -21,13 +21,11 @@ import com.rabobank.argos.domain.permission.Permission;
 import com.rabobank.argos.domain.supplychain.SupplyChain;
 import com.rabobank.argos.service.adapter.in.rest.api.handler.SupplychainApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestSupplyChain;
+import com.rabobank.argos.service.domain.DeleteService;
 import com.rabobank.argos.service.domain.auditlog.AuditLog;
 import com.rabobank.argos.service.domain.auditlog.AuditParam;
 import com.rabobank.argos.service.domain.hierarchy.HierarchyRepository;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
-import com.rabobank.argos.service.domain.layout.ApprovalConfigurationRepository;
-import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
-import com.rabobank.argos.service.domain.link.LinkMetaBlockRepository;
 import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
 import com.rabobank.argos.service.domain.security.PermissionCheck;
 import com.rabobank.argos.service.domain.supplychain.SupplyChainRepository;
@@ -56,9 +54,7 @@ public class SupplyChainRestService implements SupplychainApi {
     private final HierarchyRepository hierarchyRepository;
     private final SupplyChainMapper converter;
     private final LabelRepository labelRepository;
-    private final LayoutMetaBlockRepository layoutRepository;
-    private final LinkMetaBlockRepository linkMetaBlockRepository;
-    private final ApprovalConfigurationRepository approvalConfigurationRepository;
+    private final DeleteService deleteService;
 
     @Override
     @PermissionCheck(permissions = Permission.TREE_EDIT)
@@ -124,11 +120,12 @@ public class SupplyChainRestService implements SupplychainApi {
     @AuditLog
     public ResponseEntity<Void> deleteSupplyChainById(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR)
                                                       @AuditParam("supplyChainId") String supplyChainId) {
-        layoutRepository.deleteBySupplyChainId(supplyChainId);
-        linkMetaBlockRepository.deleteBySupplyChainId(supplyChainId);
-        approvalConfigurationRepository.deleteBySupplyChainId(supplyChainId);
-        supplyChainRepository.delete(supplyChainId);
-        return ResponseEntity.noContent().build();
+        if (supplyChainRepository.exists(supplyChainId)) {
+            deleteService.deleteSupplyChain(supplyChainId);
+            return ResponseEntity.noContent().build();
+        } else {
+            throw supplyChainNotFound(supplyChainId);
+        }
     }
 
     private void verifyParentLabelExists(String parentLabelId) {

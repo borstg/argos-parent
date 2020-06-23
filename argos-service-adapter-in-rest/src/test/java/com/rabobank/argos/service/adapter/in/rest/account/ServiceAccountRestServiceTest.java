@@ -19,6 +19,7 @@ import com.rabobank.argos.domain.account.ServiceAccount;
 import com.rabobank.argos.domain.account.ServiceAccountKeyPair;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestServiceAccount;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestServiceAccountKeyPair;
+import com.rabobank.argos.service.domain.DeleteService;
 import com.rabobank.argos.service.domain.account.AccountService;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
 import com.rabobank.argos.service.domain.security.AccountSecurityContext;
@@ -81,9 +82,12 @@ class ServiceAccountRestServiceTest {
     @Mock
     private AccountSecurityContext accountSecurityContext;
 
+    @Mock
+    private DeleteService deleteService;
+
     @BeforeEach
     void setUp() {
-        service = new ServiceAccountRestService(accountMapper, labelRepository, keyPairMapper, accountService, accountSecurityContext);
+        service = new ServiceAccountRestService(accountMapper, labelRepository, keyPairMapper, accountService, accountSecurityContext, deleteService);
     }
 
     @Test
@@ -175,14 +179,15 @@ class ServiceAccountRestServiceTest {
 
     @Test
     void deleteServiceAccount() {
-        when(accountService.deleteServiceAccount(ACCOUNT_ID)).thenReturn(true);
+        when(accountService.serviceAccountExists(ACCOUNT_ID)).thenReturn(true);
         ResponseEntity<Void> response = service.deleteServiceAccount(ACCOUNT_ID);
-        assertThat(response.getStatusCodeValue(), is(200));
+        assertThat(response.getStatusCodeValue(), is(204));
+        verify(deleteService).deleteServiceAccount(ACCOUNT_ID);
     }
 
     @Test
     void deleteServiceAccountWithInvalidAccountIdShouldReturnNotFound() {
-        when(accountService.deleteServiceAccount(ACCOUNT_ID)).thenReturn(false);
+        when(accountService.serviceAccountExists(ACCOUNT_ID)).thenReturn(false);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.deleteServiceAccount(ACCOUNT_ID));
         assertThat(exception.getStatus().value(), is(404));
         assertThat(exception.getMessage(), is("404 NOT_FOUND \"no service account with id : accountId found\""));

@@ -395,8 +395,7 @@ class AccountServiceImplTest {
 
     @Test
     void deleteServiceAccount() {
-        when(serviceAccountRepository.delete(ACCOUNT_ID)).thenReturn(true);
-        assertThat(accountService.deleteServiceAccount(ACCOUNT_ID), is(true));
+        accountService.deleteServiceAccount(ACCOUNT_ID);
         verify(serviceAccountRepository).delete(ACCOUNT_ID);
     }
 }

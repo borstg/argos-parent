@@ -168,8 +168,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public boolean deleteServiceAccount(String accountId) {
-        return serviceAccountRepository.delete(accountId);
+    public void deleteServiceAccount(String accountId) {
+        serviceAccountRepository.delete(accountId);
     }
 
     @Override
@@ -186,6 +186,11 @@ public class AccountServiceImpl implements AccountService {
             serviceAccountRepository.update(account);
             return account;
         });
+    }
+
+    @Override
+    public boolean serviceAccountExists(String serviceAccountId) {
+        return serviceAccountRepository.exists(serviceAccountId);
     }
 
     private void addRoleUser(PersonalAccount personalAccount) {

@@ -60,9 +60,8 @@ public class LabelRepositoryImpl implements LabelRepository {
     }
 
     @Override
-    public boolean deleteById(String id) {
-        // delete also all sub labels
-        return false;
+    public void deleteById(String id) {
+        template.remove(getPrimaryKeyQuery(id), COLLECTION);
     }
 
     @Override
