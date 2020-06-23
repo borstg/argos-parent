@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -66,6 +67,7 @@ public class ServiceAccountRestService implements ServiceAccountApi {
     @Override
     @PermissionCheck(permissions = SERVICE_ACCOUNT_EDIT)
     @AuditLog
+    @Transactional
     public ResponseEntity<RestServiceAccount> createServiceAccount(@LabelIdCheckParam(propertyPath = "parentLabelId")
                                                                    @AuditParam("serviceAccount") RestServiceAccount restServiceAccount) {
         verifyParentLabelExists(restServiceAccount.getParentLabelId());
@@ -82,6 +84,7 @@ public class ServiceAccountRestService implements ServiceAccountApi {
     @Override
     @PermissionCheck(permissions = SERVICE_ACCOUNT_EDIT)
     @AuditLog
+    @Transactional
     public ResponseEntity<RestServiceAccountKeyPair> createServiceAccountKeyById(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR)
                                                                                  @AuditParam("serviceAccountId") String serviceAccountId,
                                                                                  @AuditParam("keyPair") RestServiceAccountKeyPair restKeyPair) {
@@ -118,6 +121,7 @@ public class ServiceAccountRestService implements ServiceAccountApi {
     @Override
     @PermissionCheck(permissions = SERVICE_ACCOUNT_EDIT)
     @AuditLog
+    @Transactional
     public ResponseEntity<Void> deleteServiceAccount(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR)
                                                      @AuditParam("serviceAccountId") String serviceAccountId) {
         if (accountService.serviceAccountExists(serviceAccountId)) {
@@ -131,6 +135,7 @@ public class ServiceAccountRestService implements ServiceAccountApi {
     @Override
     @PermissionCheck(permissions = SERVICE_ACCOUNT_EDIT)
     @AuditLog
+    @Transactional
     public ResponseEntity<RestServiceAccount> updateServiceAccountById(@LabelIdCheckParam(dataExtractor = SERVICE_ACCOUNT_LABEL_ID_EXTRACTOR)
                                                                        @AuditParam("serviceAccountId") String serviceAccountId,
                                                                        @AuditParam("serviceAccount") RestServiceAccount restServiceAccount) {

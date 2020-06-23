@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -59,6 +60,7 @@ public class SupplyChainRestService implements SupplychainApi {
     @Override
     @PermissionCheck(permissions = Permission.TREE_EDIT)
     @AuditLog
+    @Transactional
     public ResponseEntity<RestSupplyChain> createSupplyChain(@LabelIdCheckParam(propertyPath = "parentLabelId") @AuditParam("supplyChain") RestSupplyChain restSupplyChain) {
         verifyParentLabelExists(restSupplyChain.getParentLabelId());
         SupplyChain supplyChain = converter.convertFromRestSupplyChainCommand(restSupplyChain);
@@ -99,6 +101,7 @@ public class SupplyChainRestService implements SupplychainApi {
     @Override
     @PermissionCheck(permissions = Permission.TREE_EDIT)
     @AuditLog
+    @Transactional
     public ResponseEntity<RestSupplyChain> updateSupplyChain(
             @LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR)
             @AuditParam("supplyChainId")
@@ -118,6 +121,7 @@ public class SupplyChainRestService implements SupplychainApi {
     @Override
     @PermissionCheck(permissions = Permission.TREE_EDIT)
     @AuditLog
+    @Transactional
     public ResponseEntity<Void> deleteSupplyChainById(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR)
                                                       @AuditParam("supplyChainId") String supplyChainId) {
         if (supplyChainRepository.exists(supplyChainId)) {

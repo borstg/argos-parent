@@ -24,6 +24,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 
@@ -45,8 +47,13 @@ public class MongoConfig {
 
     @Bean
     public SpringBootMongock mongogock(MongoTemplate mongoTemplate, ApplicationContext springContext) {
-      return new SpringBootMongockBuilder(mongoTemplate, "com.rabobank.argos.service.adapter.out.mongodb")
-          .setApplicationContext(springContext)
-          .build();
+        return new SpringBootMongockBuilder(mongoTemplate, "com.rabobank.argos.service.adapter.out.mongodb")
+                .setApplicationContext(springContext)
+                .build();
+    }
+
+    @Bean
+    public MongoTransactionManager transactionManager(MongoDbFactory dbFactory) {
+        return new MongoTransactionManager(dbFactory);
     }
 }
