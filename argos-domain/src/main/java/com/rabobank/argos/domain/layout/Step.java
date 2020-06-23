@@ -36,8 +36,6 @@ public class Step {
     private List<String> authorizedKeyIds = new ArrayList<>();
     private int requiredNumberOfLinks;
     @Builder.Default
-    private List<String> expectedCommand = new ArrayList<>();
-    @Builder.Default
     private List<Rule> expectedMaterials = new ArrayList<>();
     @Builder.Default
     private List<Rule> expectedProducts = new ArrayList<>();

@@ -1150,7 +1150,6 @@ components:
         - runId
         - layoutSegmentName
         - stepName
-        - command
         - materials
         - products
       properties:
@@ -1164,11 +1163,6 @@ components:
           type: string
           minLength: 1
           pattern: '^([A-Za-z0-9_-]*)?$'
-        command:
-          type: array
-          items:
-            type: string
-            pattern: '^[0-9a-f]*$'
         materials:
           type: array
           items:
@@ -1351,7 +1345,6 @@ components:
         - authorizedKeyIds
         - expectedMaterials
         - expectedProducts
-        - expectedCommand
       properties:
         name:
           type: string
@@ -1366,11 +1359,6 @@ components:
           type: integer
           format: int32
           minimum: 1
-        expectedCommand:
-          type: array
-          items:
-            type: string
-            pattern: '^[0-9a-f]*$'
         expectedMaterials:
           type: array
           items:

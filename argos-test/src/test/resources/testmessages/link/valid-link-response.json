@@ -7,7 +7,6 @@
     "link": {
       "runId": "#string",
       "layoutSegmentName": "segment1",
-      "command": [],
       "materials": [
         {
           "uri": "src/test/java/com/rabobank/argos/test/ArgosServiceTestIT.java",

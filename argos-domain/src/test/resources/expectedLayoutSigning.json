@@ -27,11 +27,6 @@
             "step a key 2",
             "step a key 1"
           ],
-          "expectedCommand": [
-            "3",
-            "2",
-            "1"
-          ],
           "expectedMaterials": [],
           "expectedProducts": [
             {
@@ -57,7 +52,6 @@
         },
         {
           "authorizedKeyIds": [],
-          "expectedCommand": [],
           "expectedMaterials": [
             {
               "pattern": "AllowRule",

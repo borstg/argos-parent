@@ -132,14 +132,6 @@ class RequiredNumberOfLinksVerificationTest {
         VerificationRunResult result = requiredNumberOfLinksVerification.verify(context);
         assertThat(result.isRunIsValid(), is(false));
     }
-
-
-    @Test
-    void verifyTwoLinkHashesForOneStepIsInvalid() {
-        linkMetaBlock1.getLink().setCommand(List.of("cmd"));
-        VerificationRunResult result = requiredNumberOfLinksVerification.verify(context);
-        assertThat(result.isRunIsValid(), is(false));
-    }
     
     @Test
     void verifyWithSegmentNotFoundReturnInValid() {

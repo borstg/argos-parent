@@ -79,10 +79,6 @@ Feature: Verification
     * def resp = call read('classpath:feature/verification/verification-template.feature') { verificationRequest:#(defaultVerificationRequest),testDir: 'build-steps-incomplete-run',steps:#(defaultSteps),layoutSigningKey:1}
     And match resp.response == {"runIsValid":false}
 
-  Scenario: commands-incorrect
-    * def resp = call read('classpath:feature/verification/verification-template.feature') { verificationRequest:#(defaultVerificationRequest),testDir: 'commands-incorrect',steps:#(defaultSteps),layoutSigningKey:1}
-    And match resp.response == {"runIsValid":false}
-
   Scenario: delete-rule-no-deletion
     * def resp = call read('classpath:feature/verification/verification-template.feature')  { verificationRequest:#(defaultVerificationRequest),testDir: 'delete-rule-no-deletion',steps:#(defaultSteps),layoutSigningKey:1}
     And match resp.response == {"runIsValid":false}

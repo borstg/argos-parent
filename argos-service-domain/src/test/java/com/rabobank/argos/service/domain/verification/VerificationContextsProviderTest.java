@@ -93,6 +93,7 @@ class VerificationContextsProviderTest {
     private Step step3;
 
     private List<Artifact> artifacts;
+    private List<Artifact> artifacts2;
 
     private List<MatchRule> matchRule;
 
@@ -139,8 +140,7 @@ class VerificationContextsProviderTest {
                         .stepName(STEP_NAME_1)
                         .runId(RUN_ID_1)
                         .materials(artifacts)
-                        .products(artifacts)
-                        .command(singletonList("cmd"))
+                        .products(artifacts2)
                         .build()
                 ).build();
 
@@ -188,8 +188,7 @@ class VerificationContextsProviderTest {
                         .stepName(STEP_NAME_2)
                         .runId(RUN_ID_1)
                         .materials(artifacts)
-                        .command(singletonList("cmd"))
-                        .products(artifacts)
+                        .products(artifacts2)
                         .build()
                 ).build();
 
@@ -205,12 +204,18 @@ class VerificationContextsProviderTest {
     }
 
     private void createArtifacts() {
-        Artifact artifact = Artifact
+        Artifact artifact1 = Artifact
                 .builder()
-                .hash("hash")
+                .hash("hash1")
                 .uri("path/artifact.jar")
                 .build();
-        artifacts = List.of(artifact);
+        Artifact artifact2 = Artifact
+            .builder()
+            .hash("hash2")
+            .uri("path/artifact2.jar")
+            .build();
+        artifacts = List.of(artifact1);
+        artifacts2 = List.of(artifact1, artifact2);
     }
 
     private void createMatchRules() {
@@ -436,8 +441,7 @@ class VerificationContextsProviderTest {
                         .stepName(STEP_NAME_2)
                         .runId(RUN_ID_2)
                         .materials(artifacts)
-                        .products(artifacts)
-                        .command(singletonList("cmd"))
+                        .products(artifacts2)
                         .build()
                 ).build();
 
