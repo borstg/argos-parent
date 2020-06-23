@@ -96,18 +96,19 @@ class VerificationContextsProviderContextTest {
         expectedList.add(segment3);
         
         Queue<LayoutSegment> sortedList = VerificationContextsProviderContext.topologicalSort(graph);
-        assertEquals(expectedList, sortedList);
+        assertEquals(expectedList, sortedList);        
+
+        Map<LayoutSegment, Set<LayoutSegment>> graph2 = new HashMap<>();
+        graph2.put(segment1, new HashSet<>());
+        graph2.put(segment2, new HashSet<>());
+        graph2.put(segment3, new HashSet<>());
+        graph2.put(segment4, new HashSet<>());
+        graph2.get(segment2).add(segment1);
+        graph2.get(segment2).add(segment4);
+        graph2.get(segment3).add(segment2);
+        graph2.get(segment4).add(segment3);
         
         Throwable exception = assertThrows(ArgosError.class, () -> {
-            Map<LayoutSegment, Set<LayoutSegment>> graph2 = new HashMap<>();
-            graph2.put(segment1, new HashSet<>());
-            graph2.put(segment2, new HashSet<>());
-            graph2.put(segment3, new HashSet<>());
-            graph2.put(segment4, new HashSet<>());
-            graph2.get(segment2).add(segment1);
-            graph2.get(segment2).add(segment4);
-            graph2.get(segment3).add(segment2);
-            graph2.get(segment4).add(segment3);
             VerificationContextsProviderContext.topologicalSort(graph2);
           });
         assertEquals("layout segment graph has at least 1 cycle.", exception.getMessage());

@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class MongoDBAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
 
     private final MongoTemplate mongoTemplate;
-    final static String COLLECTION = "auditlogs";
+    static final String COLLECTION = "auditlogs";
     @Override
     protected void append(ILoggingEvent eventObject) {
         Document logEntry = new Document();

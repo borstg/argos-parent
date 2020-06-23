@@ -112,7 +112,8 @@ class LinkRestServiceTest {
     @Test
     void findLinkUnknownSupplyChain() {
         when(supplyChainRepository.findBySupplyChainId(SUPPLY_CHAIN_ID)).thenReturn(Optional.empty());
-        ResponseStatusException error = assertThrows(ResponseStatusException.class, () -> restService.findLink(SUPPLY_CHAIN_ID, HASH).getStatusCodeValue());
+        
+        ResponseStatusException error = assertThrows(ResponseStatusException.class, () -> restService.findLink(SUPPLY_CHAIN_ID, HASH));
         assertThat(error.getStatus().value(), is(404));
     }
 }

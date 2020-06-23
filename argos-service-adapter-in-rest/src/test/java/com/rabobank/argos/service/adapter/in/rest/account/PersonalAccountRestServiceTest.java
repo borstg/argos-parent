@@ -230,7 +230,8 @@ class PersonalAccountRestServiceTest {
     @Test
     void updatePersonalAccountRolesByIdNotFound() {
         when(accountService.updatePersonalAccountRolesById(ACCOUNT_ID, List.of(ROLE_NAME))).thenReturn(Optional.empty());
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.updatePersonalAccountRolesById(ACCOUNT_ID, List.of(ROLE_NAME)));
+        List<String> roles = List.of(ROLE_NAME);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.updatePersonalAccountRolesById(ACCOUNT_ID, roles));
         assertThat(exception.getStatus().value(), is(404));
         assertThat(exception.getMessage(), is(PERSONAL_ACCOUNT_NOT_FOUND));
     }
@@ -284,7 +285,8 @@ class PersonalAccountRestServiceTest {
         when(localPermissions.getLabelId()).thenReturn(LABEL_ID);
         when(personalAccount.getLocalPermissions()).thenReturn(List.of(localPermissions));
         when(personalAccountMapper.convertToRestLocalPermission(localPermissions)).thenReturn(restLocalPermissions);
-        ResponseEntity<RestLocalPermissions> response = service.updateLocalPermissionsForLabel(ACCOUNT_ID, LABEL_ID, List.of(RestPermission.READ));
+        List<RestPermission> perms = List.of(RestPermission.READ);
+        ResponseEntity<RestLocalPermissions> response = service.updateLocalPermissionsForLabel(ACCOUNT_ID, LABEL_ID, perms);
         assertThat(response.getStatusCodeValue(), is(200));
         assertThat(response.getBody(), sameInstance(restLocalPermissions));
         verify(accountService).updatePersonalAccountLocalPermissionsById(eq(ACCOUNT_ID), localPermissionsArgumentCaptor.capture());
@@ -296,7 +298,8 @@ class PersonalAccountRestServiceTest {
     @Test
     void updateLocalPermissionsForLabelNotExists() {
         when(labelRepository.exists(LABEL_ID)).thenReturn(false);
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.updateLocalPermissionsForLabel(ACCOUNT_ID, LABEL_ID, List.of(RestPermission.READ)));
+        List<RestPermission> perms = List.of(RestPermission.READ);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.updateLocalPermissionsForLabel(ACCOUNT_ID, LABEL_ID, perms));
         assertThat(exception.getStatus().value(), is(400));
         assertThat(exception.getMessage(), is("400 BAD_REQUEST \"label not found : labelId\""));
     }

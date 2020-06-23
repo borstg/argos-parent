@@ -100,7 +100,7 @@ public class RestServiceExceptionHandler {
 
 
     @ExceptionHandler(value = {ResponseStatusException.class})
-    public ResponseEntity handleResponseStatusException(ResponseStatusException ex) {
+    public ResponseEntity<?> handleResponseStatusException(ResponseStatusException ex) {
         if (BAD_REQUEST == ex.getStatus()) {
             return ResponseEntity.status(ex.getStatus()).contentType(APPLICATION_JSON).body(createValidationError(ex.getReason()));
         } else {
@@ -109,7 +109,7 @@ public class RestServiceExceptionHandler {
     }
 
     @ExceptionHandler(value = {ArgosError.class})
-    public ResponseEntity handleArgosError(ArgosError ex) {
+    public ResponseEntity<?> handleArgosError(ArgosError ex) {
         if (ex.getLevel() == ArgosError.Level.WARNING) {
             log.debug("{}", ex.getMessage(), ex);
             return ResponseEntity.badRequest().contentType(APPLICATION_JSON).body(createValidationError(ex.getMessage()));
@@ -126,7 +126,7 @@ public class RestServiceExceptionHandler {
 
     private RestValidationError createValidationError(LayoutValidationException ex) {
         RestValidationError restValidationError = new RestValidationError();
-        List<RestValidationMessage> validationMessages = new ArrayList(ex.getValidationMessages());
+        List<RestValidationMessage> validationMessages = new ArrayList<>(ex.getValidationMessages());
         sortValidationMessages(validationMessages);
         restValidationError.setMessages(validationMessages);
         return restValidationError;

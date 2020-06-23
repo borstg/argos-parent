@@ -195,9 +195,9 @@ class LayoutRestServiceTest {
         when(approvalConfiguration.getSegmentName()).thenReturn("wrong-segment");
         when(approvalConfigurationMapper.convertFromRestApprovalConfiguration(restApprovalConfiguration))
                 .thenReturn(approvalConfiguration);
-
+        List<RestApprovalConfiguration> configs = List.of(restApprovalConfiguration);
         LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () ->
-                service.createApprovalConfigurations(SUPPLY_CHAIN_ID, List.of(restApprovalConfiguration))
+                service.createApprovalConfigurations(SUPPLY_CHAIN_ID, configs)
         );
 
         assertThat(layoutValidationException.getValidationMessages().isEmpty(), is(false));
@@ -216,8 +216,9 @@ class LayoutRestServiceTest {
         when(approvalConfiguration.getStepName()).thenReturn("wrong-stepname");
         when(approvalConfigurationMapper.convertFromRestApprovalConfiguration(restApprovalConfiguration))
                 .thenReturn(approvalConfiguration);
+        List<RestApprovalConfiguration> configs = List.of(restApprovalConfiguration);
 
-        LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> service.createApprovalConfigurations(SUPPLY_CHAIN_ID, List.of(restApprovalConfiguration)));
+        LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> service.createApprovalConfigurations(SUPPLY_CHAIN_ID, configs));
 
         assertThat(layoutValidationException.getValidationMessages().isEmpty(), is(false));
         assertThat(layoutValidationException.getValidationMessages().get(0).getField(), is("stepName"));
@@ -231,9 +232,10 @@ class LayoutRestServiceTest {
         when(approvalConfiguration.getSupplyChainId()).thenReturn(SUPPLY_CHAIN_ID);
         when(approvalConfigurationMapper.convertFromRestApprovalConfiguration(restApprovalConfiguration))
                 .thenReturn(approvalConfiguration);
+        List<RestApprovalConfiguration> configs = List.of(restApprovalConfiguration);
 
         ResponseStatusException responseStatusException = assertThrows(ResponseStatusException.class, () ->
-                service.createApprovalConfigurations(SUPPLY_CHAIN_ID, List.of(restApprovalConfiguration))
+                service.createApprovalConfigurations(SUPPLY_CHAIN_ID, configs)
         );
         assertThat(responseStatusException.getStatus(), is(HttpStatus.NOT_FOUND));
         assertThat(responseStatusException.getMessage(), is("404 NOT_FOUND \"layout not found\""));
@@ -245,7 +247,9 @@ class LayoutRestServiceTest {
         when(restArtifactCollectorSpecification.getContext()).thenReturn(emptyMap());
         when(restArtifactCollectorSpecification.getType()).thenReturn(XLDEPLOY);
         when(restApprovalConfiguration.getArtifactCollectorSpecifications()).thenReturn(singletonList(restArtifactCollectorSpecification));
-        LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> service.createApprovalConfigurations(SUPPLY_CHAIN_ID, List.of(restApprovalConfiguration)));
+        List<RestApprovalConfiguration> configs = List.of(restApprovalConfiguration);
+        
+        LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> service.createApprovalConfigurations(SUPPLY_CHAIN_ID, configs));
         assertThat(layoutValidationException.getValidationMessages().isEmpty(), is(false));
         assertThat(layoutValidationException.getValidationMessages().get(0).getField(), is("context"));
         assertThat(layoutValidationException.getValidationMessages().get(0).getMessage(), is("required fields : [applicationName] not present for collector type: XLDEPLOY"));

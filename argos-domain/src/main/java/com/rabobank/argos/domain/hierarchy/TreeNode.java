@@ -56,7 +56,7 @@ public class TreeNode {
     @With
     private List<Permission> permissions;
 
-    public boolean accept(TreeNodeVisitor treeNodeVisitor) {
+    public boolean accept(TreeNodeVisitor<?> treeNodeVisitor) {
         if (isLeafNode()) {
             return treeNodeVisitor.visitLeaf(this);
         } else if (treeNodeVisitor.visitEnter(this)) {
