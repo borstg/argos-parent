@@ -15,14 +15,15 @@
  */
 package com.rabobank.argos.service.domain.verification;
 
-import com.rabobank.argos.domain.Signature;
+import com.rabobank.argos.domain.crypto.Signature;
+import com.rabobank.argos.domain.crypto.signing.SignatureValidator;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
-import com.rabobank.argos.domain.signing.SignatureValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.Optional;
 
@@ -66,7 +67,7 @@ public class LayoutMetaBlockSignatureVerification implements Verification {
             log.info("Public Key with id [{}] is not avaiable in the layout.", signature.getKeyId());
             return false;
         }
-        if (!signatureValidator.isValid(layout, signature.getSignature(), publicKey.get())) {
+        if (!signatureValidator.isValid(layout, signature, publicKey.get())) {
             log.info("Signature of layout with keyId [{}] is not valid.", signature.getKeyId());
             return false;
         }
@@ -75,7 +76,14 @@ public class LayoutMetaBlockSignatureVerification implements Verification {
 
     private Optional<PublicKey> getPublicKey(Layout layout, String keyId) {
         return layout.getKeys().stream()
-                .filter(publicKey -> publicKey.getId().equals(keyId))
-                .map(com.rabobank.argos.domain.layout.PublicKey::getKey).findFirst();
+                .filter(publicKey -> publicKey.getKeyId().equals(keyId))
+                .map(t -> {
+					try {
+						return t.getJavaPublicKey();
+					} catch (GeneralSecurityException e) {
+						log.error(e.getMessage());
+						return null;
+					}
+				}).findFirst();
     }
 }

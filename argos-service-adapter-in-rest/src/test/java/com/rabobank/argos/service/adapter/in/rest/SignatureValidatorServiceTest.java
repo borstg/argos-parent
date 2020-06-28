@@ -15,10 +15,12 @@
  */
 package com.rabobank.argos.service.adapter.in.rest;
 
-import com.rabobank.argos.domain.Signature;
-import com.rabobank.argos.domain.key.KeyPair;
+import com.rabobank.argos.domain.crypto.KeyAlgorithm;
+import com.rabobank.argos.domain.crypto.KeyPair;
+import com.rabobank.argos.domain.crypto.PublicKeyFactory;
+import com.rabobank.argos.domain.crypto.Signature;
+import com.rabobank.argos.domain.crypto.signing.SignatureValidator;
 import com.rabobank.argos.domain.link.Link;
-import com.rabobank.argos.domain.signing.SignatureValidator;
 import com.rabobank.argos.service.domain.account.AccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +29,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+import java.util.Base64;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -40,7 +44,9 @@ import static org.mockito.Mockito.when;
 class SignatureValidatorServiceTest {
 
     private static final String KEY_ID = "keyId";
-    private static final String SIGNATURE = "signature";
+    
+    private static final byte[] key = Base64.getDecoder().decode("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE6UI21H3Ti3fWK98DJPiLxaxHuQBB3P28DeskZWlHQSPi104E7xi49sVMJTDaOHNs9YJVqI2fnvCFtGPk3NTCgA==");
+    
     @Mock
     private SignatureValidator signatureValidator;
 
@@ -57,33 +63,33 @@ class SignatureValidatorServiceTest {
     @Mock
     private KeyPair keyPair;
 
-    @Mock
     private PublicKey publicKey;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws GeneralSecurityException {
+    	publicKey = PublicKeyFactory.instance(key, KeyAlgorithm.EC);
         service = new SignatureValidatorService(signatureValidator, accountService);
     }
 
     @Test
-    void validateSignature() {
-        when(keyPair.getPublicKey()).thenReturn(publicKey);
+    void validateSignature() throws GeneralSecurityException {
+        when(keyPair.getPublicKey()).thenReturn(key);
+        when(keyPair.getAlgorithm()).thenReturn(KeyAlgorithm.EC);
         when(accountService.findKeyPairByKeyId(KEY_ID)).thenReturn(Optional.of(keyPair));
         when(signature.getKeyId()).thenReturn(KEY_ID);
-        when(signature.getSignature()).thenReturn(SIGNATURE);
 
-        when(signatureValidator.isValid(signable, SIGNATURE, publicKey)).thenReturn(true);
+        when(signatureValidator.isValid(signable, signature, publicKey)).thenReturn(true);
         service.validateSignature(signable, signature);
     }
 
     @Test
-    void createInValidSignature() {
-        when(keyPair.getPublicKey()).thenReturn(publicKey);
+    void createInValidSignature() throws GeneralSecurityException {
+        when(keyPair.getPublicKey()).thenReturn(key);
+        when(keyPair.getAlgorithm()).thenReturn(KeyAlgorithm.EC);
         when(accountService.findKeyPairByKeyId(KEY_ID)).thenReturn(Optional.of(keyPair));
         when(signature.getKeyId()).thenReturn(KEY_ID);
-        when(signature.getSignature()).thenReturn(SIGNATURE);
 
-        when(signatureValidator.isValid(signable, SIGNATURE, publicKey)).thenReturn(false);
+        when(signatureValidator.isValid(signable, signature, publicKey)).thenReturn(false);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.validateSignature(signable, signature));
         assertThat(exception.getStatus().value(), is(400));

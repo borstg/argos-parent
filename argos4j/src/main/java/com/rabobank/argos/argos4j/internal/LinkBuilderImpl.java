@@ -15,18 +15,26 @@
  */
 package com.rabobank.argos.argos4j.internal;
 
+import com.rabobank.argos.argos4j.Argos4jError;
 import com.rabobank.argos.argos4j.Argos4jSettings;
 import com.rabobank.argos.argos4j.FileCollector;
 import com.rabobank.argos.argos4j.LinkBuilder;
 import com.rabobank.argos.argos4j.LinkBuilderSettings;
-import com.rabobank.argos.domain.Signature;
+import com.rabobank.argos.argos4j.internal.mapper.RestMapper;
+import com.rabobank.argos.domain.ArgosError;
+import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
+import com.rabobank.argos.domain.crypto.Signature;
+import com.rabobank.argos.domain.crypto.signing.JsonSigningSerializer;
+import com.rabobank.argos.domain.crypto.signing.Signer;
 import com.rabobank.argos.domain.link.Artifact;
 import com.rabobank.argos.domain.link.Link;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
-import com.rabobank.argos.domain.signing.JsonSigningSerializer;
 import lombok.RequiredArgsConstructor;
 
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+
+import org.mapstruct.factory.Mappers;
 
 @RequiredArgsConstructor
 public class LinkBuilderImpl implements LinkBuilder {
@@ -57,7 +65,13 @@ public class LinkBuilderImpl implements LinkBuilder {
                 .layoutSegmentName(linkBuilderSettings.getLayoutSegmentName())
                 .stepName(linkBuilderSettings.getStepName()).build();
         ArgosServiceClient argosServiceClient = new ArgosServiceClient(settings, signingKeyPassphrase);
-        Signature signature = new Argos4JSigner().sign(argosServiceClient.getKeyPair(), signingKeyPassphrase, new JsonSigningSerializer().serialize(link));
+        ServiceAccountKeyPair keyPair = Mappers.getMapper(RestMapper.class).convertFromRestServiceAccountKeyPair(argosServiceClient.getKeyPair());
+        Signature signature;
+		try {
+			signature = Signer.sign(keyPair, signingKeyPassphrase, new JsonSigningSerializer().serialize(link));
+		} catch (GeneralSecurityException | ArgosError e) {
+			throw new Argos4jError("The Link object couldn't be signed: "+ e.getMessage());
+		}
 
         argosServiceClient.uploadLinkMetaBlockToService(LinkMetaBlock.builder().link(link).signature(signature).build());
     }

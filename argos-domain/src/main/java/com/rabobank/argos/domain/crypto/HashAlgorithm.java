@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.domain.key;
+package com.rabobank.argos.domain.crypto;
 
-import java.security.PublicKey;
+public enum HashAlgorithm {
+    SHA256("SHA-256"), SHA384("SHA-384"), SHA512("SHA-512");
+	
+	private String value;
+	
+	HashAlgorithm(String value) {
+		this.value = value;
+	}
+	
+	@Override
+	public String toString() {
+		return this.value;
+	}
 
-import org.apache.commons.codec.digest.DigestUtils;
-
-public interface KeyIdProvider {
-    
-    public static String computeKeyId(PublicKey publicKey) {
-        return DigestUtils.sha256Hex(publicKey.getEncoded());
-    }
 }

@@ -15,7 +15,7 @@
  */
 package com.rabobank.argos.service.domain.verification;
 
-import com.rabobank.argos.domain.layout.PublicKey;
+import com.rabobank.argos.domain.crypto.PublicKey;
 import com.rabobank.argos.domain.layout.Step;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
 import org.junit.jupiter.api.BeforeEach;

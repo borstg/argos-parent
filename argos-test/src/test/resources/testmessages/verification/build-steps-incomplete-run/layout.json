@@ -2,16 +2,18 @@
   "layout": {
     "keys": [
       {
-        "id": "b91bec49e7aaaeeda162970c03193baef561c10337483a8bc0741d514dc63b9c",
-        "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwhHPSza/Vx1VVzlXAXByXk4z13Q4JZI6fphr0LK5mdFlckHzqNOP9FtXzDxbJawQdDkFQAIvmBRBZHOP78z7jtSGhQLY3qpIJ82ztyBT/WAH9eyX+z4eZ5vur42jLsvrn9qKcXtUXcuiMNLUzBT251aoJcgsG6+fN7J1t5bcSLfwlWNrbe4VK2kjVu3Ep6YUKXmzJQvJ97YlLsVKTfod+3IrFOJBmHbrUJUDJh09mJ5Conkp44IYNy3zwuPqaJphuiVVszlaAnO2OUnwRdJJ8qs0BNJa+n3No9CTdEU6IvirZ1j/Bjmrl6t6Lc9PhZxNQeAriHRBeFufGTvvWmS9WwIDAQAB"
+        "keyId": "6a58de92fc02d7835faba93ee26d91d7e53f03eb8f86e2518632c34596c5ef3f",
+        "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEGC9LY3FrdX5Kb8voAverSlDiBC0KTx+j6T78sf71uPekPcI0hPz3XxGDxxA1JJ70ZAebIT172RLP4b9LBmsABw==",
+        "algorithm": "EC"
       },
       {
-        "id": "a97daeaf3afaed859472a367da7a860b4b90eefb97fe51384bd45e9eed020b5b",
-        "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApsOT7tBT27EF2EnYenWJqRjl+2Eg8m9tEmjNc2d3pTK+wCLMFaeyoAai3cSGafSiVZd9GVaXeUlVPCF/lHUpA0GT6gdMUyynHC/vNInqXsd1d8hLKaVFsI+KWSNbU86h9h7p1nHvLlfZ55UBrtiiRafl0L0tWWhlNtiDGQlQ/ZlyM/jzYZAtHBUR0ex/SI2c8L8Wk3ZqbxoctrbHRmlqDTgGBEL+sxajHgELj8t7Nt7nKMhvEvyG3C7vckIXxBnAW8dfZtw9SEQooq2dL5u5ZyPm1zVwLyAFtOe+Fx/NC6RVt3hUnrgKHWjeEeDqKk0NYnduOSFZA7R1tOHm+iNQFQIDAQAB"
+        "keyId": "b12d015b7519cdab1b4e2f478787983370f0c535c8e02ff893d716507a0b4eba",
+        "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEZD5KYK/PaOSBkT9GR4Xfi9WxUknzCedqxPuoPOGepLfBbVyiKO3zZF3MdkujeNCjBSMymT4S3s7cOcBtX2kmXQ==",
+        "algorithm": "EC"
       }
     ],
     "authorizedKeyIds": [
-      "b91bec49e7aaaeeda162970c03193baef561c10337483a8bc0741d514dc63b9c"
+      "6a58de92fc02d7835faba93ee26d91d7e53f03eb8f86e2518632c34596c5ef3f"
     ],
     "expectedEndProducts": [
       {
@@ -28,7 +30,7 @@
           {
             "name": "build",
             "authorizedKeyIds": [
-              "b91bec49e7aaaeeda162970c03193baef561c10337483a8bc0741d514dc63b9c"
+              "6a58de92fc02d7835faba93ee26d91d7e53f03eb8f86e2518632c34596c5ef3f"
             ],
             "requiredNumberOfLinks": 1,
             "expectedCommand": [
@@ -67,7 +69,7 @@
           {
             "name": "test",
             "authorizedKeyIds": [
-              "a97daeaf3afaed859472a367da7a860b4b90eefb97fe51384bd45e9eed020b5b"
+              "b12d015b7519cdab1b4e2f478787983370f0c535c8e02ff893d716507a0b4eba"
             ],
             "requiredNumberOfLinks": 1,
             "expectedCommand": [

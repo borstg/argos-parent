@@ -146,7 +146,7 @@ Feature: Non Personal Account
     * def accountId = createResult.response.id
     * def keyPair = read('classpath:testmessages/key/sa-keypair1.json')
     * def result = call read('create-service-account-key.feature') {accountId: #(accountId), key: #(keyPair)}
-    * match result.response == {keyId: #(keyPair.keyId), publicKey: #(keyPair.publicKey), encryptedPrivateKey: #(keyPair.encryptedPrivateKey)}
+    * match result.response == {keyId: #(keyPair.keyId), publicKey: #(keyPair.publicKey), algorithm: #(keyPair.algorithm), encryptedPrivateKey: #(keyPair.encryptedPrivateKey)}
     * def auditlog = call read('classpath:feature/auditlog.feature')
     * string stringResponse = auditlog.response
     And match stringResponse contains 'createServiceAccountKeyById'
@@ -182,7 +182,7 @@ Feature: Non Personal Account
     Given path restPath
     When method GET
     Then status 200
-    And match response == {keyId: #(keyPair.keyId), publicKey: #(keyPair.publicKey), encryptedPrivateKey: #(keyPair.encryptedPrivateKey)}
+    And match response == {keyId: #(keyPair.keyId), publicKey: #(keyPair.publicKey), algorithm: #(keyPair.algorithm), encryptedPrivateKey: #(keyPair.encryptedPrivateKey)}
 
   Scenario: get a active service account key with implicit read permission should return a 200
 
@@ -197,7 +197,7 @@ Feature: Non Personal Account
     Given path restPath
     When method GET
     Then status 200
-    And match response == {keyId: #(keyPair.keyId), publicKey: #(keyPair.publicKey), encryptedPrivateKey: #(keyPair.encryptedPrivateKey)}
+    And match response == {keyId: #(keyPair.keyId), publicKey: #(keyPair.publicKey), algorithm: #(keyPair.algorithm), encryptedPrivateKey: #(keyPair.encryptedPrivateKey)}
 
   Scenario: get a active service account key without READ permission should return a 403 error
     * def createResult = call read('create-service-account.feature') { name: 'sa 1', parentLabelId: #(rootLabelId)}
@@ -230,7 +230,7 @@ Feature: Non Personal Account
     Given path '/api/serviceaccount/me/activekey'
     When method GET
     Then status 200
-    And match response == {keyId: #(keyPair.keyId), publicKey: #(keyPair.publicKey), encryptedPrivateKey: #(keyPair.encryptedPrivateKey)}
+    And match response == {keyId: #(keyPair.keyId), publicKey: #(keyPair.publicKey), algorithm: #(keyPair.algorithm), encryptedPrivateKey: #(keyPair.encryptedPrivateKey)}
 
   Scenario: get active key of authenticated sa with invalid credentials should return a 401
     * def keypairResponse = call read('classpath:feature/account/create-service-account-with-key.feature') {accountName: 'sa1', parentLabelId: #(rootLabelId), keyFile: 'sa-keypair1'}
@@ -254,5 +254,5 @@ Feature: Non Personal Account
     Given path restPathKey
     When method GET
     Then status 200
-    And match response == {keyId: #(keyPair.keyId), publicKey: #(keyPair.publicKey), encryptedPrivateKey: #(keyPair.encryptedPrivateKey)}
+    And match response == {keyId: #(keyPair.keyId), publicKey: #(keyPair.publicKey), algorithm: #(keyPair.algorithm), encryptedPrivateKey: #(keyPair.encryptedPrivateKey)}
 

@@ -13,24 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.domain.account;
+package com.rabobank.argos.domain.crypto;
 
-import com.rabobank.argos.domain.key.KeyPair;
+import java.security.GeneralSecurityException;
+
+import com.rabobank.argos.domain.crypto.signing.SignatureAlgorithm;
+
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
-import java.security.PublicKey;
-
-@Getter
+@Builder
 @Setter
-public class ServiceAccountKeyPair extends KeyPair {
-
-    private String encryptedHashedKeyPassphrase;
-
-    @Builder
-    public ServiceAccountKeyPair(String keyId, byte[] encryptedPrivateKey, PublicKey publicKey, String encryptedHashedKeyPassphrase) {
-        super(keyId, encryptedPrivateKey, publicKey);
-        this.encryptedHashedKeyPassphrase = encryptedHashedKeyPassphrase;
+@Getter
+@EqualsAndHashCode(exclude={"signature"})
+@ToString
+public class Signature {
+    private String keyId;
+    private String signature;
+    @Builder.Default
+    private KeyAlgorithm keyAlgorithm = KeyAlgorithm.EC;
+    @Builder.Default
+    private HashAlgorithm hashAlgorithm = HashAlgorithm.SHA384;
+    
+    public SignatureAlgorithm getAlgorithm() throws GeneralSecurityException {
+    	return SignatureAlgorithm.getAlgorithm(this.keyAlgorithm, this.hashAlgorithm);
     }
 }

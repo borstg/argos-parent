@@ -13,25 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.service.adapter.out.mongodb.account.converter;
+package com.rabobank.argos.domain.crypto;
 
-import com.rabobank.argos.service.adapter.out.mongodb.MongoDbException;
-import org.bson.types.Binary;
-import org.springframework.core.convert.converter.Converter;
+import lombok.AllArgsConstructor;
 
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 
-import static com.rabobank.argos.domain.key.RSAPublicKeyFactory.instance;
+import static lombok.AccessLevel.PRIVATE;
 
-public class ByteArrayToPublicKeyToReadConverter implements Converter<Binary, PublicKey> {
+@AllArgsConstructor(access = PRIVATE)
+public class PublicKeyFactory {
 
-    @Override
-    public PublicKey convert(Binary bytes) {
-        try {
-            return instance(bytes.getData());
-        } catch (GeneralSecurityException e) {
-            throw new MongoDbException(e);
-        }
+    public static PublicKey instance(byte[] encodedKey, KeyAlgorithm algorithm) throws GeneralSecurityException {
+        X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(encodedKey);
+        KeyFactory keyFactory = KeyFactory.getInstance(algorithm.name());
+        return keyFactory.generatePublic(x509EncodedKeySpec);
     }
 }

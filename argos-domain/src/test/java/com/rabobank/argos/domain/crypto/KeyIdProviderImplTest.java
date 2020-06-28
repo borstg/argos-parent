@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.domain;
+package com.rabobank.argos.domain.crypto;
 
-import com.rabobank.argos.domain.key.KeyIdProvider;
-import com.rabobank.argos.domain.key.RSAPublicKeyFactory;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
+
+import com.rabobank.argos.domain.crypto.KeyIdProvider;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -32,7 +32,10 @@ class KeyIdProviderImplTest {
     @Test
     void computeKeyId() throws IOException, GeneralSecurityException {
         byte[] decode = Base64.getDecoder().decode(IOUtils.toByteArray(this.getClass().getResourceAsStream("/publickey")));
-        String keyId = KeyIdProvider.computeKeyId(RSAPublicKeyFactory.instance(decode));
-        assertThat(keyId, is("1aaf91a3f8e540cfd9ebbacd6147d43c76abefc535feefd85592197055bea1c8"));
+        String keyId = KeyIdProvider.computeKeyId(PublicKeyFactory.instance(decode, KeyAlgorithm.EC));
+        assertThat(keyId, is("a1d531635534c408a0286ce38423adc3da2cbaf1e635d98262db64cd858b0671"));        
+
+        keyId = KeyIdProvider.computeKeyId(decode);
+        assertThat(keyId, is("a1d531635534c408a0286ce38423adc3da2cbaf1e635d98262db64cd858b0671"));
     }
 }

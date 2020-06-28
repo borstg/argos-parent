@@ -64,6 +64,12 @@
             <artifactId>argos4j</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- to resolve conflicts -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -192,7 +198,6 @@
                                     <includes>**/*.json</includes>
                                 </artifactItem>
                             </artifactItems>
-
                             <outputDirectory>${project.build.directory}/api</outputDirectory>
                         </configuration>
                     </execution>

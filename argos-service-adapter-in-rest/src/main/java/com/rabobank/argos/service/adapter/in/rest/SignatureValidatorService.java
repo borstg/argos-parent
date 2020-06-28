@@ -15,13 +15,19 @@
  */
 package com.rabobank.argos.service.adapter.in.rest;
 
-import com.rabobank.argos.domain.Signature;
-import com.rabobank.argos.domain.key.KeyPair;
+import com.rabobank.argos.domain.crypto.KeyAlgorithm;
+import com.rabobank.argos.domain.crypto.KeyPair;
+import com.rabobank.argos.domain.crypto.PublicKeyFactory;
+import com.rabobank.argos.domain.crypto.Signature;
+import com.rabobank.argos.domain.crypto.signing.SignatureValidator;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.link.Link;
-import com.rabobank.argos.domain.signing.SignatureValidator;
 import com.rabobank.argos.service.domain.account.AccountService;
 import lombok.RequiredArgsConstructor;
+
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -35,23 +41,32 @@ public class SignatureValidatorService {
     private final AccountService accountService;
 
     public void validateSignature(Layout layout, Signature signature) {
-        if (!signatureValidator.isValid(layout, signature.getSignature(), getKeyPair(signature).getPublicKey())) {
-            throwInValidSignatureException();
-        }
+    	try {
+			if (!signatureValidator.isValid(layout, signature, getPublicKey(signature))) {
+			    throwInValidSignatureException();
+			}
+		} catch (GeneralSecurityException e) {
+		    throwInValidSignatureException();
+		}
     }
 
     public void validateSignature(Link link, Signature signature) {
-        if (!signatureValidator.isValid(link, signature.getSignature(), getKeyPair(signature).getPublicKey())) {
-            throwInValidSignatureException();
-        }
+        try {
+			if (!signatureValidator.isValid(link, signature, getPublicKey(signature))) {
+			    throwInValidSignatureException();
+			}
+		} catch (GeneralSecurityException e) {
+		    throwInValidSignatureException();
+		}
     }
 
     private void throwInValidSignatureException() {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid signature");
     }
 
-    private KeyPair getKeyPair(Signature signature) {
-        return accountService.findKeyPairByKeyId(signature.getKeyId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "signature with keyId " + signature.getKeyId() + " not found"));
+    private PublicKey getPublicKey(Signature signature) throws GeneralSecurityException {
+    	KeyPair keyPair = accountService.findKeyPairByKeyId(signature.getKeyId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "signature with keyId " + signature.getKeyId() + " not found"));
+    	return PublicKeyFactory.instance(keyPair.getPublicKey(), keyPair.getAlgorithm());
     }
 
 }

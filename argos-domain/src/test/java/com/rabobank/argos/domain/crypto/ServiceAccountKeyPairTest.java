@@ -13,28 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.argos4j;
+package com.rabobank.argos.domain.crypto;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.rabobank.argos.argos4j.internal.ArgosServiceClient;
+class ServiceAccountKeyPairTest {
 
-class ArgosServiceClientTest {
+	@BeforeEach
+	void setUp() throws Exception {
+	}
 
-    @BeforeEach
-    void setUp() throws Exception {
-    }
-
-    @Test
+	@Test
     void calculatePassphraseTest() {
-        String expected = "de38d63d28c4478625b22bbd2ef43447ee12e51d68e6fa121413b4052fb29a434126e439ab3ab96790109d04054ec6d82e95e72d551f78b7bdf674f90191ea34";
+        String expected = "c3719225981552ba21838aeba9179a61c0525043e7d24068ca59f811001d14f08d7fc9c71078180f6d21615874e0a652c44c67847b034523e2d40974977a3a10";
         String keyId = "ef07177be75d393163c1589f6dce3c41dd7d4ac4a0cbe4777d2aa45b53342dc6";
-        String passphrase = "R5gkNnqKdBM9eF";
+        String passphrase = "test";
+        String actual = ServiceAccountKeyPair.calculateHashedPassphrase(keyId, passphrase);
         
-        assertEquals(expected, ArgosServiceClient.calculatePassphrase(keyId, passphrase));
+        assertEquals(expected, actual);
     }
 
 }

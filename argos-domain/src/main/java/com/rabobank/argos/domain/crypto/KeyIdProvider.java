@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.domain;
+package com.rabobank.argos.domain.crypto;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import java.security.PublicKey;
 
-@Builder
-@Setter
-@Getter
-@EqualsAndHashCode(exclude={"signature"})
-@ToString
-public class Signature {
-    private String keyId;
-    private String signature;
+import org.apache.commons.codec.digest.DigestUtils;
+
+public interface KeyIdProvider {
+    
+    public static String computeKeyId(PublicKey publicKey) {
+        return DigestUtils.sha256Hex(publicKey.getEncoded());
+    }
+    
+    public static String computeKeyId(byte[] publicKey) {
+        return DigestUtils.sha256Hex(publicKey);
+    }
 }

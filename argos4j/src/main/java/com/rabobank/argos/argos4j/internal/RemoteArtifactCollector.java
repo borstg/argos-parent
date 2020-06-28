@@ -19,6 +19,7 @@ import com.rabobank.argos.argos4j.Argos4jError;
 import com.rabobank.argos.argos4j.RemoteCollector;
 import com.rabobank.argos.argos4j.RemoteFileCollector;
 import com.rabobank.argos.argos4j.RemoteZipFileCollector;
+import com.rabobank.argos.domain.crypto.HashUtil;
 import com.rabobank.argos.domain.link.Artifact;
 import feign.Client;
 import feign.Request;

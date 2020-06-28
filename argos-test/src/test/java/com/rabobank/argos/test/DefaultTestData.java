@@ -15,7 +15,9 @@
  */
 package com.rabobank.argos.test;
 
+import com.rabobank.argos.argos4j.rest.api.model.RestKeyAlgorithm;
 import com.rabobank.argos.argos4j.rest.api.model.RestLabel;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,6 +44,7 @@ public class DefaultTestData {
         private String keyId;
         private String passphrase;
         private byte[] publicKey;
+        private RestKeyAlgorithm algorithm;
     }
 
     @Builder
@@ -52,6 +55,7 @@ public class DefaultTestData {
         private String passphrase;
         private String hashedKeyPassphrase;
         private byte[] publicKey;
+        private RestKeyAlgorithm algorithm;
     }
 
 }

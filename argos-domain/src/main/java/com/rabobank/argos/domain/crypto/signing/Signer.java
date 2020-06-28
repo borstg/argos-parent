@@ -13,50 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.service.domain.verification.helper;
+package com.rabobank.argos.domain.crypto.signing;
 
 import com.rabobank.argos.domain.ArgosError;
-import com.rabobank.argos.domain.Signature;
-import com.rabobank.argos.domain.key.KeyIdProvider;
+import com.rabobank.argos.domain.crypto.KeyPair;
+import com.rabobank.argos.domain.crypto.Signature;
 
 import org.apache.commons.codec.binary.Hex;
 
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.Security;
 
-public class ArgosTestSigner {
+public class Signer {
+    
+    private Signer() {};
 
-    public static Signature sign(KeyPair keyPair, String jsonRepresentation) {
-        return Signature.builder()
-                .keyId(KeyIdProvider.computeKeyId(keyPair.getPublic()))
-                .signature(createSignature(keyPair.getPrivate(), jsonRepresentation))
-                .build();
+    public static Signature sign(KeyPair keyPair, char[] keyPassphrase, String jsonRepresentation) throws GeneralSecurityException {
+    	Signature sig = Signature.builder().keyId(keyPair.getKeyId()).build();
+    	sig.setSignature(createSignature(keyPair.decryptPrivateKey(keyPassphrase), jsonRepresentation, sig.getAlgorithm()));
+        return sig;
     }
 
-    private static String createSignature(PrivateKey privateKey, String jsonRepr) {
+    private static String createSignature(PrivateKey privateKey, String jsonRepr, SignatureAlgorithm algorithm) {
         try {
-            java.security.Signature privateSignature = java.security.Signature.getInstance("SHA256withRSA");
+            java.security.Signature privateSignature = java.security.Signature.getInstance(algorithm.toString());
             privateSignature.initSign(privateKey);
             privateSignature.update(jsonRepr.getBytes(StandardCharsets.UTF_8));
             return Hex.encodeHexString(privateSignature.sign());
         } catch (GeneralSecurityException e) {
             throw new ArgosError(e.getMessage(), e);
         }
-    }
-    
-    public static KeyPair generateKey() {
-        KeyPairGenerator keyGen = null;
-        try {
-            keyGen = KeyPairGenerator.getInstance("RSA");
-        } catch (NoSuchAlgorithmException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        keyGen.initialize(2048);
-        return keyGen.genKeyPair();
     }
 }

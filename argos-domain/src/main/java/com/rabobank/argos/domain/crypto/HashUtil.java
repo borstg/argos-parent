@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.argos4j.internal;
+package com.rabobank.argos.domain.crypto;
 
-import com.rabobank.argos.argos4j.Argos4jError;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.input.UnixLineEndingInputStream;
+
+import com.rabobank.argos.domain.ArgosError;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +40,7 @@ public class HashUtil {
                 digest.update(buffer, 0, len);
             }
         } catch (IOException e) {
-            throw new Argos4jError("The file " + filename + " couldn't be recorded: " + e.getMessage());
+            throw new ArgosError("The file " + filename + " couldn't be recorded: " + e.getMessage());
         }
         return Hex.encodeHexString(digest.digest());
     }

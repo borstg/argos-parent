@@ -13,14 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.domain.signing;
+package com.rabobank.argos.domain.crypto;
 
-import com.rabobank.argos.domain.layout.Layout;
-import com.rabobank.argos.domain.link.Link;
-
-public interface SigningSerializer {
-
-    String serialize(Link link);
-
-    String serialize(Layout layout);
+public enum KeyAlgorithm {
+  RSA, EC
 }

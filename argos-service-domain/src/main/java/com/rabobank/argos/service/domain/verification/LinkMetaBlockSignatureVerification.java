@@ -15,13 +15,14 @@
  */
 package com.rabobank.argos.service.domain.verification;
 
+import com.rabobank.argos.domain.crypto.signing.SignatureValidator;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
-import com.rabobank.argos.domain.signing.SignatureValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.Optional;
 
@@ -51,20 +52,27 @@ public class LinkMetaBlockSignatureVerification implements Verification {
     private boolean okay(LayoutMetaBlock layoutMetaBlock, LinkMetaBlock linkMetaBlock) {
         return getPublicKey(layoutMetaBlock, linkMetaBlock.getSignature().getKeyId())
                 .map(keyPair -> signatureValidator.isValid(linkMetaBlock.getLink(),
-                        linkMetaBlock.getSignature().getSignature(), keyPair))
+                        linkMetaBlock.getSignature(), keyPair))
                 .orElse(false);
     }
 
     private Optional<PublicKey> getPublicKey(LayoutMetaBlock layoutMetaBlock, String keyId) {
-        Optional<com.rabobank.argos.domain.layout.PublicKey> keyOptional = getKeyById(layoutMetaBlock, keyId);
+        Optional<com.rabobank.argos.domain.crypto.PublicKey> keyOptional = getKeyById(layoutMetaBlock, keyId);
         if (keyOptional.isEmpty()) {
-            log.info("key with id: {} not found in layout", keyId);
+            log.error("key with id: {} not found in layout", keyId);
         }
-        return keyOptional.map(com.rabobank.argos.domain.layout.PublicKey::getKey);
+        return keyOptional.map(t -> {
+			try {
+				return t.getJavaPublicKey();
+			} catch (GeneralSecurityException e) {
+				log.error(e.getMessage());
+				return null;
+			}
+		});
     }
 
-    private Optional<com.rabobank.argos.domain.layout.PublicKey> getKeyById(LayoutMetaBlock layoutMetaBlock, String keyId) {
-        return layoutMetaBlock.getLayout().getKeys().stream().filter(publicKey -> publicKey.getId().equals(keyId)).findFirst();
+    private Optional<com.rabobank.argos.domain.crypto.PublicKey> getKeyById(LayoutMetaBlock layoutMetaBlock, String keyId) {
+        return layoutMetaBlock.getLayout().getKeys().stream().filter(publicKey -> publicKey.getKeyId().equals(keyId)).findFirst();
     }
 
 }

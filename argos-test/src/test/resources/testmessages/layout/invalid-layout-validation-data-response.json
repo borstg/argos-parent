@@ -1,12 +1,12 @@
 {
   "messages": [
     {
-      "field": "keys[0].id",
+      "field": "keys[0].keyId",
       "type": "DATA_INPUT",
       "message": "must match \"^[0-9a-f]*$\""
     },
     {
-      "field": "keys[0].id",
+      "field": "keys[0].keyId",
       "type": "DATA_INPUT",
       "message": "size must be between 64 and 64"
     }
