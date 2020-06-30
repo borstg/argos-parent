@@ -17,6 +17,8 @@ package com.rabobank.argos.service.adapter.out.mongodb.account;
 
 import com.github.cloudyrock.mongock.ChangeLog;
 import com.github.cloudyrock.mongock.ChangeSet;
+import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
 import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.CompoundIndexDefinition;
@@ -31,6 +33,7 @@ import static com.rabobank.argos.service.adapter.out.mongodb.account.ServiceAcco
 import static com.rabobank.argos.service.adapter.out.mongodb.account.ServiceAccountRepositoryImpl.ACTIVE_KEY_ID_FIELD;
 import static com.rabobank.argos.service.adapter.out.mongodb.account.ServiceAccountRepositoryImpl.COLLECTION;
 import static com.rabobank.argos.service.adapter.out.mongodb.account.ServiceAccountRepositoryImpl.PARENT_LABEL_ID_FIELD;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 
 @ChangeLog
@@ -49,4 +52,14 @@ public class ServiceAccountDatabaseChangelog {
         template.indexOps(COLLECTION).ensureIndex(new Index(ACTIVE_KEY_ID_FIELD, ASC)
                 .partial(PartialIndexFilter.of(new Criteria(ACTIVE_KEY_ID_FIELD).exists(true))).unique());
     }
+
+    @SneakyThrows
+    @ChangeSet(order = "003", id = "ServiceAccountDatabaseChangelog-3", author = "michel")
+    public void createAccountsView(MongoTemplate template) {
+        String createAccountsViewCommand = IOUtils.toString(getClass()
+                .getResourceAsStream("/db-migration-scripts/create-accounts-keyinfo-view-01.json"), UTF_8);
+        template.dropCollection("accounts-keyinfo");
+        template.executeCommand(createAccountsViewCommand);
+    }
+
 }

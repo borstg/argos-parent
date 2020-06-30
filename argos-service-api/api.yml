@@ -154,6 +154,44 @@ paths:
           description: supply chain deleted
         '500':
           $ref: '#/components/responses/Error'
+  /supplychain/{supplyChainId}/account/key:
+    get:
+      summary: searches on keys of service accounts and personal accounts
+      operationId: searchKeysFromAccount
+      security:
+        - bearerAuth: []
+      tags:
+        - searchAccount
+      parameters:
+        - name: supplyChainId
+          in: path
+          description: supply chain id
+          required: true
+          schema:
+            type: string
+        - name: keyIds
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              minLength: 64
+              maxLength: 64
+              pattern: '^[0-9a-f]*$'
+
+      responses:
+        '200':
+          description: array of AccountKeyInfo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccountKeyInfo"
+        '500':
+          $ref: '#/components/responses/Error'
   /supplychain/{supplyChainId}/link:
     get:
       summary: find link
@@ -1616,3 +1654,30 @@ components:
             - MODEL_CONSISTENCY
         message:
           type: string
+    AccountKeyInfo:
+      type: object
+      properties:
+        accountId:
+          type: string
+        name:
+          type: string
+        path:
+          type: string
+        accountType:
+          type: string
+          enum:
+            - SERVICE_ACCOUNT
+            - PERSONAL_ACCOUNT
+        keyId:
+          $ref: '#/components/schemas/KeyId'
+        keyStatus:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - MOVED
+            - DELETED
+
+
+
+
