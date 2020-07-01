@@ -61,7 +61,6 @@ public class TreeNode {
             return treeNodeVisitor.visitLeaf(this);
         } else if (treeNodeVisitor.visitEnter(this)) {
             children.forEach(child -> child.accept(treeNodeVisitor));
-
         }
         return treeNodeVisitor.visitExit(this);
     }
