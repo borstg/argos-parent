@@ -30,6 +30,5 @@ public class AccountKeyInfo {
     private String name;
     private KeyInfo key;
     private AccountType accountType;
-    private List<String> idPathToRoot;
     private List<String> pathToRoot;
 }

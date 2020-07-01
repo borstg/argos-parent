@@ -52,13 +52,7 @@
                   0.0
                 ]
               },
-              "idPathToRoot": {
-                "$arrayElemAt": [
-                  "$joinedhierarchy.idPathToRoot",
-                  0.0
-                ]
-              },
-              "_class": "com.rabobank.argos.domain.account.AccountInfo"
+              "_class": "com.rabobank.argos.domain.account.AccountKeyInfo"
             }
           }
         ],
@@ -113,9 +107,7 @@
               "accountType": "PERSONAL_ACCOUNT",
               "pathToRoot": [
               ],
-              "idPathToRoot": [
-              ],
-              "_class": "com.rabobank.argos.domain.account.AccountInfo"
+              "_class": "com.rabobank.argos.domain.account.AccountKeyInfo"
             }
           }
         ]
@@ -184,9 +176,6 @@
         "pathToRoot": {
           "$first": "$pathToRoot"
         },
-        "idPathToRoot": {
-          "$first": "$idPathToRoot"
-        },
         "activeKey": {
           "$first": "$activeKey"
         },
@@ -205,7 +194,6 @@
         "name": 1,
         "accountType": 1,
         "pathToRoot": 1,
-        "idPathToRoot": 1,
         "_class": 1,
         "key": {
           "$filter": {

@@ -1675,7 +1675,6 @@ components:
           enum:
             - ACTIVE
             - INACTIVE
-            - MOVED
             - DELETED
 
 

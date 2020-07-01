@@ -30,6 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class AccountInfoRepositoryImpl implements AccountInfoRepository {
+    protected static final String ACCOUNTS_KEYINFO_VIEW = "accounts-keyinfo";
     private final MongoTemplate template;
     static final String ACCOUNT_KEY_ID_FIELD = "key.keyId";
 
@@ -37,7 +38,6 @@ public class AccountInfoRepositoryImpl implements AccountInfoRepository {
     public List<AccountKeyInfo> findByKeyIds(List<String> keyIds) {
         Criteria rootCriteria = Criteria.where(ACCOUNT_KEY_ID_FIELD).in(keyIds);
         Query query = new Query(rootCriteria);
-        log.info(query.toString());
-        return template.find(query, AccountKeyInfo.class, "accounts-keyinfo");
+        return template.find(query, AccountKeyInfo.class, ACCOUNTS_KEYINFO_VIEW);
     }
 }

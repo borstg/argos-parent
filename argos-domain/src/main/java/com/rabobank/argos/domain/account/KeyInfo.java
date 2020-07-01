@@ -23,8 +23,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class KeyInfo {
-    public enum KeyStatus {ACTIVE, INACTIVE, MOVED}
-
+    public enum KeyStatus {ACTIVE, INACTIVE}
     private String keyId;
     private KeyStatus status;
 }

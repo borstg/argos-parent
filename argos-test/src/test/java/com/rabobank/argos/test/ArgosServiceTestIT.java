@@ -96,4 +96,10 @@ class ArgosServiceTestIT {
         return new Karate().feature("classpath:feature/permission/permission.feature");
     }
 
+    @Karate.Test
+    Karate searchAccounts() {
+        return new Karate().feature("classpath:feature/account/search-account.feature");
+    }
+
+
 }

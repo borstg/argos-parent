@@ -15,9 +15,12 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.account;
 
+import com.rabobank.argos.domain.permission.Permission;
 import com.rabobank.argos.service.adapter.in.rest.api.handler.SearchAccountApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountKeyInfo;
 import com.rabobank.argos.service.domain.account.AccountInfoRepository;
+import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
+import com.rabobank.argos.service.domain.security.PermissionCheck;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +30,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountKeyInfo.KeyStatusEnum.DELETED;
+import static com.rabobank.argos.service.adapter.in.rest.supplychain.SupplyChainLabelIdExtractor.SUPPLY_CHAIN_LABEL_ID_EXTRACTOR;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,13 +44,29 @@ public class SearchAccountRestservice implements SearchAccountApi {
 
     private final AccountKeyInfoMapper accountKeyInfoMapper;
 
+    @PermissionCheck(permissions = Permission.READ)
     @Override
-    public ResponseEntity<List<RestAccountKeyInfo>> searchKeysFromAccount(String supplyChainId, @Valid List<String> keyIds) {
-        log.info(keyIds.toString());
+    public ResponseEntity<List<RestAccountKeyInfo>> searchKeysFromAccount(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId, @Valid List<String> keyIds) {
         List<RestAccountKeyInfo> restAccountKeyInfos = accountInfoRepository.findByKeyIds(keyIds)
                 .stream()
                 .map(accountKeyInfoMapper::convertToRestAccountInfo)
                 .collect(Collectors.toList());
+        restAccountKeyInfos.addAll(createRemovedAccountKeyInfos(keyIds, restAccountKeyInfos));
         return ResponseEntity.ok(restAccountKeyInfos);
+    }
+
+    private List<RestAccountKeyInfo> createRemovedAccountKeyInfos(@Valid List<String> keyIds, List<RestAccountKeyInfo> restAccountKeyInfos) {
+        List<String> returnedKeyIds = restAccountKeyInfos
+                .stream()
+                .map(RestAccountKeyInfo::getKeyId)
+                .collect(Collectors.toList());
+        return keyIds
+                .stream()
+                .distinct()
+                .filter(keyId -> !returnedKeyIds.contains(keyId))
+                .map(keyId -> new RestAccountKeyInfo()
+                        .keyId(keyId)
+                        .keyStatus(DELETED))
+                .collect(Collectors.toList());
     }
 }

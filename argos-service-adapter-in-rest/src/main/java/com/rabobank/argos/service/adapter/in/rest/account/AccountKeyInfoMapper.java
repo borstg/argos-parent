@@ -23,7 +23,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public abstract class AccountKeyInfoMapper {
@@ -33,9 +32,8 @@ public abstract class AccountKeyInfoMapper {
     public abstract RestAccountKeyInfo convertToRestAccountInfo(AccountKeyInfo accountKeyInfo);
 
     @Named("convertToPath")
-    public String convertToPath(List<String> pathToRoot) {
-        return SupplyChainHelper.reversePath(pathToRoot)
-                .stream()
-                .collect(Collectors.joining("/"));
+    String convertToPath(List<String> pathToRoot) {
+
+        return String.join("/", SupplyChainHelper.reversePath(pathToRoot));
     }
 }
