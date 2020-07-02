@@ -1,0 +1,10 @@
+[
+  {
+    "accountId": "#uuid",
+    "name": "default-sa2",
+    "path": "default_root_label",
+    "accountType": "SERVICE_ACCOUNT",
+    "keyId": "#(keyId)",
+    "keyStatus": "ACTIVE"
+  }
+]

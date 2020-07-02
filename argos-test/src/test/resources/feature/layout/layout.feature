@@ -69,8 +69,8 @@ Feature: Layout
     When method GET
     Then status 200
     * def layoutId = layoutResponse.response.id
-    * def response = read('classpath:testmessages/layout/valid-layout-response.json')
-    And match response contains response
+    * def expected = read('classpath:testmessages/layout/valid-layout-response.json')
+    And match response contains expected
 
   Scenario: find layout without authorization should return a 401 error
     * def layoutResponse = call read('create-layout.feature') {supplyChainId:#(supplyChain.response.id), json:#(validLayout), keyNumber:1}

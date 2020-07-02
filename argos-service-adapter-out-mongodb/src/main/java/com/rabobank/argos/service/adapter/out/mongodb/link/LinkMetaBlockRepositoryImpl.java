@@ -81,7 +81,7 @@ public class LinkMetaBlockRepositoryImpl implements LinkMetaBlockRepository {
         andCriteria.add(Criteria.where(SEGMENT_NAME_FIELD).is(segmentName));
         andCriteria.add(Criteria.where(STEP_NAME_FIELD).is(stepName));
         hashes.forEach(hash -> andCriteria.add(Criteria.where(LINK_PRODUCTS_HASH_FIELD).is(hash)));
-        rootCriteria.andOperator(andCriteria.toArray(new Criteria[andCriteria.size()]));
+        rootCriteria.andOperator(andCriteria.toArray(new Criteria[0]));
         Query query = new Query(rootCriteria);
         return template.find(query, LinkMetaBlock.class, COLLECTION);
     }
@@ -93,7 +93,7 @@ public class LinkMetaBlockRepositoryImpl implements LinkMetaBlockRepository {
         andCriteria.add(Criteria.where(SEGMENT_NAME_FIELD).is(segmentName));
         andCriteria.add(Criteria.where(STEP_NAME_FIELD).is(stepName));
         hashes.forEach(hash -> andCriteria.add(Criteria.where(LINK_MATERIALS_HASH_FIELD).is(hash)));
-        rootCriteria.andOperator(andCriteria.toArray(new Criteria[andCriteria.size()]));
+        rootCriteria.andOperator(andCriteria.toArray(new Criteria[0]));
         Query query = new Query(rootCriteria);
         return template.find(query, LinkMetaBlock.class, COLLECTION);
     }
@@ -121,7 +121,7 @@ public class LinkMetaBlockRepositoryImpl implements LinkMetaBlockRepository {
                     Criteria.where(LINK_PRODUCTS_HASH_FIELD).is(artifact.getHash())
                     .and(LINK_PRODUCTS_URI_FIELD).is(artifact.getUri())));
         }
-        rootCriteria.andOperator(andCriteria.toArray(new Criteria[andCriteria.size()]));
+        rootCriteria.andOperator(andCriteria.toArray(new Criteria[0]));
         Query query = new Query(rootCriteria);
         return template.find(query, LinkMetaBlock.class, COLLECTION);
     }

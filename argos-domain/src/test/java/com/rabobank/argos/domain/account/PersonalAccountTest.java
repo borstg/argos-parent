@@ -53,6 +53,8 @@ class PersonalAccountTest {
                 .providerId(PROVIDER_ID)
                 .roleIds(Collections.singletonList(ROLE_ID))
                 .build();
+
+
         assertThat(account.getAccountId(), hasLength(36));
         assertThat(account.getName(), is(NAME));
         assertThat(account.getEmail(), is(EMAIL));
