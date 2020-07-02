@@ -62,7 +62,6 @@ public class SearchAccountRestservice implements SearchAccountApi {
                 .collect(Collectors.toList());
         return keyIds
                 .stream()
-                .distinct()
                 .filter(keyId -> !returnedKeyIds.contains(keyId))
                 .map(keyId -> new RestAccountKeyInfo()
                         .keyId(keyId)
