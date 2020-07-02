@@ -795,7 +795,7 @@ paths:
           $ref: '#/components/responses/Error'
   /personalaccount/{accountId}/key:
     get:
-      summary: get active key bij personal account id
+      summary: get active key by personal account id
       operationId: getPersonalAccountKeyById
       tags:
         - personal account

@@ -31,7 +31,7 @@ public abstract class AccountInfoMapper {
     public abstract RestAccountInfo convertToRestAccountInfo(AccountInfo accountKeyInfo);
 
     @Named("convertToPath")
-    String convertToPath(List<String> pathToRoot) {
+    protected String convertToPath(List<String> pathToRoot) {
         return String.join("/", SupplyChainHelper.reversePath(pathToRoot));
     }
 }

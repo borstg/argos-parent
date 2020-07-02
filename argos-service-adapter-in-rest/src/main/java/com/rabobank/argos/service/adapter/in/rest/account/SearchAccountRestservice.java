@@ -57,9 +57,9 @@ public class SearchAccountRestservice implements SearchAccountApi {
     private final AccountKeyInfoMapper accountKeyInfoMapper;
 
     private final AccountInfoMapper accountInfoMapper;
-
+    @PermissionCheck(permissions = Permission.READ)
     @Override
-    public ResponseEntity<List<RestAccountInfo>> searchAccounts(String supplyChainId, @NotNull @Valid String name, @Valid RestAccountType restAccountType) {
+    public ResponseEntity<List<RestAccountInfo>> searchAccounts(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId, @NotNull @Valid String name, @Valid RestAccountType restAccountType) {
         Optional<TreeNode> supplyChainTreeNode = hierarchyRepository.getSubTree(supplyChainId, HierarchyMode.NONE, 0);
         List<String> idPathToRoot = supplyChainTreeNode.map(TreeNode::getIdPathToRoot)
                 .orElse(Collections.emptyList());
