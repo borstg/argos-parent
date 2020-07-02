@@ -18,6 +18,7 @@ package com.rabobank.argos.service.adapter.in.rest.account;
 import com.rabobank.argos.domain.account.AccountKeyInfo;
 import com.rabobank.argos.domain.account.KeyInfo;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountKeyInfo;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static com.rabobank.argos.domain.account.AccountKeyInfo.AccountType.SERVICE_ACCOUNT;
+import static com.rabobank.argos.domain.account.AccountType.SERVICE_ACCOUNT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -55,7 +56,7 @@ class AccountKeyInfoMapperTest {
         RestAccountKeyInfo restAccountKeyInfo = accountKeyInfoMapper.convertToRestAccountInfo(accountKeyInfo);
         assertThat(restAccountKeyInfo.getAccountId(), is(ACCOUNTID));
         assertThat(restAccountKeyInfo.getName(), is(NAME));
-        assertThat(restAccountKeyInfo.getAccountType(), is(RestAccountKeyInfo.AccountTypeEnum.SERVICE_ACCOUNT));
+        assertThat(restAccountKeyInfo.getAccountType(), is(RestAccountType.SERVICE_ACCOUNT));
         assertThat(restAccountKeyInfo.getKeyId(), is(KEY_ID));
         assertThat(restAccountKeyInfo.getKeyStatus(), is(RestAccountKeyInfo.KeyStatusEnum.ACTIVE));
         assertThat(restAccountKeyInfo.getPath(), is("root/to/path"));

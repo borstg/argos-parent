@@ -21,13 +21,13 @@ import lombok.Setter;
 
 import java.util.List;
 
+@Builder
 @Getter
 @Setter
-@Builder
-public class AccountKeyInfo {
+public class AccountInfo {
     private String accountId;
     private String name;
-    private KeyInfo key;
-    private AccountType accountType;
+    private String parentLabelId;
     private List<String> pathToRoot;
+    private AccountType accountType;
 }

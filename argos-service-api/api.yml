@@ -154,6 +154,43 @@ paths:
           description: supply chain deleted
         '500':
           $ref: '#/components/responses/Error'
+
+  /supplychain/{supplyChainId}/account:
+    get:
+      summary: searches for service accounts and personal accounts
+      operationId: searchAccounts
+      security:
+        - bearerAuth: []
+      tags:
+        - searchAccount
+      parameters:
+        - name: supplyChainId
+          in: path
+          description: supply chain id
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: accountType
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/AccountType"
+      responses:
+        '200':
+          description: array of AccountInfo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccountInfo"
+        '500':
+          $ref: '#/components/responses/Error'
   /supplychain/{supplyChainId}/account/key:
     get:
       summary: searches on keys of service accounts and personal accounts
@@ -1654,7 +1691,35 @@ components:
             - MODEL_CONSISTENCY
         message:
           type: string
+
+    AccountType:
+      type: string
+      enum:
+        - SERVICE_ACCOUNT
+        - PERSONAL_ACCOUNT
     AccountKeyInfo:
+      type: object
+      required:
+        - keyId
+        - keyStatus
+      properties:
+        accountId:
+          type: string
+        name:
+          type: string
+        path:
+          type: string
+        accountType:
+          $ref: '#/components/schemas/AccountType'
+        keyId:
+          $ref: '#/components/schemas/KeyId'
+        keyStatus:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - DELETED
+    AccountInfo:
       type: object
       properties:
         accountId:
@@ -1664,19 +1729,5 @@ components:
         path:
           type: string
         accountType:
-          type: string
-          enum:
-            - SERVICE_ACCOUNT
-            - PERSONAL_ACCOUNT
-        keyId:
-          $ref: '#/components/schemas/KeyId'
-        keyStatus:
-          type: string
-          enum:
-            - ACTIVE
-            - INACTIVE
-            - DELETED
-
-
-
+          $ref: '#/components/schemas/AccountType'
 

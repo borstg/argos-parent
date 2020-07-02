@@ -1,0 +1,95 @@
+{
+  "create": "accounts-info",
+  "viewOn": "serviceAccounts",
+  "pipeline": [
+    {
+      "$facet": {
+        "serviceaccounts": [
+          {
+            "$lookup": {
+              "from": "hierarchy",
+              "localField": "accountId",
+              "foreignField": "referenceId",
+              "as": "joinedhierarchy"
+            }
+          },
+          {
+            "$project": {
+              "accountId": 1.0,
+              "name": 1.0,
+              "parentlabelId": {
+                "$arrayElemAt": [
+                  "$joinedhierarchy.parentLabelId",
+                  0.0
+                ]
+              },
+              "accountType": {
+                "$arrayElemAt": [
+                  "$joinedhierarchy.type",
+                  0.0
+                ]
+              },
+              "pathToRoot": {
+                "$arrayElemAt": [
+                  "$joinedhierarchy.pathToRoot",
+                  0.0
+                ]
+              },
+              "_class": "com.rabobank.argos.domain.account.AccountInfo"
+            }
+          }
+        ],
+        "personalaccounts": [
+          {
+            "$limit": 1.0
+          },
+          {
+            "$project": {
+              "_id": "$$REMOVE"
+            }
+          },
+          {
+            "$lookup": {
+              "from": "personalaccounts",
+              "pipeline": [
+              ],
+              "as": "joinedpersonalaccounts"
+            }
+          },
+          {
+            "$unwind": "$joinedpersonalaccounts"
+          },
+          {
+            "$project": {
+              "_id": "$joinedpersonalaccounts._id",
+              "accountId": "$joinedpersonalaccounts.accountId",
+              "name": "$joinedpersonalaccounts.name",
+              "accountType": "PERSONAL_ACCOUNT",
+              "pathToRoot": [
+              ],
+              "_class": "com.rabobank.argos.domain.account.AccountInfo"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "$project": {
+        "accounts": {
+          "$concatArrays": [
+            "$serviceaccounts",
+            "$personalaccounts"
+          ]
+        }
+      }
+    },
+    {
+      "$unwind": "$accounts"
+    },
+    {
+      "$replaceRoot": {
+        "newRoot": "$accounts"
+      }
+    }
+  ]
+}

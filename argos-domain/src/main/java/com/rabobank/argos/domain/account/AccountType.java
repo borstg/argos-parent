@@ -15,19 +15,4 @@
  */
 package com.rabobank.argos.domain.account;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.util.List;
-
-@Getter
-@Setter
-@Builder
-public class AccountKeyInfo {
-    private String accountId;
-    private String name;
-    private KeyInfo key;
-    private AccountType accountType;
-    private List<String> pathToRoot;
-}
+public enum AccountType {SERVICE_ACCOUNT, PERSONAL_ACCOUNT}
