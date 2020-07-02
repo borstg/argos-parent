@@ -158,7 +158,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <coverageThreshold>59</coverageThreshold>
+                            <coverageThreshold>60</coverageThreshold>
                         </configuration>
                     </plugin>
                 </plugins>
