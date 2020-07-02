@@ -53,7 +53,7 @@ class AccountKeyInfoMapperTest {
                 .pathToRoot(List.of("path", "to", "root"))
                 .name(NAME)
                 .build();
-        RestAccountKeyInfo restAccountKeyInfo = accountKeyInfoMapper.convertToRestAccountInfo(accountKeyInfo);
+        RestAccountKeyInfo restAccountKeyInfo = accountKeyInfoMapper.convertToRestAccountKeyInfo(accountKeyInfo);
         assertThat(restAccountKeyInfo.getAccountId(), is(ACCOUNTID));
         assertThat(restAccountKeyInfo.getName(), is(NAME));
         assertThat(restAccountKeyInfo.getAccountType(), is(RestAccountType.SERVICE_ACCOUNT));

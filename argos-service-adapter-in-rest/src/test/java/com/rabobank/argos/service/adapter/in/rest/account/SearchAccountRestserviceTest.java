@@ -18,6 +18,7 @@ package com.rabobank.argos.service.adapter.in.rest.account;
 import com.rabobank.argos.domain.account.AccountKeyInfo;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountKeyInfo;
 import com.rabobank.argos.service.domain.account.AccountInfoRepository;
+import com.rabobank.argos.service.domain.hierarchy.HierarchyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +40,9 @@ class SearchAccountRestserviceTest {
     protected static final String KEY_ID = "keyId";
     @Mock
     private AccountInfoRepository accountInfoRepository;
+
+    @Mock
+    private HierarchyRepository hierarchyRepository;
     @Mock
     private AccountKeyInfoMapper accountKeyInfoMapper;
 
@@ -48,18 +52,22 @@ class SearchAccountRestserviceTest {
     @Mock
     private RestAccountKeyInfo restAccountKeyInfo;
 
+    @Mock
+    private AccountInfoMapper accountInfoMapper;
+
+
     private SearchAccountRestservice searchAccountRestservice;
 
     @BeforeEach
     void setUp() {
-        searchAccountRestservice = new SearchAccountRestservice(accountInfoRepository, accountKeyInfoMapper);
+        searchAccountRestservice = new SearchAccountRestservice(hierarchyRepository, accountInfoRepository, accountKeyInfoMapper, accountInfoMapper);
     }
 
     @Test
     void searchKeysFromAccountShouldReturn200() {
         when(accountInfoRepository.findByKeyIds(any())).thenReturn(Collections.singletonList(accountKeyInfo));
         when(restAccountKeyInfo.getKeyId()).thenReturn(KEY_ID);
-        when(accountKeyInfoMapper.convertToRestAccountInfo(accountKeyInfo)).thenReturn(restAccountKeyInfo);
+        when(accountKeyInfoMapper.convertToRestAccountKeyInfo(accountKeyInfo)).thenReturn(restAccountKeyInfo);
         ResponseEntity<List<RestAccountKeyInfo>> responseEntity = searchAccountRestservice.searchKeysFromAccount("supplyChainId", Collections.singletonList(KEY_ID));
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
     }

@@ -15,12 +15,17 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.account;
 
+import com.rabobank.argos.domain.account.AccountInfo;
+import com.rabobank.argos.domain.account.AccountType;
+import com.rabobank.argos.domain.hierarchy.HierarchyMode;
+import com.rabobank.argos.domain.hierarchy.TreeNode;
 import com.rabobank.argos.domain.permission.Permission;
 import com.rabobank.argos.service.adapter.in.rest.api.handler.SearchAccountApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountInfo;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountKeyInfo;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountType;
 import com.rabobank.argos.service.domain.account.AccountInfoRepository;
+import com.rabobank.argos.service.domain.hierarchy.HierarchyRepository;
 import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
 import com.rabobank.argos.service.domain.security.PermissionCheck;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +36,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountKeyInfo.KeyStatusEnum.DELETED;
@@ -43,13 +50,27 @@ import static com.rabobank.argos.service.adapter.in.rest.supplychain.SupplyChain
 @Slf4j
 public class SearchAccountRestservice implements SearchAccountApi {
 
+    private final HierarchyRepository hierarchyRepository;
+
     private final AccountInfoRepository accountInfoRepository;
 
     private final AccountKeyInfoMapper accountKeyInfoMapper;
 
+    private final AccountInfoMapper accountInfoMapper;
+
     @Override
-    public ResponseEntity<List<RestAccountInfo>> searchAccounts(String supplyChainId, @NotNull @Valid String name, @Valid RestAccountType accountType) {
-        return null;
+    public ResponseEntity<List<RestAccountInfo>> searchAccounts(String supplyChainId, @NotNull @Valid String name, @Valid RestAccountType restAccountType) {
+        Optional<TreeNode> supplyChainTreeNode = hierarchyRepository.getSubTree(supplyChainId, HierarchyMode.NONE, 0);
+        List<String> idPathToRoot = supplyChainTreeNode.map(TreeNode::getIdPathToRoot)
+                .orElse(Collections.emptyList());
+        AccountType accountType = restAccountType != null ? AccountType.valueOf(restAccountType.name()) : null;
+        List<AccountInfo> accountInfos = accountInfoRepository.findByNameIdPathToRootAndAccountType(name, idPathToRoot, accountType);
+        List<RestAccountInfo> restAccountInfos = accountInfos
+                .stream()
+                .map(accountInfoMapper::convertToRestAccountInfo)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(restAccountInfos);
     }
 
     @PermissionCheck(permissions = Permission.READ)
@@ -57,7 +78,7 @@ public class SearchAccountRestservice implements SearchAccountApi {
     public ResponseEntity<List<RestAccountKeyInfo>> searchKeysFromAccount(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId, @Valid List<String> keyIds) {
         List<RestAccountKeyInfo> restAccountKeyInfos = accountInfoRepository.findByKeyIds(keyIds)
                 .stream()
-                .map(accountKeyInfoMapper::convertToRestAccountInfo)
+                .map(accountKeyInfoMapper::convertToRestAccountKeyInfo)
                 .collect(Collectors.toList());
         restAccountKeyInfos.addAll(createRemovedAccountKeyInfos(keyIds, restAccountKeyInfos));
         return ResponseEntity.ok(restAccountKeyInfos);

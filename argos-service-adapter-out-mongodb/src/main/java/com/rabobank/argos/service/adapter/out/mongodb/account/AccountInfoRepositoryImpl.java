@@ -23,11 +23,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.MongoRegexCreator;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.List;
+
+import static java.util.Objects.requireNonNull;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.MongoRegexCreator.MatchMode.CONTAINING;
 
 @Component
 @RequiredArgsConstructor
@@ -35,6 +39,7 @@ import java.util.List;
 public class AccountInfoRepositoryImpl implements AccountInfoRepository {
     protected static final String ACCOUNTS_KEYINFO_VIEW = "accounts-keyinfo";
     protected static final String ACCOUNTS_INFO_VIEW = "accounts-info";
+    private static final String CASE_INSENSITIVE = "i";
     private final MongoTemplate template;
     static final String ACCOUNT_KEY_ID_FIELD = "key.keyId";
 
@@ -47,8 +52,12 @@ public class AccountInfoRepositoryImpl implements AccountInfoRepository {
 
     @Override
     public List<AccountInfo> findByNameIdPathToRootAndAccountType(String name, List<String> idPathToRoot, AccountType accountType) {
-
-        return Collections.emptyList();
+        Criteria criteria = where("name").regex(requireNonNull(MongoRegexCreator.INSTANCE.toRegularExpression(name, CONTAINING)), CASE_INSENSITIVE);
+        criteria.orOperator(where("parentLabelId").is(null), where("parentLabelId").in(idPathToRoot));
+        if (accountType != null) {
+            criteria.and("accountType")
+                    .is(accountType.name());
+        }
+        return template.find(new Query(criteria), AccountInfo.class, ACCOUNTS_INFO_VIEW);
     }
-
 }
