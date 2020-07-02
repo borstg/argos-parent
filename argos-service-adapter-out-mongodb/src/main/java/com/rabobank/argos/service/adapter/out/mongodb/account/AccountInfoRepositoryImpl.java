@@ -53,7 +53,7 @@ public class AccountInfoRepositoryImpl implements AccountInfoRepository {
     @Override
     public List<AccountInfo> findByNameIdPathToRootAndAccountType(String name, List<String> idPathToRoot, AccountType accountType) {
         Criteria criteria = where("name").regex(requireNonNull(MongoRegexCreator.INSTANCE.toRegularExpression(name, CONTAINING)), CASE_INSENSITIVE);
-        criteria.orOperator(where("parentLabelId").is(null), where("parentLabelId").in(idPathToRoot));
+        criteria.orOperator(where("parentlabelId").is(null), where("parentlabelId").in(idPathToRoot));
         if (accountType != null) {
             criteria.and("accountType")
                     .is(accountType.name());
