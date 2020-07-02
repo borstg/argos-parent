@@ -17,7 +17,9 @@ package com.rabobank.argos.service.adapter.in.rest.account;
 
 import com.rabobank.argos.domain.permission.Permission;
 import com.rabobank.argos.service.adapter.in.rest.api.handler.SearchAccountApi;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountInfo;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountKeyInfo;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountType;
 import com.rabobank.argos.service.domain.account.AccountInfoRepository;
 import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
 import com.rabobank.argos.service.domain.security.PermissionCheck;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,6 +46,11 @@ public class SearchAccountRestservice implements SearchAccountApi {
     private final AccountInfoRepository accountInfoRepository;
 
     private final AccountKeyInfoMapper accountKeyInfoMapper;
+
+    @Override
+    public ResponseEntity<List<RestAccountInfo>> searchAccounts(String supplyChainId, @NotNull @Valid String name, @Valid RestAccountType accountType) {
+        return null;
+    }
 
     @PermissionCheck(permissions = Permission.READ)
     @Override

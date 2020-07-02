@@ -15,10 +15,15 @@
  */
 package com.rabobank.argos.service.domain.account;
 
+import com.rabobank.argos.domain.account.AccountInfo;
 import com.rabobank.argos.domain.account.AccountKeyInfo;
+import com.rabobank.argos.domain.account.AccountType;
+import org.springframework.lang.Nullable;
 
 import java.util.List;
 
 public interface AccountInfoRepository {
     List<AccountKeyInfo> findByKeyIds(List<String> keyIds);
+
+    List<AccountInfo> findByNameIdPathToRootAndAccountType(String name, List<String> idPathToRoot, @Nullable AccountType accountType);
 }

@@ -15,7 +15,9 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.account;
 
+import com.rabobank.argos.domain.account.AccountInfo;
 import com.rabobank.argos.domain.account.AccountKeyInfo;
+import com.rabobank.argos.domain.account.AccountType;
 import com.rabobank.argos.service.domain.account.AccountInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -31,6 +34,7 @@ import java.util.List;
 @Slf4j
 public class AccountInfoRepositoryImpl implements AccountInfoRepository {
     protected static final String ACCOUNTS_KEYINFO_VIEW = "accounts-keyinfo";
+    protected static final String ACCOUNTS_INFO_VIEW = "accounts-info";
     private final MongoTemplate template;
     static final String ACCOUNT_KEY_ID_FIELD = "key.keyId";
 
@@ -40,4 +44,11 @@ public class AccountInfoRepositoryImpl implements AccountInfoRepository {
         Query query = new Query(rootCriteria);
         return template.find(query, AccountKeyInfo.class, ACCOUNTS_KEYINFO_VIEW);
     }
+
+    @Override
+    public List<AccountInfo> findByNameIdPathToRootAndAccountType(String name, List<String> idPathToRoot, AccountType accountType) {
+
+        return Collections.emptyList();
+    }
+
 }
