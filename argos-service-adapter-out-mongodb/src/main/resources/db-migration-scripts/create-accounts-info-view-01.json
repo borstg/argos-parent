@@ -17,7 +17,7 @@
             "$project": {
               "accountId": 1.0,
               "name": 1.0,
-              "parentlabelId": {
+              "parentLabelId": {
                 "$arrayElemAt": [
                   "$joinedhierarchy.parentLabelId",
                   0.0

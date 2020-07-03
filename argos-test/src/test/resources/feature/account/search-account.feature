@@ -47,7 +47,6 @@ Feature: Search Account
     When method GET
     Then status 200
     * def expectedResponse = read('classpath:testmessages/account/search-account-info-response.json')
-    * print response
     And match response contains expectedResponse
 
   Scenario: search account without READ should return a 403
