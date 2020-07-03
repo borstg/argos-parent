@@ -40,6 +40,8 @@ public class AccountInfoRepositoryImpl implements AccountInfoRepository {
     protected static final String ACCOUNTS_KEYINFO_VIEW = "accounts-keyinfo";
     protected static final String ACCOUNTS_INFO_VIEW = "accounts-info";
     private static final String CASE_INSENSITIVE = "i";
+    protected static final String PARENT_LABEL_ID_FIELD = "parentLabelId";
+    protected static final String ACCOUNT_TYPE_FIELD = "accountType";
     private final MongoTemplate template;
     static final String ACCOUNT_KEY_ID_FIELD = "key.keyId";
 
@@ -53,9 +55,9 @@ public class AccountInfoRepositoryImpl implements AccountInfoRepository {
     @Override
     public List<AccountInfo> findByNameIdPathToRootAndAccountType(String name, List<String> idPathToRoot, AccountType accountType) {
         Criteria criteria = where("name").regex(requireNonNull(MongoRegexCreator.INSTANCE.toRegularExpression(name, CONTAINING)), CASE_INSENSITIVE);
-        criteria.orOperator(where("parentlabelId").is(null), where("parentlabelId").in(idPathToRoot));
+        criteria.orOperator(where(PARENT_LABEL_ID_FIELD).is(null), where(PARENT_LABEL_ID_FIELD).in(idPathToRoot));
         if (accountType != null) {
-            criteria.and("accountType")
+            criteria.and(ACCOUNT_TYPE_FIELD)
                     .is(accountType.name());
         }
         return template.find(new Query(criteria), AccountInfo.class, ACCOUNTS_INFO_VIEW);
