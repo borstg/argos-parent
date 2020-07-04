@@ -16,5 +16,5 @@
 package com.rabobank.argos.domain.crypto;
 
 public enum KeyAlgorithm {
-  RSA, EC
+  EC
 }
