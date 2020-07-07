@@ -25,7 +25,6 @@ import java.util.List;
 @Setter
 @Builder
 public class AccountKeyInfo {
-    public enum AccountType {SERVICE_ACCOUNT, PERSONAL_ACCOUNT}
     private String accountId;
     private String name;
     private KeyInfo key;

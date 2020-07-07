@@ -15,7 +15,9 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.account;
 
+import com.rabobank.argos.domain.account.AccountInfo;
 import com.rabobank.argos.domain.account.AccountKeyInfo;
+import com.rabobank.argos.domain.account.AccountType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +30,7 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.Collections;
 
+import static com.rabobank.argos.service.adapter.out.mongodb.account.AccountInfoRepositoryImpl.ACCOUNTS_INFO_VIEW;
 import static com.rabobank.argos.service.adapter.out.mongodb.account.AccountInfoRepositoryImpl.ACCOUNTS_KEYINFO_VIEW;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -42,6 +45,10 @@ class AccountInfoRepositoryImplTest {
     private MongoTemplate template;
     @Mock
     private AccountKeyInfo accountKeyInfo;
+
+    @Mock
+    private AccountInfo accountInfo;
+
     private AccountInfoRepositoryImpl accountInfoRepository;
     @Captor
     private ArgumentCaptor<Query> queryArgumentCaptor;
@@ -49,7 +56,6 @@ class AccountInfoRepositoryImplTest {
     @BeforeEach
     void setup() {
         accountInfoRepository = new AccountInfoRepositoryImpl(template);
-
     }
 
     @Test
@@ -58,5 +64,13 @@ class AccountInfoRepositoryImplTest {
         accountInfoRepository.findByKeyIds(Collections.singletonList("keyId"));
         verify(template).find(queryArgumentCaptor.capture(), eq(AccountKeyInfo.class), eq(ACCOUNTS_KEYINFO_VIEW));
         assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"key.keyId\" : { \"$in\" : [\"keyId\"]}}, Fields: {}, Sort: {}"));
+    }
+
+    @Test
+    public void findByNameIdPathToRootAndAccountType() {
+        when(template.find(any(), eq(AccountInfo.class), eq(ACCOUNTS_INFO_VIEW))).thenReturn(Collections.singletonList(accountInfo));
+        accountInfoRepository.findByNameIdPathToRootAndAccountType("name", Collections.singletonList("id"), AccountType.SERVICE_ACCOUNT);
+        verify(template).find(queryArgumentCaptor.capture(), eq(AccountInfo.class), eq(ACCOUNTS_INFO_VIEW));
+        assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"name\" : { \"$regex\" : \".*name.*\", \"$options\" : \"i\"}, \"$or\" : [{ \"parentLabelId\" : null}, { \"parentLabelId\" : { \"$in\" : [\"id\"]}}], \"accountType\" : \"SERVICE_ACCOUNT\"}, Fields: {}, Sort: {}"));
     }
 }

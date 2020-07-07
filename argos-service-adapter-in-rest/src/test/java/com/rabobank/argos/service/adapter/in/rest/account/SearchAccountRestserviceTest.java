@@ -15,9 +15,14 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.account;
 
+import com.rabobank.argos.domain.account.AccountInfo;
 import com.rabobank.argos.domain.account.AccountKeyInfo;
+import com.rabobank.argos.domain.hierarchy.HierarchyMode;
+import com.rabobank.argos.domain.hierarchy.TreeNode;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountInfo;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountKeyInfo;
 import com.rabobank.argos.service.domain.account.AccountInfoRepository;
+import com.rabobank.argos.service.domain.hierarchy.HierarchyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +33,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -37,8 +43,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class SearchAccountRestserviceTest {
     protected static final String KEY_ID = "keyId";
+    protected static final String SUPPLY_CHAIN_ID = "supplyChainId";
     @Mock
     private AccountInfoRepository accountInfoRepository;
+
+    @Mock
+    private HierarchyRepository hierarchyRepository;
     @Mock
     private AccountKeyInfoMapper accountKeyInfoMapper;
 
@@ -48,19 +58,45 @@ class SearchAccountRestserviceTest {
     @Mock
     private RestAccountKeyInfo restAccountKeyInfo;
 
+    @Mock
+    private AccountInfoMapper accountInfoMapper;
+
+    @Mock
+    private TreeNode treeNode;
+
+    @Mock
+    private AccountInfo accountInfo;
+
+    @Mock
+    private RestAccountInfo restAccountInfo;
+
     private SearchAccountRestservice searchAccountRestservice;
 
     @BeforeEach
     void setUp() {
-        searchAccountRestservice = new SearchAccountRestservice(accountInfoRepository, accountKeyInfoMapper);
+        searchAccountRestservice = new SearchAccountRestservice(hierarchyRepository, accountInfoRepository, accountKeyInfoMapper, accountInfoMapper);
     }
 
     @Test
     void searchKeysFromAccountShouldReturn200() {
         when(accountInfoRepository.findByKeyIds(any())).thenReturn(Collections.singletonList(accountKeyInfo));
         when(restAccountKeyInfo.getKeyId()).thenReturn(KEY_ID);
-        when(accountKeyInfoMapper.convertToRestAccountInfo(accountKeyInfo)).thenReturn(restAccountKeyInfo);
-        ResponseEntity<List<RestAccountKeyInfo>> responseEntity = searchAccountRestservice.searchKeysFromAccount("supplyChainId", Collections.singletonList(KEY_ID));
+        when(accountKeyInfoMapper.convertToRestAccountKeyInfo(accountKeyInfo)).thenReturn(restAccountKeyInfo);
+        ResponseEntity<List<RestAccountKeyInfo>> responseEntity = searchAccountRestservice.searchKeysFromAccount(SUPPLY_CHAIN_ID, Collections.singletonList(KEY_ID));
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
     }
+
+    @Test
+    void searchAccountsShouldReturn200() {
+        when(accountInfoRepository
+                .findByNameIdPathToRootAndAccountType(any(), any(), any()))
+                .thenReturn(Collections.singletonList(accountInfo));
+        when(accountInfoMapper.convertToRestAccountInfo(accountInfo)).thenReturn(restAccountInfo);
+        when(hierarchyRepository.getSubTree(SUPPLY_CHAIN_ID, HierarchyMode.NONE, 0))
+                .thenReturn(Optional.of(treeNode));
+        when(treeNode.getIdPathToRoot()).thenReturn(Collections.singletonList("id"));
+        ResponseEntity<List<RestAccountInfo>> responseEntity = searchAccountRestservice.searchAccounts(SUPPLY_CHAIN_ID, "name", null);
+        assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
+    }
+
 }

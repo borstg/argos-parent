@@ -16,8 +16,8 @@
 package com.rabobank.argos.service.adapter.in.rest.account;
 
 import com.rabobank.argos.domain.SupplyChainHelper;
-import com.rabobank.argos.domain.account.AccountKeyInfo;
-import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountKeyInfo;
+import com.rabobank.argos.domain.account.AccountInfo;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -25,11 +25,10 @@ import org.mapstruct.Named;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public abstract class AccountKeyInfoMapper {
+public abstract class AccountInfoMapper {
     @Mapping(target = "path", source = "pathToRoot", qualifiedByName = "convertToPath")
-    @Mapping(target = "keyId", source = "key.keyId")
-    @Mapping(target = "keyStatus", source = "key.status")
-    public abstract RestAccountKeyInfo convertToRestAccountKeyInfo(AccountKeyInfo accountKeyInfo);
+
+    public abstract RestAccountInfo convertToRestAccountInfo(AccountInfo accountKeyInfo);
 
     @Named("convertToPath")
     protected String convertToPath(List<String> pathToRoot) {

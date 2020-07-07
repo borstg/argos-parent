@@ -15,9 +15,8 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.account;
 
-import com.rabobank.argos.domain.account.AccountKeyInfo;
-import com.rabobank.argos.domain.account.KeyInfo;
-import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountKeyInfo;
+import com.rabobank.argos.domain.account.AccountInfo;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountInfo;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestAccountType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,33 +31,29 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @ExtendWith(MockitoExtension.class)
-class AccountKeyInfoMapperTest {
-    protected static final String ACCOUNTID = "accountid";
-    protected static final String KEY_ID = "keyId";
-    protected static final String NAME = "name";
-    private AccountKeyInfoMapper accountKeyInfoMapper;
+class AccountInfoMapperTest {
+    private static final String ACCOUNTID = "accountId";
+    private static final String NAME = "name";
+    private AccountInfoMapper accountInfoMapper;
 
     @BeforeEach
     void setup() {
-        accountKeyInfoMapper = Mappers.getMapper(AccountKeyInfoMapper.class);
+        accountInfoMapper = Mappers.getMapper(AccountInfoMapper.class);
     }
 
     @Test
     void convertToRestAccountInfo() {
-        AccountKeyInfo accountKeyInfo = AccountKeyInfo
+        AccountInfo accountInfo = AccountInfo
                 .builder()
                 .accountId(ACCOUNTID)
                 .accountType(SERVICE_ACCOUNT)
-                .key(KeyInfo.builder().keyId(KEY_ID).status(KeyInfo.KeyStatus.ACTIVE).build())
                 .pathToRoot(List.of("path", "to", "root"))
                 .name(NAME)
                 .build();
-        RestAccountKeyInfo restAccountKeyInfo = accountKeyInfoMapper.convertToRestAccountKeyInfo(accountKeyInfo);
-        assertThat(restAccountKeyInfo.getAccountId(), is(ACCOUNTID));
-        assertThat(restAccountKeyInfo.getName(), is(NAME));
-        assertThat(restAccountKeyInfo.getAccountType(), is(RestAccountType.SERVICE_ACCOUNT));
-        assertThat(restAccountKeyInfo.getKeyId(), is(KEY_ID));
-        assertThat(restAccountKeyInfo.getKeyStatus(), is(RestAccountKeyInfo.KeyStatusEnum.ACTIVE));
-        assertThat(restAccountKeyInfo.getPath(), is("root/to/path"));
+        RestAccountInfo restAccountInfo = accountInfoMapper.convertToRestAccountInfo(accountInfo);
+        assertThat(restAccountInfo.getAccountId(), is(ACCOUNTID));
+        assertThat(restAccountInfo.getAccountType(), is(RestAccountType.SERVICE_ACCOUNT));
+        assertThat(restAccountInfo.getName(), is(NAME));
+        assertThat(restAccountInfo.getPath(), is("root/to/path"));
     }
 }

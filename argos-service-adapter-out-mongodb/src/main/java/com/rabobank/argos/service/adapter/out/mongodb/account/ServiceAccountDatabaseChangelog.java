@@ -55,11 +55,20 @@ public class ServiceAccountDatabaseChangelog {
 
     @SneakyThrows
     @ChangeSet(order = "003", id = "ServiceAccountDatabaseChangelog-3", author = "michel")
-    public void createAccountsView(MongoTemplate template) {
-        String createAccountsViewCommand = IOUtils.toString(getClass()
+    public void createAccountsKeyInfoView(MongoTemplate template) {
+        String createAccountsKeyInfoViewCommand = IOUtils.toString(getClass()
                 .getResourceAsStream("/db-migration-scripts/create-accounts-keyinfo-view-01.json"), UTF_8);
         template.dropCollection("accounts-keyinfo");
-        template.executeCommand(createAccountsViewCommand);
+        template.executeCommand(createAccountsKeyInfoViewCommand);
+    }
+
+    @SneakyThrows
+    @ChangeSet(order = "004", id = "ServiceAccountDatabaseChangelog-4", author = "michel")
+    public void createAccountsInfoView(MongoTemplate template) {
+        String createAccountsInfoViewCommand = IOUtils.toString(getClass()
+                .getResourceAsStream("/db-migration-scripts/create-accounts-info-view-01.json"), UTF_8);
+        template.dropCollection("accounts-info");
+        template.executeCommand(createAccountsInfoViewCommand);
     }
 
 }

@@ -13,17 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.service.domain.account;
+package com.rabobank.argos.domain.account;
 
-import com.rabobank.argos.domain.account.AccountInfo;
-import com.rabobank.argos.domain.account.AccountKeyInfo;
-import com.rabobank.argos.domain.account.AccountType;
-import org.springframework.lang.Nullable;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-public interface AccountInfoRepository {
-    List<AccountKeyInfo> findByKeyIds(List<String> keyIds);
-
-    List<AccountInfo> findByNameIdPathToRootAndAccountType(String name, List<String> idPathToRoot, @Nullable AccountType accountType);
+@Builder
+@Getter
+@Setter
+public class AccountInfo {
+    private String accountId;
+    private String name;
+    private String parentLabelId;
+    private List<String> pathToRoot;
+    private AccountType accountType;
 }
