@@ -69,6 +69,7 @@ steps:
   - pitest
   - sonar
 
+
 - name: build argos integration test stub image
   image: plugins/docker
   settings:
