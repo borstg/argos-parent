@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 public class CreateOrModifyRuleVerification implements RuleVerification {
     @Override
     public RuleType getRuleType() {
-        return RuleType.CREATEORMODIFY;
+        return RuleType.CREATE_OR_MODIFY;
     }
 
     @Override

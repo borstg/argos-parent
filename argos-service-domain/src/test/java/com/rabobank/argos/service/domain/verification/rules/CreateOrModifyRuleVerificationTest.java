@@ -59,7 +59,7 @@ class CreateOrModifyRuleVerificationTest {
 
     @Test
     void getRuleType() {
-        assertThat(verification.getRuleType(), is(RuleType.CREATEORMODIFY));
+        assertThat(verification.getRuleType(), is(RuleType.CREATE_OR_MODIFY));
     }
 
     @Test

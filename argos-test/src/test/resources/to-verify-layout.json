@@ -43,7 +43,7 @@
             ],
             "expectedProducts": [
               {
-                "ruleType": "CREATEORMODIFY",
+                "ruleType": "CREATE_OR_MODIFY",
                 "pattern": "target/argos-test-app.war"
               },
               {
