@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.service.adapter.in.rest.layout;
+package com.rabobank.argos.domain.layout;
 
-import com.rabobank.argos.domain.layout.ApprovalConfiguration;
-import com.rabobank.argos.service.adapter.in.rest.api.model.RestApprovalConfiguration;
-import org.mapstruct.Mapper;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-@Mapper(componentModel = "spring")
-public interface ApprovalConfigurationMapper {
-    ApprovalConfiguration convertFromRestApprovalConfiguration(RestApprovalConfiguration restApprovalConfiguration);
+import java.util.List;
 
-    RestApprovalConfiguration convertToRestApprovalConfiguration(ApprovalConfiguration approvalConfiguration);
+@Getter
+@Setter
+@Builder
+@ToString
+public class ReleaseConfiguration {
+    private String supplyChainId;
+    private List<ArtifactCollectorSpecification> artifactCollectorSpecifications;
 }

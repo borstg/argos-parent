@@ -29,6 +29,7 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayout;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayoutMetaBlock;
 import com.rabobank.argos.service.domain.layout.ApprovalConfigurationRepository;
 import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
+import com.rabobank.argos.service.domain.layout.ReleaseConfigurationRepository;
 import com.rabobank.argos.service.domain.security.AccountSecurityContext;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,7 +81,10 @@ class LayoutRestServiceTest {
     private ApprovalConfigurationRepository approvalConfigurationRepository;
 
     @Mock
-    private ApprovalConfigurationMapper approvalConfigurationMapper;
+    private ConfigurationMapper configurationMapper;
+
+    @Mock
+    private ReleaseConfigurationRepository releaseConfigurationRepository;
 
     @Mock
     private RestLayout restLayout;
@@ -124,7 +128,7 @@ class LayoutRestServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new LayoutRestService(converter, layoutMetaBlockRepository, validator, approvalConfigurationRepository, approvalConfigurationMapper, accountSecurityContext);
+        service = new LayoutRestService(converter, layoutMetaBlockRepository, validator, approvalConfigurationRepository, releaseConfigurationRepository, configurationMapper, accountSecurityContext);
     }
 
     @Test
@@ -175,9 +179,9 @@ class LayoutRestServiceTest {
         when(layout.getLayoutSegments()).thenReturn(createSegmentAndStep());
         when(approvalConfiguration.getSegmentName()).thenReturn(SEGMENT_NAME);
         when(approvalConfiguration.getStepName()).thenReturn(STEP_NAME);
-        when(approvalConfigurationMapper.convertFromRestApprovalConfiguration(restApprovalConfiguration))
+        when(configurationMapper.convertFromRestApprovalConfiguration(restApprovalConfiguration))
                 .thenReturn(approvalConfiguration);
-        when(approvalConfigurationMapper.convertToRestApprovalConfiguration(approvalConfiguration))
+        when(configurationMapper.convertToRestApprovalConfiguration(approvalConfiguration))
                 .thenReturn(restApprovalConfiguration);
         ResponseEntity<List<RestApprovalConfiguration>> responseEntity = service.
                 createApprovalConfigurations(SUPPLY_CHAIN_ID, List.of(restApprovalConfiguration));
@@ -193,7 +197,7 @@ class LayoutRestServiceTest {
         when(layoutMetaBlock.getLayout()).thenReturn(layout);
         when(layout.getLayoutSegments()).thenReturn(createSegmentAndStep());
         when(approvalConfiguration.getSegmentName()).thenReturn("wrong-segment");
-        when(approvalConfigurationMapper.convertFromRestApprovalConfiguration(restApprovalConfiguration))
+        when(configurationMapper.convertFromRestApprovalConfiguration(restApprovalConfiguration))
                 .thenReturn(approvalConfiguration);
         List<RestApprovalConfiguration> configs = List.of(restApprovalConfiguration);
         LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () ->
@@ -214,7 +218,7 @@ class LayoutRestServiceTest {
         when(layout.getLayoutSegments()).thenReturn(createSegmentAndStep());
         when(approvalConfiguration.getSegmentName()).thenReturn(SEGMENT_NAME);
         when(approvalConfiguration.getStepName()).thenReturn("wrong-stepname");
-        when(approvalConfigurationMapper.convertFromRestApprovalConfiguration(restApprovalConfiguration))
+        when(configurationMapper.convertFromRestApprovalConfiguration(restApprovalConfiguration))
                 .thenReturn(approvalConfiguration);
         List<RestApprovalConfiguration> configs = List.of(restApprovalConfiguration);
 
@@ -230,7 +234,7 @@ class LayoutRestServiceTest {
     void createApprovalConfigurationsWithoutExistingLayoutShouldThrowValidationError() {
         when(layoutMetaBlockRepository.findBySupplyChainId(SUPPLY_CHAIN_ID)).thenReturn(Optional.empty());
         when(approvalConfiguration.getSupplyChainId()).thenReturn(SUPPLY_CHAIN_ID);
-        when(approvalConfigurationMapper.convertFromRestApprovalConfiguration(restApprovalConfiguration))
+        when(configurationMapper.convertFromRestApprovalConfiguration(restApprovalConfiguration))
                 .thenReturn(approvalConfiguration);
         List<RestApprovalConfiguration> configs = List.of(restApprovalConfiguration);
 
@@ -259,7 +263,7 @@ class LayoutRestServiceTest {
     @Test
     void getApprovalConfigurations() {
         when(approvalConfigurationRepository.findBySupplyChainId(SUPPLY_CHAIN_ID)).thenReturn(List.of(approvalConfiguration));
-        when(approvalConfigurationMapper.convertToRestApprovalConfiguration(approvalConfiguration))
+        when(configurationMapper.convertToRestApprovalConfiguration(approvalConfiguration))
                 .thenReturn(restApprovalConfiguration);
         ResponseEntity<List<RestApprovalConfiguration>> responseEntity = service.getApprovalConfigurations(SUPPLY_CHAIN_ID);
         assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
@@ -278,7 +282,7 @@ class LayoutRestServiceTest {
         when(account.getActiveKeyPair()).thenReturn(keyPair);
 
         when(approvalConfigurationRepository.findBySupplyChainId(SUPPLY_CHAIN_ID)).thenReturn(List.of(approvalConfiguration));
-        when(approvalConfigurationMapper.convertToRestApprovalConfiguration(approvalConfiguration))
+        when(configurationMapper.convertToRestApprovalConfiguration(approvalConfiguration))
                 .thenReturn(restApprovalConfiguration);
 
 

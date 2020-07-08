@@ -23,6 +23,7 @@ import com.rabobank.argos.service.domain.hierarchy.HierarchyService;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
 import com.rabobank.argos.service.domain.layout.ApprovalConfigurationRepository;
 import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
+import com.rabobank.argos.service.domain.layout.ReleaseConfigurationRepository;
 import com.rabobank.argos.service.domain.link.LinkMetaBlockRepository;
 import com.rabobank.argos.service.domain.supplychain.SupplyChainRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,13 +75,16 @@ class DeleteServiceTest {
     @Mock
     private TreeNode serviceAccountTreeNode;
 
+    @Mock
+    private ReleaseConfigurationRepository releaseConfigurationRepository;
+
     private final static String ID = "id";
 
     private DeleteService service;
 
     @BeforeEach
     void setUp() {
-        service = new DeleteService(labelRepository, layoutRepository, linkMetaBlockRepository, approvalConfigurationRepository, supplyChainRepository, hierarchyService, accountService);
+        service = new DeleteService(labelRepository, layoutRepository, linkMetaBlockRepository, approvalConfigurationRepository, supplyChainRepository, hierarchyService, accountService, releaseConfigurationRepository);
     }
 
     @Test
