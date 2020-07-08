@@ -111,6 +111,7 @@ class DeleteServiceTest {
         verify(linkMetaBlockRepository).deleteBySupplyChainId("supplyChainId");
         verify(approvalConfigurationRepository).deleteBySupplyChainId("supplyChainId");
         verify(accountService).deleteServiceAccount("serviceAccountId");
+        verify(releaseConfigurationRepository).deleteBySupplyChainId("supplyChainId");
     }
 
     @Test
@@ -120,6 +121,7 @@ class DeleteServiceTest {
         verify(layoutRepository).deleteBySupplyChainId(ID);
         verify(linkMetaBlockRepository).deleteBySupplyChainId(ID);
         verify(approvalConfigurationRepository).deleteBySupplyChainId(ID);
+        verify(releaseConfigurationRepository).deleteBySupplyChainId(ID);
     }
 
     @Test

@@ -22,11 +22,13 @@ import com.rabobank.argos.domain.layout.ApprovalConfiguration;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
 import com.rabobank.argos.domain.layout.LayoutSegment;
+import com.rabobank.argos.domain.layout.ReleaseConfiguration;
 import com.rabobank.argos.domain.layout.Step;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestApprovalConfiguration;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestArtifactCollectorSpecification;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayout;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayoutMetaBlock;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestReleaseConfiguration;
 import com.rabobank.argos.service.domain.layout.ApprovalConfigurationRepository;
 import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
 import com.rabobank.argos.service.domain.layout.ReleaseConfigurationRepository;
@@ -122,6 +124,12 @@ class LayoutRestServiceTest {
 
     @Mock
     private LayoutSegment layoutSegment;
+
+    @Mock
+    private ReleaseConfiguration releaseConfiguration;
+
+    @Mock
+    private RestReleaseConfiguration restReleaseConfiguration;
 
     @Mock
     private Step step;
@@ -330,6 +338,31 @@ class LayoutRestServiceTest {
         assertThat(exception.getMessage(), Is.is("not logged in"));
     }
 
+    @Test
+    void getReleaseConfiguration() {
+        when(releaseConfigurationRepository.findBySupplyChainId(SUPPLY_CHAIN_ID)).thenReturn(Optional.of(releaseConfiguration));
+        when(configurationMapper.convertToRestReleaseConfiguration(releaseConfiguration)).thenReturn(restReleaseConfiguration);
+        ResponseEntity<RestReleaseConfiguration> response = service.getReleaseConfiguration(SUPPLY_CHAIN_ID);
+        assertThat(response.getBody(), is(restReleaseConfiguration));
+        assertThat(response.getStatusCodeValue(), is(200));
+    }
+
+    @Test
+    void getReleaseConfigurationNotFound() {
+        when(releaseConfigurationRepository.findBySupplyChainId(SUPPLY_CHAIN_ID)).thenReturn(Optional.empty());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.getReleaseConfiguration(SUPPLY_CHAIN_ID));
+        assertThat(exception.getMessage(), is("404 NOT_FOUND \"release configuration not found\""));
+    }
+
+    @Test
+    void createReleaseConfiguration() {
+        when(configurationMapper.convertFromRestReleaseConfiguration(restReleaseConfiguration)).thenReturn(releaseConfiguration);
+        ResponseEntity<RestReleaseConfiguration> response = service.createReleaseConfiguration(SUPPLY_CHAIN_ID, restReleaseConfiguration);
+        verify(releaseConfigurationRepository).save(releaseConfiguration);
+        verify(releaseConfiguration).setSupplyChainId(SUPPLY_CHAIN_ID);
+        assertThat(response.getBody(), is(restReleaseConfiguration));
+        assertThat(response.getStatusCodeValue(), is(200));
+    }
 
     private static List<LayoutSegment> createSegmentAndStep() {
         return singletonList(LayoutSegment
