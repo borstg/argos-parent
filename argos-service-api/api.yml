@@ -492,6 +492,39 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '500':
           $ref: '#/components/responses/Error'
+  /supplychain/{supplyChainId}/release:
+    post:
+      summary: releases a list of artifact sets these sets will be verified
+      operationId: createRelease
+      tags:
+        - release
+      security:
+        - basicAuth: []
+        - bearerAuth: []
+      parameters:
+        - name: supplyChainId
+          in: path
+          description: supply chain id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReleaseArtifacts"
+      responses:
+        '200':
+          description: VerificationResult
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/Error'
 
   /hierarchy:
     get:
@@ -1730,4 +1763,15 @@ components:
           type: string
         accountType:
           $ref: '#/components/schemas/AccountType'
+    ReleaseArtifacts:
+      type: object
+      properties:
+        releaseArtifacts:
+          type: array
+          minItems: 1
+          items:
+            type: array
+            minItems: 1
+            items:
+              $ref: '#/components/schemas/Artifact'
 

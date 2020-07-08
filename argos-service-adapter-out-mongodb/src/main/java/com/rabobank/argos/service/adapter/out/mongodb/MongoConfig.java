@@ -27,7 +27,9 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +52,11 @@ public class MongoConfig {
         return new SpringBootMongockBuilder(mongoTemplate, "com.rabobank.argos.service.adapter.out.mongodb")
                 .setApplicationContext(springContext)
                 .build();
+    }
+
+    @Bean
+    public GridFsTemplate gridFsTemplate(MongoDbFactory dbFactory, MappingMongoConverter mappingMongoConverter) {
+        return new GridFsTemplate(dbFactory, mappingMongoConverter);
     }
 
     @Bean
