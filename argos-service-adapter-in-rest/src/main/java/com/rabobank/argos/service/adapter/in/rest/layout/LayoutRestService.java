@@ -22,6 +22,7 @@ import com.rabobank.argos.domain.layout.ApprovalConfiguration;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
 import com.rabobank.argos.domain.layout.LayoutSegment;
+import com.rabobank.argos.domain.layout.ReleaseConfiguration;
 import com.rabobank.argos.domain.layout.Step;
 import com.rabobank.argos.domain.permission.Permission;
 import com.rabobank.argos.service.adapter.in.rest.api.handler.LayoutApi;
@@ -29,10 +30,12 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestApprovalConfigur
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestArtifactCollectorSpecification;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayout;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayoutMetaBlock;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestReleaseConfiguration;
 import com.rabobank.argos.service.domain.auditlog.AuditLog;
 import com.rabobank.argos.service.domain.auditlog.AuditParam;
 import com.rabobank.argos.service.domain.layout.ApprovalConfigurationRepository;
 import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
+import com.rabobank.argos.service.domain.layout.ReleaseConfigurationRepository;
 import com.rabobank.argos.service.domain.security.AccountSecurityContext;
 import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
 import com.rabobank.argos.service.domain.security.PermissionCheck;
@@ -71,7 +74,8 @@ public class LayoutRestService implements LayoutApi {
     private final LayoutMetaBlockRepository layoutMetaBlockRepository;
     private final LayoutValidatorService validator;
     private final ApprovalConfigurationRepository approvalConfigurationRepository;
-    private final ApprovalConfigurationMapper approvalConfigurationConverter;
+    private final ReleaseConfigurationRepository releaseConfigurationRepository;
+    private final ConfigurationMapper configurationConverter;
     private final AccountSecurityContext accountSecurityContext;
 
 
@@ -114,7 +118,7 @@ public class LayoutRestService implements LayoutApi {
                 .collect(Collectors.toList());
         approvalConfigurationRepository.saveAll(supplyChainId, approvalConfigurations);
         return ResponseEntity.ok(approvalConfigurations.stream()
-                .map(approvalConfigurationConverter::convertToRestApprovalConfiguration)
+                .map(configurationConverter::convertToRestApprovalConfiguration)
                 .collect(Collectors.toList()));
 
     }
@@ -125,7 +129,7 @@ public class LayoutRestService implements LayoutApi {
         return ResponseEntity.ok(approvalConfigurationRepository
                 .findBySupplyChainId(supplyChainId)
                 .stream()
-                .map(approvalConfigurationConverter::convertToRestApprovalConfiguration)
+                .map(configurationConverter::convertToRestApprovalConfiguration)
                 .collect(Collectors.toList()));
     }
 
@@ -142,10 +146,29 @@ public class LayoutRestService implements LayoutApi {
             String activeAccountKeyId = optionalKeyPair.get().getKeyId();
             Layout layout = optionalLayoutMetaBlock.get().getLayout();
             return ok(approvalConfigurationRepository.findBySupplyChainId(supplyChainId).stream().filter(approvalConf -> canApprove(approvalConf, activeAccountKeyId, layout)
-            ).map(approvalConfigurationConverter::convertToRestApprovalConfiguration).collect(Collectors.toList()));
+            ).map(configurationConverter::convertToRestApprovalConfiguration).collect(Collectors.toList()));
         } else {
             return ok(emptyList());
         }
+    }
+
+    @Override
+    @Transactional
+    @PermissionCheck(permissions = Permission.LAYOUT_ADD)
+    public ResponseEntity<RestReleaseConfiguration> createReleaseConfiguration(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId, RestReleaseConfiguration restReleaseConfiguration) {
+        validateContextFieldsForCollectorSpecification(restReleaseConfiguration);
+        ReleaseConfiguration releaseConfiguration = configurationConverter.convertFromRestReleaseConfiguration(restReleaseConfiguration);
+        releaseConfiguration.setSupplyChainId(supplyChainId);
+        releaseConfigurationRepository.save(releaseConfiguration);
+        return ResponseEntity.ok(restReleaseConfiguration);
+    }
+
+    @Override
+    @PermissionCheck(permissions = Permission.READ)
+    public ResponseEntity<RestReleaseConfiguration> getReleaseConfiguration(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId) {
+        return ResponseEntity.ok(releaseConfigurationRepository.findBySupplyChainId(supplyChainId)
+                .map(configurationConverter::convertToRestReleaseConfiguration)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "release configuration not found")));
     }
 
     private boolean canApprove(ApprovalConfiguration approvalConf, String activeAccountKeyId, Layout layout) {
@@ -162,13 +185,18 @@ public class LayoutRestService implements LayoutApi {
                 .forEach(this::validateContextFieldsForCollectorSpecification);
     }
 
+    private void validateContextFieldsForCollectorSpecification(RestReleaseConfiguration restReleaseConfiguration) {
+        restReleaseConfiguration.getArtifactCollectorSpecifications()
+                .forEach(this::validateContextFieldsForCollectorSpecification);
+    }
+
     private void validateContextFieldsForCollectorSpecification(RestArtifactCollectorSpecification restArtifactCollectorSpecification) {
         ContextInputValidator.of(restArtifactCollectorSpecification.getType()).validateContextFields(restArtifactCollectorSpecification);
     }
 
     private ApprovalConfiguration convertAndValidate(String supplyChainId, RestApprovalConfiguration restApprovalConfiguration) {
         validateContextFieldsForCollectorSpecification(restApprovalConfiguration);
-        ApprovalConfiguration approvalConfiguration = approvalConfigurationConverter.convertFromRestApprovalConfiguration(restApprovalConfiguration);
+        ApprovalConfiguration approvalConfiguration = configurationConverter.convertFromRestApprovalConfiguration(restApprovalConfiguration);
         approvalConfiguration.setSupplyChainId(supplyChainId);
         verifyStepNameAndSegmentNameExistInLayout(approvalConfiguration);
         return approvalConfiguration;
