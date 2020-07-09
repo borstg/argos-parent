@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.domain.release;
+package com.rabobank.argos.service.adapter.in.rest.release;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import com.rabobank.argos.domain.release.ReleaseResult;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestReleaseResult;
+import org.mapstruct.Mapper;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-@Builder
-@Getter
-@Setter
-public class ReleaseFileMetaData {
-    private String documentId;
-    private Date releaseDate;
-    private String supplyChainPath;
-    private List<Set<String>> releaseArtifacts;
+@Mapper(componentModel = "spring")
+public interface ReleaseResultMapper {
+
+    RestReleaseResult maptoRestReleaseResult(ReleaseResult releaseResult);
+
+    List<String> maptoListString(Set<String> artifactHashes);
+
 }

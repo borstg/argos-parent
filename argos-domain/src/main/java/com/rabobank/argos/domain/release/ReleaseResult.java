@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.service.domain.release;
+package com.rabobank.argos.domain.release;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
-import com.rabobank.argos.domain.link.Artifact;
-import com.rabobank.argos.domain.release.ReleaseResult;
-
-import java.util.List;
-import java.util.Set;
-
-public interface ReleaseService {
-    ReleaseResult createRelease(String supplyChainId, List<Set<Artifact>> releaseArtifacts);
+@Builder
+@Getter
+@Setter
+public class ReleaseResult {
+    private boolean releaseIsValid;
+    private ReleaseDossierMetaData releaseDossierMetaData;
 }

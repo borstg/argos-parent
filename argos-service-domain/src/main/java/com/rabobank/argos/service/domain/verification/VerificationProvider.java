@@ -53,12 +53,16 @@ public class VerificationProvider {
                         .stream()
                         .map(verification -> verification.verify(context))
                         .filter(result -> !result.isRunIsValid())
-                        .findFirst().orElse(VerificationRunResult.okay())
+                        .findFirst().orElse(VerificationRunResult
+                                .builder()
+                                .runIsValid(true)
+                                .validLinkMetaBlocks(context.getOriginalLinkMetaBlocks())
+                                .build())
                 ).collect(Collectors.toList());
 
         return verificationRunResults
                 .stream()
-                .map(verificationRunResult -> {                    
+                .map(verificationRunResult -> {
                     log.info("context validity: {}", verificationRunResult.isRunIsValid());
                     return verificationRunResult;
                 })

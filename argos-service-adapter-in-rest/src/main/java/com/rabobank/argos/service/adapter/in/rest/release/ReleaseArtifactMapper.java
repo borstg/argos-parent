@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.service.domain.release;
-
+package com.rabobank.argos.service.adapter.in.rest.release;
 
 import com.rabobank.argos.domain.link.Artifact;
-import com.rabobank.argos.domain.release.ReleaseResult;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestArtifact;
+import org.mapstruct.Mapper;
 
 import java.util.List;
 import java.util.Set;
 
-public interface ReleaseService {
-    ReleaseResult createRelease(String supplyChainId, List<Set<Artifact>> releaseArtifacts);
+@Mapper(componentModel = "spring")
+public abstract class ReleaseArtifactMapper {
+
+    abstract List<Set<Artifact>> mapToArtifacts(List<List<RestArtifact>> restArtifacts);
+
+    abstract Set<Artifact> mapToSetArtifacts(List<RestArtifact> restArtifacts);
+
 }

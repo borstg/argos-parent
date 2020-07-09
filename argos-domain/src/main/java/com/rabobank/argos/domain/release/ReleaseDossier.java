@@ -13,26 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.service.domain.verification;
+package com.rabobank.argos.domain.release;
 
+import com.rabobank.argos.domain.account.AccountType;
+import com.rabobank.argos.domain.layout.LayoutMetaBlock;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Getter
 @Builder
-public class VerificationRunResult {
-    private boolean runIsValid;
-    private final List<LinkMetaBlock> validLinkMetaBlocks;
+@Getter
+@Setter
+public class ReleaseDossier {
 
-    public static VerificationRunResult valid(boolean runIsValid) {
-        return VerificationRunResult.builder().runIsValid(runIsValid).build();
+    private List<Account> accounts;
+    private LayoutMetaBlock layoutMetaBlock;
+    private List<LinkMetaBlock> linkMetaBlocks;
 
-    }
-
-    public static VerificationRunResult okay() {
-        return valid(true);
+    @Getter
+    @Setter
+    @Builder
+    public static class Account {
+        private String id;
+        private String name;
+        private String keyId;
+        private String path;
+        private AccountType type;
     }
 }
+

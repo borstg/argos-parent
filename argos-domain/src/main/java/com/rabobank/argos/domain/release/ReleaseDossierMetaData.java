@@ -15,38 +15,20 @@
  */
 package com.rabobank.argos.domain.release;
 
-import com.rabobank.argos.domain.account.AccountType;
-import com.rabobank.argos.domain.layout.LayoutMetaBlock;
-import com.rabobank.argos.domain.link.LinkMetaBlock;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Builder
 @Getter
 @Setter
-public class ReleaseFile {
-    private String id;
+public class ReleaseDossierMetaData {
+    private String documentId;
     private Date releaseDate;
     private String supplyChainPath;
-    private List<Account> accounts;
-    private LayoutMetaBlock layoutMetaBlock;
-    private List<LinkMetaBlock> originalLinkMetaBlocks;
-
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class Account {
-        private String id;
-        private String name;
-        private String keyId;
-        private String path;
-        private AccountType type;
-    }
+    private List<Set<String>> releaseArtifacts;
 }
-
