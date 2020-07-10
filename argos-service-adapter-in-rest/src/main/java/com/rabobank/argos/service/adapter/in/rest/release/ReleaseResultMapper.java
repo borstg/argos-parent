@@ -27,6 +27,6 @@ public interface ReleaseResultMapper {
 
     RestReleaseResult maptoRestReleaseResult(ReleaseResult releaseResult);
 
-    List<String> maptoListString(Set<String> artifactHashes);
+    List<String> mapToListString(Set<String> artifactHashes);
 
 }

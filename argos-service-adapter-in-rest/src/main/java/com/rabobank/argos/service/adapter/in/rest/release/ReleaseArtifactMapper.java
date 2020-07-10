@@ -23,10 +23,10 @@ import java.util.List;
 import java.util.Set;
 
 @Mapper(componentModel = "spring")
-public abstract class ReleaseArtifactMapper {
+public interface ReleaseArtifactMapper {
 
-    abstract List<Set<Artifact>> mapToArtifacts(List<List<RestArtifact>> restArtifacts);
+    List<Set<Artifact>> mapToArtifacts(List<List<RestArtifact>> restArtifacts);
 
-    abstract Set<Artifact> mapToSetArtifacts(List<RestArtifact> restArtifacts);
+    Set<Artifact> mapToSetArtifacts(List<RestArtifact> restArtifacts);
 
 }

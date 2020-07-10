@@ -15,8 +15,11 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.release;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.mongodb.client.MongoClients;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
+import com.rabobank.argos.domain.layout.PublicKey;
 import com.rabobank.argos.domain.release.ReleaseDossier;
 import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
 import de.flapdoodle.embed.mongo.Command;
@@ -42,7 +45,6 @@ import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import org.springframework.data.mongodb.gridfs.GridFsOperations;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 import java.io.IOException;
@@ -76,8 +78,11 @@ class ReleaseRepositoryImplTestIT {
         MongoTemplate mongoTemplate = new MongoTemplate(MongoClients.create(connectionString), "test");
         MongoDbFactory factory = new SimpleMongoClientDbFactory(MongoClients.create(connectionString), "test");
         GridFsTemplate gridFsTemplate = new GridFsTemplate(factory, getDefaultMongoConverter(factory));
-        GridFsOperations gridFsOperations;
-        releaseRepository = new ReleaseRepositoryImpl(gridFsTemplate);
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(PublicKey.class, new PublicKeyJsonSerializer());
+        mapper.registerModule(module);
+        releaseRepository = new ReleaseRepositoryImpl(gridFsTemplate, mongoTemplate, mapper);
     }
 
 

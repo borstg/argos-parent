@@ -23,6 +23,7 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestReleaseResult;
 import com.rabobank.argos.service.domain.release.ReleaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,6 +41,7 @@ public class ReleaseRestService implements ReleaseApi {
     private final ReleaseResultMapper releaseResultMapper;
 
     @Override
+    @Transactional
     public ResponseEntity<RestReleaseResult> createRelease(String supplyChainId, @Valid RestReleaseArtifacts restReleaseArtifacts) {
         List<Set<Artifact>> artifacts = artifactMapper.mapToArtifacts(restReleaseArtifacts.getReleaseArtifacts());
         ReleaseResult releaseResult = releaseService.createRelease(supplyChainId, artifacts);

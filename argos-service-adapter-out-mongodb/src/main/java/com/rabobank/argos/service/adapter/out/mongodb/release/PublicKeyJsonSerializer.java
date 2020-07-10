@@ -7,13 +7,13 @@ import com.rabobank.argos.domain.layout.PublicKey;
 
 import java.io.IOException;
 
-public class PublicKeySerializer extends StdSerializer<PublicKey> {
+public class PublicKeyJsonSerializer extends StdSerializer<PublicKey> {
 
-    public PublicKeySerializer() {
+    public PublicKeyJsonSerializer() {
         this(null);
     }
 
-    public PublicKeySerializer(Class<PublicKey> t) {
+    public PublicKeyJsonSerializer(Class<PublicKey> t) {
         super(t);
     }
 

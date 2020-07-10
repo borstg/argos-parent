@@ -23,9 +23,11 @@ import com.rabobank.argos.domain.link.Artifact;
 import com.rabobank.argos.domain.release.ReleaseDossier;
 import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
 import com.rabobank.argos.domain.release.ReleaseResult;
+import com.rabobank.argos.service.domain.NotFoundException;
 import com.rabobank.argos.service.domain.account.AccountInfoRepository;
 import com.rabobank.argos.service.domain.hierarchy.HierarchyRepository;
 import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
+import com.rabobank.argos.service.domain.link.LinkMetaBlockRepository;
 import com.rabobank.argos.service.domain.verification.VerificationProvider;
 import com.rabobank.argos.service.domain.verification.VerificationRunResult;
 import lombok.RequiredArgsConstructor;
@@ -48,13 +50,16 @@ public class ReleaseServiceImpl implements ReleaseService {
     private final ReleaseRepository releaseRepository;
     private final AccountInfoRepository accountInfoRepository;
     private final HierarchyRepository hierarchyRepository;
+    private final LinkMetaBlockRepository linkMetaBlockRepository;
 
     @Override
     public ReleaseResult createRelease(String supplyChainId, List<Set<Artifact>> releaseArtifacts) {
 
+
         LayoutMetaBlock layoutMetaBlock = repository.findBySupplyChainId(supplyChainId)
-                .orElseThrow(() -> new IllegalArgumentException("Layout not found"));
+                .orElseThrow(() -> new NotFoundException("Layout not found"));
         ReleaseResult.ReleaseResultBuilder releaseBuilder = ReleaseResult.builder();
+
         List<Artifact> allArtifacts = releaseArtifacts
                 .stream()
                 .flatMap(Collection::stream)
@@ -62,12 +67,17 @@ public class ReleaseServiceImpl implements ReleaseService {
 
         VerificationRunResult verificationRunResult = verificationProvider.verifyRun(layoutMetaBlock, allArtifacts);
         releaseBuilder.releaseIsValid(verificationRunResult.isRunIsValid());
+
         if (verificationRunResult.isRunIsValid()) {
+
             ReleaseDossierMetaData releaseDossierMetaData = createAndStoreRelease(layoutMetaBlock,
                     verificationRunResult,
                     releaseArtifacts);
             releaseBuilder.releaseDossierMetaData(releaseDossierMetaData);
+            linkMetaBlockRepository.deleteBySupplyChainId(supplyChainId);
+
         }
+
         return releaseBuilder.build();
     }
 
@@ -77,7 +87,7 @@ public class ReleaseServiceImpl implements ReleaseService {
 
         String supplyChainPath = hierarchyRepository.getSubTree(layoutMetaBlock.getSupplyChainId(), HierarchyMode.NONE, 0)
                 .map(treeNode -> String.join(".", reversePath(treeNode.getPathToRoot())))
-                .orElseThrow(() -> new IllegalArgumentException("Layout not found"));
+                .orElseThrow(() -> new NotFoundException("Supplychain not found"));
 
         List<ReleaseDossier.Account> accounts = getAccounts(layoutMetaBlock);
 
