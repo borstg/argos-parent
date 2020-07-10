@@ -1,60 +1,42 @@
 {
   "create": "accounts-keyinfo",
-  "viewOn": "serviceAccounts",
+  "viewOn": "personalaccounts",
   "pipeline": [
     {
       "$facet": {
         "serviceaccounts": [
           {
-            "$lookup": {
-              "from": "hierarchy",
-              "localField": "accountId",
-              "foreignField": "referenceId",
-              "as": "joinedhierarchy"
-            }
+            "$limit": 1.0
           },
           {
             "$project": {
-              "accountId": 1.0,
-              "name": 1.0,
-              "inactiveKeys": "$inactiveKeyPairs.keyId",
-              "activeKey": {
-                "$cond": [
-                  {
-                    "$ne": [
-                      {
-                        "$ifNull": [
-                          "$activeKeyPair.keyId",
-                          ""
-                        ]
-                      },
-                      ""
-                    ]
-                  },
-                  [
-                    {
-                      "keyId": "$activeKeyPair.keyId",
-                      "status": "ACTIVE"
-                    }
-                  ],
-                  null
-                ]
-              },
-              "accountType": {
-                "$arrayElemAt": [
-                  "$joinedhierarchy.type",
-                  0.0
-                ]
-              },
-              "pathToRoot": {
-                "$arrayElemAt": [
-                  "$joinedhierarchy.pathToRoot",
-                  0.0
-                ]
-              },
+              "_id": "$$REMOVE"
+            }
+          },
+          {
+            "$lookup": {
+              "from": "service-accounts-key-info-tmp",
+              "pipeline": [
+              ],
+              "as": "joinedServiceAccounts"
+            }
+          },
+          {
+            "$unwind": "$joinedServiceAccounts"
+          },
+          {
+            "$project": {
+              "_id": "$joinedServiceAccounts._id",
+              "accountId": "$joinedServiceAccounts.accountId",
+              "name": "$joinedServiceAccounts.name",
+              "inactiveKeys": "$joinedServiceAccounts.inactiveKeys",
+              "activeKey": "$joinedServiceAccounts.activeKey",
+              "accountType": "$joinedServiceAccounts.accountType",
+              "pathToRoot": "$joinedServiceAccounts.pathToRoot",
               "_class": "com.rabobank.argos.domain.account.AccountKeyInfo"
             }
           }
+
         ],
         "personalaccounts": [
           {
@@ -189,12 +171,12 @@
     },
     {
       "$project": {
-        "_id": 1,
-        "accountId": 1,
-        "name": 1,
-        "accountType": 1,
-        "pathToRoot": 1,
-        "_class": 1,
+        "_id": 1.0,
+        "accountId": 1.0,
+        "name": 1.0,
+        "accountType": 1.0,
+        "pathToRoot": 1.0,
+        "_class": 1.0,
         "key": {
           "$filter": {
             "input": {
@@ -202,7 +184,8 @@
                 {
                   "$ifNull": [
                     "$activeKey",
-                    []
+                    [
+                    ]
                   ]
                 },
                 "$inactiveKeyInfo"
