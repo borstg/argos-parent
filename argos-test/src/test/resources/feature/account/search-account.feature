@@ -56,7 +56,7 @@ Feature: Search Account
     And param name = "default-sa1"
     When method GET
     Then status 403
-@michel
+
   Scenario: search account by name not in path should return a 200 with empty array
     * def root1 = call read('classpath:feature/label/create-label.feature') { name: 'root1'}
     * def personalAccount = defaultTestData.personalAccounts['default-pa1']
