@@ -33,16 +33,16 @@ import java.io.IOException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-class ApprovalConfigurationMapperTest {
+class ConfigurationMapperTest {
 
-    private ApprovalConfigurationMapper approvalConfigMapper;
+    private ConfigurationMapper approvalConfigMapper;
     private ObjectMapper mapper;
     private String approvalConfigJson;
 
 
     @BeforeEach
     void setup() throws IOException {
-        approvalConfigMapper = Mappers.getMapper(ApprovalConfigurationMapper.class);
+        approvalConfigMapper = Mappers.getMapper(ConfigurationMapper.class);
         mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         approvalConfigJson = IOUtils.toString(getClass().getResourceAsStream("/approval-config.json"), UTF_8);

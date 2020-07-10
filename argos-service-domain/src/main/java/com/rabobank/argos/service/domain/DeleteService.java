@@ -21,6 +21,7 @@ import com.rabobank.argos.service.domain.hierarchy.HierarchyService;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
 import com.rabobank.argos.service.domain.layout.ApprovalConfigurationRepository;
 import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
+import com.rabobank.argos.service.domain.layout.ReleaseConfigurationRepository;
 import com.rabobank.argos.service.domain.link.LinkMetaBlockRepository;
 import com.rabobank.argos.service.domain.supplychain.SupplyChainRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class DeleteService {
     private final SupplyChainRepository supplyChainRepository;
     private final HierarchyService hierarchyService;
     private final AccountService accountService;
+    private final ReleaseConfigurationRepository releaseConfigurationRepository;
 
     public void deleteLabel(String labelId) {
         hierarchyService.getSubTree(labelId, HierarchyMode.ALL, -1).ifPresent(
@@ -63,6 +65,7 @@ public class DeleteService {
         layoutRepository.deleteBySupplyChainId(supplyChainId);
         linkMetaBlockRepository.deleteBySupplyChainId(supplyChainId);
         approvalConfigurationRepository.deleteBySupplyChainId(supplyChainId);
+        releaseConfigurationRepository.deleteBySupplyChainId(supplyChainId);
         supplyChainRepository.delete(supplyChainId);
     }
 

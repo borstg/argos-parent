@@ -198,3 +198,44 @@ Feature: Layout
     Given path layoutPath+'/approvalconfig/me'
     When method GET
     Then status 403
+
+  Scenario: create release configuration should return 200
+    Given path layoutPath+'/releaseconfig'
+    * def releaseConfig = { artifactCollectorSpecifications: [{name: "xldeploy", type: "XLDEPLOY", uri: "https://localhost:8888", context: {applicationName: "appname"}}]}
+    And request releaseConfig
+    When method POST
+    Then status 200
+    And match response == releaseConfig
+
+  Scenario: create release configuration without LAYOUT_ADD permission should return 403
+    Given path layoutPath+'/releaseconfig'
+    * def releaseConfig = { artifactCollectorSpecifications: [{name: "xldeploy", type: "XLDEPLOY", uri: "https://localhost:8888", context: {applicationName: "appname"}}]}
+    * configure headers = call read('classpath:headers.js') { token: #(tokenWithoutLayoutAddPermissions)}
+    And request releaseConfig
+    When method POST
+    Then status 403
+
+  Scenario: get release configuration should return 200
+    Given path layoutPath+'/releaseconfig'
+    When method GET
+    Then status 404
+    Given path layoutPath+'/releaseconfig'
+    * def releaseConfig = { artifactCollectorSpecifications: [{name: "xldeploy", type: "XLDEPLOY", uri: "https://localhost:8888", context: {applicationName: "appname"}}]}
+    And request releaseConfig
+    When method POST
+    Then status 200
+    Given path layoutPath+'/releaseconfig'
+    When method GET
+    Then status 200
+    And match response == releaseConfig
+
+  Scenario: get release configurations with no READ permission should return a 403
+    Given path layoutPath+'/releaseconfig'
+    * def releaseConfig = { artifactCollectorSpecifications: [{name: "xldeploy", type: "XLDEPLOY", uri: "https://localhost:8888", context: {applicationName: "appname"}}]}
+    And request releaseConfig
+    When method POST
+    Then status 200
+    * configure headers = call read('classpath:headers.js') { token: #(accountWithNoReadPermissions.response.token)}
+    Given path layoutPath+'/releaseconfig'
+    When method GET
+    Then status 403

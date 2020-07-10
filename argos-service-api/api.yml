@@ -371,6 +371,61 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '500':
           $ref: '#/components/responses/Error'
+  /supplychain/{supplyChainId}/layout/releaseconfig:
+    get:
+      summary: returns release configurations for a layout
+      operationId: getReleaseConfiguration
+      tags:
+        - layout
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: supplyChainId
+          in: path
+          description: supply chain id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: release configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseConfiguration"
+        '500':
+          $ref: '#/components/responses/Error'
+    post:
+      summary: create release configurations for a layout
+      operationId: createReleaseConfiguration
+      tags:
+        - layout
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: supplyChainId
+          in: path
+          description: supply chain id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReleaseConfiguration"
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseConfiguration"
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/Error'
 
   /supplychain/{supplyChainId}/layout/approvalconfig:
     get:
@@ -1650,6 +1705,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Permission"
+    ReleaseConfiguration:
+      type: object
+      required:
+        - artifactCollectorSpecifications
+      properties:
+        artifactCollectorSpecifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArtifactCollectorSpecification"
+          minItems: 1
     ApprovalConfiguration:
       type: object
       required:
