@@ -28,6 +28,7 @@
             "$project": {
               "_id": "$joinedServiceAccounts._id",
               "accountId": "$joinedServiceAccounts.accountId",
+              "parentLabelId": "$joinedServiceAccounts.parentLabelId",
               "name": "$joinedServiceAccounts.name",
               "accountType": "$joinedServiceAccounts.accountType",
               "pathToRoot": "$joinedServiceAccounts.pathToRoot",

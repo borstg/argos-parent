@@ -98,6 +98,6 @@ class ArgosServiceTestIT {
 
     @Karate.Test()
     Karate searchAccounts() {
-        return new Karate().feature("classpath:feature/account/search-account.feature");
+        return new Karate().tags("@michel").feature("classpath:feature/account/search-account.feature");
     }
 }
