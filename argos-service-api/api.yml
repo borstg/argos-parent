@@ -1854,7 +1854,7 @@ components:
           type: string
         releaseDate:
           type: string
-          format: date
+          format: date-time
         supplyChainPath:
           type: string
         releaseArtifacts:

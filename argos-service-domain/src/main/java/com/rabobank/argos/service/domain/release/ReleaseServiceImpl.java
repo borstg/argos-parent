@@ -46,7 +46,7 @@ import static com.rabobank.argos.domain.SupplyChainHelper.reversePath;
 public class ReleaseServiceImpl implements ReleaseService {
 
     private final VerificationProvider verificationProvider;
-    private final LayoutMetaBlockRepository repository;
+    private final LayoutMetaBlockRepository layoutMetaBlockRepository;
     private final ReleaseRepository releaseRepository;
     private final AccountInfoRepository accountInfoRepository;
     private final HierarchyRepository hierarchyRepository;
@@ -55,11 +55,23 @@ public class ReleaseServiceImpl implements ReleaseService {
     @Override
     public ReleaseResult createRelease(String supplyChainId, List<Set<Artifact>> releaseArtifacts) {
 
+        String supplyChainPath = getSupplyChainPath(supplyChainId);
+        List<Set<String>> releaseArtifactHashes = convertToReleaseArtifactHashes(releaseArtifacts);
+        return releaseRepository
+                .findReleaseByReleasedArtifactsAndPath(releaseArtifactHashes, supplyChainPath)
+                .map(releaseDossierMetaData -> ReleaseResult
+                        .builder()
+                        .releaseIsValid(true)
+                        .releaseDossierMetaData(releaseDossierMetaData)
+                        .build()
+                )
+                .orElseGet(() -> verifyAndStoreRelease(supplyChainId, releaseArtifacts, supplyChainPath, releaseArtifactHashes));
+    }
 
-        LayoutMetaBlock layoutMetaBlock = repository.findBySupplyChainId(supplyChainId)
-                .orElseThrow(() -> new NotFoundException("Layout not found"));
+    private ReleaseResult verifyAndStoreRelease(String supplyChainId, List<Set<Artifact>> releaseArtifacts, String supplyChainPath, List<Set<String>> releaseArtifactHashes) {
         ReleaseResult.ReleaseResultBuilder releaseBuilder = ReleaseResult.builder();
-
+        LayoutMetaBlock layoutMetaBlock = layoutMetaBlockRepository.findBySupplyChainId(supplyChainId)
+                .orElseThrow(() -> new NotFoundException("Layout not found"));
         List<Artifact> allArtifacts = releaseArtifacts
                 .stream()
                 .flatMap(Collection::stream)
@@ -69,37 +81,26 @@ public class ReleaseServiceImpl implements ReleaseService {
         releaseBuilder.releaseIsValid(verificationRunResult.isRunIsValid());
 
         if (verificationRunResult.isRunIsValid()) {
-
-            ReleaseDossierMetaData releaseDossierMetaData = createAndStoreRelease(layoutMetaBlock,
+            ReleaseDossierMetaData releaseDossierMetaData = createAndStoreRelease(
+                    supplyChainPath,
+                    layoutMetaBlock,
                     verificationRunResult,
-                    releaseArtifacts);
+                    releaseArtifactHashes);
             releaseBuilder.releaseDossierMetaData(releaseDossierMetaData);
             linkMetaBlockRepository.deleteBySupplyChainId(supplyChainId);
-
         }
 
         return releaseBuilder.build();
     }
 
-    private ReleaseDossierMetaData createAndStoreRelease(LayoutMetaBlock layoutMetaBlock,
+    private ReleaseDossierMetaData createAndStoreRelease(String supplyChainPath, LayoutMetaBlock layoutMetaBlock,
                                                          VerificationRunResult verificationRunResult,
-                                                         List<Set<Artifact>> releaseArtifacts) {
-
-        String supplyChainPath = hierarchyRepository.getSubTree(layoutMetaBlock.getSupplyChainId(), HierarchyMode.NONE, 0)
-                .map(treeNode -> String.join(".", reversePath(treeNode.getPathToRoot())))
-                .orElseThrow(() -> new NotFoundException("Supplychain not found"));
+                                                         List<Set<String>> releaseArtifacts) {
 
         List<ReleaseDossier.Account> accounts = getAccounts(layoutMetaBlock);
 
-        List<Set<String>> releaseArtifactHashes = releaseArtifacts
-                .stream()
-                .map(s -> s.stream()
-                        .map(Artifact::getHash)
-                        .collect(Collectors.toSet()))
-                .collect(Collectors.toList());
-
         ReleaseDossierMetaData releaseDossierMetaData = ReleaseDossierMetaData.builder()
-                .releaseArtifacts(releaseArtifactHashes)
+                .releaseArtifacts(releaseArtifacts)
                 .supplyChainPath(supplyChainPath)
                 .build();
 
@@ -110,6 +111,21 @@ public class ReleaseServiceImpl implements ReleaseService {
                 .build();
         releaseRepository.storeRelease(releaseDossierMetaData, releaseDossier);
         return releaseDossierMetaData;
+    }
+
+    private List<Set<String>> convertToReleaseArtifactHashes(List<Set<Artifact>> releaseArtifacts) {
+        return releaseArtifacts
+                .stream()
+                .map(s -> s.stream()
+                        .map(Artifact::getHash)
+                        .collect(Collectors.toSet()))
+                .collect(Collectors.toList());
+    }
+
+    private String getSupplyChainPath(String supplyChainId) {
+        return hierarchyRepository.getSubTree(supplyChainId, HierarchyMode.NONE, 0)
+                .map(treeNode -> String.join(".", reversePath(treeNode.getPathToRoot())) + "." + treeNode.getName())
+                .orElseThrow(() -> new NotFoundException("Supplychain not found"));
     }
 
     private List<ReleaseDossier.Account> getAccounts(LayoutMetaBlock layoutMetaBlock) {

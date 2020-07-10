@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.client.gridfs.model.GridFSFile;
+import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.release.ReleaseDossier;
 import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
 import com.rabobank.argos.service.domain.NotFoundException;
@@ -26,11 +27,14 @@ import com.rabobank.argos.service.domain.release.ReleaseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.MongoRegexCreator;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.stereotype.Component;
@@ -39,11 +43,15 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static org.springframework.data.mongodb.core.query.MongoRegexCreator.MatchMode.STARTING_WITH;
 
 @Component
 @RequiredArgsConstructor
@@ -57,6 +65,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     private final MongoTemplate mongoTemplate;
 
+    @Autowired
     @Qualifier("releaseFileJsonMapper")
     private final ObjectMapper releaseFileJsonMapper;
 
@@ -70,23 +79,32 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
         metaData.put("releaseArtifacts", releaseDossierMetaData.getReleaseArtifacts());
         metaData.put("supplyChainPath", releaseDossierMetaData.getSupplyChainPath());
 
-        String jsonReleaseFile = releaseFileJsonMapper.writeValueAsString(releaseDossier);
-
-        InputStream inputStream = IOUtils.toInputStream(jsonReleaseFile, StandardCharsets.UTF_8);
-        String fileName = "release-" + releaseDossierMetaData.getSupplyChainPath() + "-" + releaseDate.toInstant().getEpochSecond() + ".json";
-        ObjectId objectId = gridFsTemplate.store(inputStream, fileName, "application/json", metaData);
-        releaseDossierMetaData.setDocumentId(objectId.toHexString());
-        return releaseDossierMetaData;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            releaseFileJsonMapper.writeValue(baos, releaseDossier);
+            try (InputStream inputStream = baos.toInputStream()) {
+                String fileName = "release-" + releaseDossierMetaData.getSupplyChainPath() + "-" + releaseDate.toInstant().getEpochSecond() + ".json";
+                ObjectId objectId = gridFsTemplate.store(inputStream, fileName, "application/json", metaData);
+                releaseDossierMetaData.setDocumentId(objectId.toHexString());
+                return releaseDossierMetaData;
+            }
+        }
     }
 
     @Override
-    public Optional<ReleaseDossierMetaData> findReleaseByReleasedArtifactsAndPath(List<String> releasedArtifacts, String path) {
-        Criteria criteria = Criteria.where(METADATA_RELEASE_ARTIFACTS_FIELD)
-                .elemMatch(new Criteria()
-                        .elemMatch(new Criteria()
-                                .all(releasedArtifacts)));
+    public Optional<ReleaseDossierMetaData> findReleaseByReleasedArtifactsAndPath(List<Set<String>> releasedArtifacts, String path) {
+        if (releasedArtifacts.isEmpty()) {
+            throw new ArgosError("releasedArtifacts cannot be empty", ArgosError.Level.WARNING);
+        }
+        Criteria criteria = createInitialCriteria(releasedArtifacts);
+
+        if (releasedArtifacts.size() > 1) {
+            addAdditionalReleaseArtifacts(releasedArtifacts, criteria);
+        }
+
         if (path != null) {
-            //criteria.andOperator(Criteria.where(METADATA_SUPPLY_CHAIN_PATH_FIELD).re)
+            criteria.and(METADATA_SUPPLY_CHAIN_PATH_FIELD)
+                    .regex(Objects.requireNonNull(MongoRegexCreator.INSTANCE
+                            .toRegularExpression(path, STARTING_WITH)));
         }
 
         List<Document> documents = mongoTemplate.find(new Query(criteria), Document.class, COLLECTION_NAME);
@@ -104,16 +122,40 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     }
 
+    private void addAdditionalReleaseArtifacts(List<Set<String>> releasedArtifacts, Criteria criteria) {
+        for (int i = 1; i < releasedArtifacts.size(); i++) {
+            criteria.and(METADATA_SUPPLY_CHAIN_PATH_FIELD)
+                    .elemMatch(new Criteria()
+                            .elemMatch(new Criteria()
+                                    .all(releasedArtifacts.get(i))));
+        }
+    }
+
+    private Criteria createInitialCriteria(List<Set<String>> releasedArtifacts) {
+        return Criteria.where(METADATA_RELEASE_ARTIFACTS_FIELD)
+                .elemMatch(new Criteria()
+                        .elemMatch(new Criteria()
+                                .all(releasedArtifacts.get(0))));
+    }
+
     private static Function<Document, ReleaseDossierMetaData> toMetaDataDossier() {
-        return document -> ReleaseDossierMetaData
-                .builder()
-                .documentId(document.getObjectId(ID_FIELD)
-                        .toHexString())
-                .releaseArtifacts(document.getList(METADATA_RELEASE_ARTIFACTS_FIELD,
-                        (Class<Set<String>>) (Class<?>) Set.class,
-                        Collections.emptyList()))
-                .releaseDate(document.getDate("uploadDate"))
-                .supplyChainPath(document.getString(METADATA_SUPPLY_CHAIN_PATH_FIELD)).build();
+        return document -> {
+            Document metaData = (Document) document.get("metadata");
+            List<Set<String>> releaseArtifacts = metaData
+                    .getList("releaseArtifacts", (Class<List<String>>) (Class<?>) List.class,
+                            Collections.emptyList())
+                    .stream()
+                    .map(HashSet::new)
+                    .collect(Collectors.toList());
+            return ReleaseDossierMetaData
+                    .builder()
+                    .documentId(document.getObjectId(ID_FIELD)
+                            .toHexString())
+                    .releaseArtifacts(releaseArtifacts)
+                    .releaseDate(document.getDate("uploadDate"))
+                    .supplyChainPath(metaData.getString("supplyChainPath"))
+                    .build();
+        };
     }
 
     @SneakyThrows

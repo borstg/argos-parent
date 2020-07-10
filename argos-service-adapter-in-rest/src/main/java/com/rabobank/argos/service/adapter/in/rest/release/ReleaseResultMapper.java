@@ -19,14 +19,22 @@ import com.rabobank.argos.domain.release.ReleaseResult;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestReleaseResult;
 import org.mapstruct.Mapper;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 @Mapper(componentModel = "spring")
-public interface ReleaseResultMapper {
+public abstract class ReleaseResultMapper {
 
-    RestReleaseResult maptoRestReleaseResult(ReleaseResult releaseResult);
+    abstract RestReleaseResult maptoRestReleaseResult(ReleaseResult releaseResult);
 
-    List<String> mapToListString(Set<String> artifactHashes);
+    abstract List<String> mapToListString(Set<String> artifactHashes);
+
+    OffsetDateTime mapToZonedOffsetDateTime(Date date) {
+        return date.toInstant()
+                .atOffset(ZoneOffset.UTC);
+    }
 
 }
