@@ -48,8 +48,7 @@ public interface RestMapper {
         if ( publicKey != null ) {
         	serviceAccountKeyPairBuilder
         		.keyId(KeyIdProvider.computeKeyId(publicKey))
-        		.publicKey( Arrays.copyOf( publicKey, publicKey.length ))
-        		.algorithm(KeyAlgorithm.valueOf(keyPair.getAlgorithm().name()));
+        		.publicKey( Arrays.copyOf( publicKey, publicKey.length ));
         }
         
         byte[] encryptedPrivateKey = keyPair.getEncryptedPrivateKey();

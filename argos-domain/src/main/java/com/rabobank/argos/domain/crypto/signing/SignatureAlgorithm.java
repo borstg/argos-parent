@@ -17,12 +17,11 @@ package com.rabobank.argos.domain.crypto.signing;
 
 import java.security.GeneralSecurityException;
 
-import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.crypto.HashAlgorithm;
 import com.rabobank.argos.domain.crypto.KeyAlgorithm;
 
 public enum SignatureAlgorithm {
-	SHA_384_WITH_ECDSA("SHA384withECDSA");
+	SHA_384_WITH_ECDSA("SHA384withECDSA"), SHA_256_WITH_RSA("SHA256withRSA");;
 	
 	String value;
 	
@@ -43,7 +42,8 @@ public enum SignatureAlgorithm {
     			throw new GeneralSecurityException(hashAlgorithm+" not supported");
     		}
     	} else {
-			throw new GeneralSecurityException(keyAlgorithm+" not supported");  
+    		return SHA_256_WITH_RSA;
+			//throw new GeneralSecurityException(keyAlgorithm+" not supported");  
     	}
 	}
 

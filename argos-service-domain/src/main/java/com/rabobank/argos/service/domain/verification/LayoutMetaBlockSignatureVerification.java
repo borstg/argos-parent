@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.Optional;
@@ -80,7 +81,7 @@ public class LayoutMetaBlockSignatureVerification implements Verification {
                 .map(t -> {
 					try {
 						return t.getJavaPublicKey();
-					} catch (GeneralSecurityException e) {
+					} catch (GeneralSecurityException | IOException e) {
 						log.error(e.getMessage());
 						return null;
 					}

@@ -17,19 +17,27 @@ package com.rabobank.argos.domain.crypto;
 
 import lombok.AllArgsConstructor;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 
 import static lombok.AccessLevel.PRIVATE;
 
 @AllArgsConstructor(access = PRIVATE)
 public class PublicKeyFactory {
 
-    public static PublicKey instance(byte[] encodedKey, KeyAlgorithm algorithm) throws GeneralSecurityException {
+    public static PublicKey instance(byte[] encodedKey) throws GeneralSecurityException, IOException {
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(encodedKey);
-        KeyFactory keyFactory = KeyFactory.getInstance(algorithm.name());
+        KeyFactory keyFactory = null;
+        try (ASN1InputStream aIn = new ASN1InputStream(encodedKey)) {
+        	SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(aIn.readObject());
+        	keyFactory = KeyFactory.getInstance(info.getAlgorithm().getAlgorithm().getId(), "BC");
+        }
         return keyFactory.generatePublic(x509EncodedKeySpec);
     }
 }

@@ -15,7 +15,6 @@
  */
 package com.rabobank.argos.service.adapter.in.rest;
 
-import com.rabobank.argos.domain.crypto.KeyAlgorithm;
 import com.rabobank.argos.domain.crypto.KeyPair;
 import com.rabobank.argos.domain.crypto.PublicKeyFactory;
 import com.rabobank.argos.domain.crypto.Signature;
@@ -29,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.Base64;
@@ -66,15 +66,14 @@ class SignatureValidatorServiceTest {
     private PublicKey publicKey;
 
     @BeforeEach
-    void setUp() throws GeneralSecurityException {
-    	publicKey = PublicKeyFactory.instance(key, KeyAlgorithm.EC);
+    void setUp() throws GeneralSecurityException, IOException {
+    	publicKey = PublicKeyFactory.instance(key);
         service = new SignatureValidatorService(signatureValidator, accountService);
     }
 
     @Test
     void validateSignature() throws GeneralSecurityException {
         when(keyPair.getPublicKey()).thenReturn(key);
-        when(keyPair.getAlgorithm()).thenReturn(KeyAlgorithm.EC);
         when(accountService.findKeyPairByKeyId(KEY_ID)).thenReturn(Optional.of(keyPair));
         when(signature.getKeyId()).thenReturn(KEY_ID);
 
@@ -85,7 +84,6 @@ class SignatureValidatorServiceTest {
     @Test
     void createInValidSignature() throws GeneralSecurityException {
         when(keyPair.getPublicKey()).thenReturn(key);
-        when(keyPair.getAlgorithm()).thenReturn(KeyAlgorithm.EC);
         when(accountService.findKeyPairByKeyId(KEY_ID)).thenReturn(Optional.of(keyPair));
         when(signature.getKeyId()).thenReturn(KEY_ID);
 

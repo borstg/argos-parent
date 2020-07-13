@@ -36,8 +36,8 @@ public class ServiceAccountKeyPair extends KeyPair {
     private String encryptedHashedKeyPassphrase;
     
     @Builder
-    public ServiceAccountKeyPair(String keyId, byte[] publicKey, KeyAlgorithm algorithm, byte[] encryptedPrivateKey, String encryptedHashedKeyPassphrase) {
-    	super(keyId, publicKey, algorithm, encryptedPrivateKey);
+    public ServiceAccountKeyPair(String keyId, byte[] publicKey, byte[] encryptedPrivateKey, String encryptedHashedKeyPassphrase) {
+    	super(keyId, publicKey, encryptedPrivateKey);
         this.encryptedHashedKeyPassphrase = encryptedHashedKeyPassphrase;
     }
     

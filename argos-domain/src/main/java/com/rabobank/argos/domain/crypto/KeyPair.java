@@ -29,11 +29,9 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.spec.ECGenParameterSpec;
 
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
@@ -57,8 +55,8 @@ import com.rabobank.argos.domain.ArgosError;
 public class KeyPair extends PublicKey implements Serializable {
     private byte[] encryptedPrivateKey;
     
-    public KeyPair(String keyId, byte[] publicKey, KeyAlgorithm algorithm, byte[] encryptedPrivateKey) {
-    	super(keyId, publicKey, algorithm);
+    public KeyPair(String keyId, byte[] publicKey, byte[] encryptedPrivateKey) {
+    	super(keyId, publicKey);
         this.encryptedPrivateKey = encryptedPrivateKey;
     }
 
@@ -85,7 +83,7 @@ public class KeyPair extends PublicKey implements Serializable {
     }
     
 	public static KeyPair createKeyPair(char[] passphrase) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, OperatorCreationException, PemGenerationException {
-		KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
+		KeyPairGenerator generator = KeyPairGenerator.getInstance(KeyAlgorithm.EC.name());
         generator.initialize(new ECGenParameterSpec("secp256r1"));
 		java.security.KeyPair keyPair = generator.generateKeyPair();
         JceOpenSSLPKCS8EncryptorBuilder encryptorBuilder = new JceOpenSSLPKCS8EncryptorBuilder(PKCS8Generator.AES_256_CBC).setProvider("BC");  
@@ -96,6 +94,6 @@ public class KeyPair extends PublicKey implements Serializable {
         JcaPKCS8Generator gen2 = new JcaPKCS8Generator(keyPair.getPrivate(), encryptor);  
         PemObject obj2 = gen2.generate();
         return new KeyPair(KeyIdProvider.computeKeyId(keyPair.getPublic()), 
-        		keyPair.getPublic().getEncoded(), KeyAlgorithm.EC, obj2.getContent());
+        		keyPair.getPublic().getEncoded(), obj2.getContent());
 	}
 }

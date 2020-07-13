@@ -302,7 +302,7 @@ Feature: Personal Account
     Given path '/api/personalaccount/'+defaultTestData.personalAccounts['default-pa1'].accountId+'/key'
     When method GET
     Then status 200
-    Then match response == {keyId: #(defaultTestData.personalAccounts['default-pa1'].keyId), publicKey: #(defaultTestData.personalAccounts['default-pa1'].publicKey), algorithm: #(defaultTestData.personalAccounts['default-pa1'].algorithm)}
+    Then match response == {keyId: #(defaultTestData.personalAccounts['default-pa1'].keyId), publicKey: #(defaultTestData.personalAccounts['default-pa1'].publicKey)}
 
   Scenario: search personal account without PERSONAL_ACCOUNT_READ should return a 403
     * def extraAccount = call read('classpath:feature/account/create-personal-account.feature') {name: 'Extra Person', email: 'extra@extra.go'}

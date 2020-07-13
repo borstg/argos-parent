@@ -19,7 +19,6 @@ package com.rabobank.argos.test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabobank.argos.argos4j.rest.api.client.PersonalAccountApi;
 import com.rabobank.argos.argos4j.rest.api.client.ServiceAccountApi;
-import com.rabobank.argos.argos4j.rest.api.model.RestKeyAlgorithm;
 import com.rabobank.argos.argos4j.rest.api.model.RestKeyPair;
 import com.rabobank.argos.argos4j.rest.api.model.RestLabel;
 import com.rabobank.argos.argos4j.rest.api.model.RestLayoutMetaBlock;
@@ -27,7 +26,6 @@ import com.rabobank.argos.argos4j.rest.api.model.RestPersonalAccount;
 import com.rabobank.argos.argos4j.rest.api.model.RestServiceAccount;
 import com.rabobank.argos.argos4j.rest.api.model.RestServiceAccountKeyPair;
 import com.rabobank.argos.domain.ArgosError;
-import com.rabobank.argos.domain.crypto.KeyAlgorithm;
 import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.test.rest.api.ApiClient;
 import com.rabobank.argos.test.rest.api.client.IntegrationTestServiceApi;
@@ -93,8 +91,7 @@ class TestServiceHelper {
         getPersonalAccountApi(defaultUser1Token).createKey(new RestKeyPair()
                 .encryptedPrivateKey(keyPair.getEncryptedPrivateKey())
                 .publicKey(keyPair.getPublicKey())
-                .keyId(keyPair.getKeyId())
-                .algorithm(RestKeyAlgorithm.EC));
+                .keyId(keyPair.getKeyId()));
 
         defaultTestData.getPersonalAccounts().put("default-pa1", DefaultTestData.PersonalAccount.builder()
                 .passphrase(keyPair.getPassphrase())
@@ -102,7 +99,6 @@ class TestServiceHelper {
                 .accountId(defaultUser1.getId())
                 .token(defaultUser1Token)
                 .publicKey(keyPair.getPublicKey())
-                .algorithm(RestKeyAlgorithm.EC)
                 .build());
 
         String defaultUser2Token = getToken(DEFAULT_USER_2, "User2", "default2@nl.nl");
@@ -132,15 +128,13 @@ class TestServiceHelper {
                 		.keyId(keyPair.getKeyId())
                         .hashedKeyPassphrase(hashedKeyPassphrase)
                         .encryptedPrivateKey(keyPair.getEncryptedPrivateKey())
-                        .publicKey(keyPair.getPublicKey())
-                        .algorithm(RestKeyAlgorithm.EC));
+                        .publicKey(keyPair.getPublicKey()));
         defaultTestData.getServiceAccount().put(name,
                 DefaultTestData.ServiceAccount.builder()
                         .passphrase(keyPair.getPassphrase())
                         .keyId(keyPair.getKeyId())
                         .hashedKeyPassphrase(hashedKeyPassphrase)
                         .publicKey(keyPair.getPublicKey())
-                        .algorithm(RestKeyAlgorithm.EC)
                         .build());
     }
 
@@ -158,7 +152,6 @@ class TestServiceHelper {
     private static class TestDateKeyPair {
         private String keyId;
         private byte[] publicKey;
-        private KeyAlgorithm algorithm;
         private String passphrase;
         private byte[] encryptedPrivateKey;
     }

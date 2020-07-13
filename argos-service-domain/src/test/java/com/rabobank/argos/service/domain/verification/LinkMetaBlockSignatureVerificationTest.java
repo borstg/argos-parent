@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.Collections;
@@ -81,14 +82,14 @@ class LinkMetaBlockSignatureVerificationTest {
     }
 
     @Test
-    void verifyOkay() throws GeneralSecurityException {
+    void verifyOkay() throws GeneralSecurityException, IOException {
         mockSetup(true);
         assertThat(verification.verify(context).isRunIsValid(), is(true));
         verify(context).removeLinkMetaBlocks(Collections.emptyList());
     }
 
     @Test
-    void verifyNotValid() throws GeneralSecurityException {
+    void verifyNotValid() throws GeneralSecurityException, IOException {
         mockSetup(false);
         assertThat(verification.verify(context).isRunIsValid(), is(true));
         verify(context).removeLinkMetaBlocks(List.of(linkMetaBlock));
@@ -106,7 +107,7 @@ class LinkMetaBlockSignatureVerificationTest {
         verify(context).removeLinkMetaBlocks(List.of(linkMetaBlock));
     }
 
-    private void mockSetup(boolean valid) throws GeneralSecurityException {
+    private void mockSetup(boolean valid) throws GeneralSecurityException, IOException {
         when(context.getLinkMetaBlocks()).thenReturn(List.of(linkMetaBlock));
         when(linkMetaBlock.getLink()).thenReturn(link);
         when(linkMetaBlock.getSignature()).thenReturn(signature);

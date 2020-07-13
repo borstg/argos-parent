@@ -142,7 +142,6 @@ public class TestITService implements IntegrationTestServiceApi {
         return ResponseEntity.ok(new RestKeyPair()
         		.keyId(keyPair.getKeyId())
         		.publicKey(keyPair.getPublicKey())
-        		.algorithm(RestKeyAlgorithm.valueOf(keyPair.getAlgorithm().name()))
         		.encryptedPrivateKey(keyPair.getEncryptedPrivateKey()));
     }
 

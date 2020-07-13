@@ -64,7 +64,7 @@ class JsonSigningSerializerTest {
     void serializeLayout() throws IOException, GeneralSecurityException {
     	
     	Layout layout = Layout.builder()
-                .keys(Arrays.asList(new PublicKey("keyId", Base64.getDecoder().decode(PUBLIC_KEY), KeyAlgorithm.EC)))
+                .keys(Arrays.asList(new PublicKey("keyId", Base64.getDecoder().decode(PUBLIC_KEY))))
                 .expectedEndProducts(singletonList(MatchRule.builder()
                         .destinationSegmentName("destinationSegmentName")
                         .destinationType(ArtifactType.PRODUCTS)

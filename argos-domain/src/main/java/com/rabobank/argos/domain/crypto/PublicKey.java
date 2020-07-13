@@ -15,6 +15,7 @@
  */
 package com.rabobank.argos.domain.crypto;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Security;
 
@@ -32,20 +33,18 @@ import lombok.Setter;
 public class PublicKey {
     private String keyId;
     private byte[] publicKey;
-    private KeyAlgorithm algorithm;
 
     static {
         Security.addProvider(new BouncyCastleProvider());
     }
     
-    public PublicKey(String keyId, byte[] publicKey, KeyAlgorithm algorithm) {
+    public PublicKey(String keyId, byte[] publicKey) {
         this.keyId = keyId;
         this.publicKey = publicKey;
-        this.algorithm = algorithm;
     }
     
     @JsonIgnore
-    public java.security.PublicKey getJavaPublicKey() throws GeneralSecurityException {
-    	return PublicKeyFactory.instance(publicKey, algorithm);
+    public java.security.PublicKey getJavaPublicKey() throws GeneralSecurityException, IOException {
+    	return PublicKeyFactory.instance(publicKey);
     }
 }

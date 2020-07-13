@@ -119,9 +119,9 @@ class VerificationTest {
     	bobKey = KeyPair.createKeyPair(PASSWORD);
         aliceKey = KeyPair.createKeyPair(PASSWORD);
         carlKey = KeyPair.createKeyPair(PASSWORD);
-        bobPublicKey = new PublicKey(bobKey.getKeyId(), bobKey.getPublicKey(), bobKey.getAlgorithm());
-        alicePublicKey = new PublicKey(aliceKey.getKeyId(), aliceKey.getPublicKey(), aliceKey.getAlgorithm());
-        carlPublicKey = new PublicKey(carlKey.getKeyId(), carlKey.getPublicKey(), carlKey.getAlgorithm());
+        bobPublicKey = new PublicKey(bobKey.getKeyId(), bobKey.getPublicKey());
+        alicePublicKey = new PublicKey(aliceKey.getKeyId(), aliceKey.getPublicKey());
+        carlPublicKey = new PublicKey(carlKey.getKeyId(), carlKey.getPublicKey());
         rulesVerification = new RulesVerification(List.of(
                 new AllowRuleVerification(), 
                 new CreateRuleVerification(),

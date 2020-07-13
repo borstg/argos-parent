@@ -1,7 +1,6 @@
 {
   "keyId": "dd39eed990878d0709b8878a2f2bcd784447d4d91e0feb53265334ddde8787bc",
   "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEqHsyNGY1arbgIE5UbDS+pxx/w4TEidM412h8jt9mEGJENyMThkN+6FqVsqGCpovczcqSguPC1ZqAz8b8lBz3sQ==",
-  "algorithm": "EC",
   "encryptedPrivateKey": "MIGpMFUGCSqGSIb3DQEFDTBIMCcGCSqGSIb3DQEFDDAaBBSFmK58OaSAA0nAPSvctsnXbqfffwICCAAwHQYJYIZIAWUDBAEqBBCbyJiw73pqZ39DToS3cWlYBFCdzViZz+ntkR9AAuygP10rHNyT4FyDXdQp1/tvtCq6kfyN4x5IvM8hFNoV4rR8dgtbewkTi6a942/dsavnXzVYycDplD8UYAxNoMo8ib8AYw==",
   "passphrase": "test"
 }

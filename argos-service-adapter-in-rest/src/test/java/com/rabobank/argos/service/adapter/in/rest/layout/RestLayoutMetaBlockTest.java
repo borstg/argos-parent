@@ -75,7 +75,6 @@ class RestLayoutMetaBlockTest {
                 "layout.expectedEndProducts[0].destinationStepName", "must not be null",
                 "layout.expectedEndProducts[0].destinationType", "must not be null",
                 "layout.expectedEndProducts[0].pattern", "must not be null",
-                "layout.keys[0].algorithm", "must not be null",
                 "layout.keys[0].keyId", "must not be null",
                 "layout.keys[0].publicKey", "must not be null",
                 "layout.layoutSegments[0].name", "must not be null",
@@ -104,7 +103,6 @@ class RestLayoutMetaBlockTest {
                                 .name("segment1")
                                 .addStepsItem(new RestStep())
                         ))), contains(expectedErrors(
-                "layout.keys[0].algorithm", "must not be null",
                 "layout.keys[0].keyId", "must match \"^[0-9a-f]*$\"",
                 "layout.keys[0].keyId", "size must be between 64 and 64",
                 "layout.layoutSegments[0].steps[0].authorizedKeyIds", "size must be between 1 and 2147483647",
@@ -125,7 +123,6 @@ class RestLayoutMetaBlockTest {
                         .addKeysItem(new RestPublicKey()
                                 .keyId("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254")
                                 .publicKey(new byte[]{1})
-                                .algorithm(RestKeyAlgorithm.EC)
                         ).addLayoutSegmentsItem(new RestLayoutSegment()
                                 .name("segment 1")
                                 .addStepsItem(new RestStep()
@@ -157,7 +154,6 @@ class RestLayoutMetaBlockTest {
                         .addKeysItem(new RestPublicKey()
                                 .keyId("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254")
                                 .publicKey(new byte[]{1})
-                                .algorithm(RestKeyAlgorithm.EC)
                         ).addLayoutSegmentsItem(new RestLayoutSegment()
                                 .name("segment1")
                                 .addStepsItem(new RestStep()

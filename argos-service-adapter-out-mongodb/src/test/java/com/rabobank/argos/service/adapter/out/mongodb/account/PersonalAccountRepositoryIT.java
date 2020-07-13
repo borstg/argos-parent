@@ -53,17 +53,17 @@ class PersonalAccountRepositoryIT {
 
     private static final String PIETJE = "Pietje";
     private static final PersonalAccount PIETJE_ACCOUNT = PersonalAccount.builder().name(PIETJE).email("pietje@piet.nl")
-            .activeKeyPair(new KeyPair("keyId1", null, null, null))
+            .activeKeyPair(new KeyPair("keyId1", null, null))
             .inactiveKeyPairs(List.of(
-                    new KeyPair("keyId2", null, null, null),
-                    new KeyPair("keyId3", null, null, null))).build();
+                    new KeyPair("keyId2", null, null),
+                    new KeyPair("keyId3", null, null))).build();
     private static final String KLAASJE = "Klaasje";
     private static final PersonalAccount KLAASJE_ACCOUNT = PersonalAccount.builder()
     		.name(KLAASJE).email("klaasje@klaas.nl")
-            .activeKeyPair(new KeyPair("keyId4", null, null, null))
+            .activeKeyPair(new KeyPair("keyId4", null, null))
             .inactiveKeyPairs(
-            		List.of(new KeyPair("keyId5", null, null, null),
-                    new KeyPair("keyId6", null, null, null)))
+            		List.of(new KeyPair("keyId5", null, null),
+                    new KeyPair("keyId6", null, null)))
             .build();
     private MongodExecutable mongodExecutable;
     private PersonalAccountRepository personalAccountRepository;

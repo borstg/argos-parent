@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.Collections;
@@ -74,7 +75,7 @@ class LayoutMetaBlockSignatureVerificationTest {
     }
 
     @Test
-    void verifyOkay() throws GeneralSecurityException {
+    void verifyOkay() throws GeneralSecurityException, IOException {
         when(domainPublicKey.getKeyId()).thenReturn(KEY_ID);
         when(domainPublicKey.getJavaPublicKey()).thenReturn(publicKey);
         mockSetup(true);
@@ -82,7 +83,7 @@ class LayoutMetaBlockSignatureVerificationTest {
     }
 
     @Test
-    void verifyNotOkay() throws GeneralSecurityException {
+    void verifyNotOkay() throws GeneralSecurityException, IOException {
         when(domainPublicKey.getKeyId()).thenReturn(KEY_ID);
         when(domainPublicKey.getJavaPublicKey()).thenReturn(publicKey);
         mockSetup(false);

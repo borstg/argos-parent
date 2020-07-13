@@ -15,7 +15,6 @@
  */
 package com.rabobank.argos.service.adapter.in.rest;
 
-import com.rabobank.argos.domain.crypto.KeyAlgorithm;
 import com.rabobank.argos.domain.crypto.KeyPair;
 import com.rabobank.argos.domain.crypto.PublicKeyFactory;
 import com.rabobank.argos.domain.crypto.Signature;
@@ -25,6 +24,7 @@ import com.rabobank.argos.domain.link.Link;
 import com.rabobank.argos.service.domain.account.AccountService;
 import lombok.RequiredArgsConstructor;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
@@ -45,7 +45,7 @@ public class SignatureValidatorService {
 			if (!signatureValidator.isValid(layout, signature, getPublicKey(signature))) {
 			    throwInValidSignatureException();
 			}
-		} catch (GeneralSecurityException e) {
+		} catch (GeneralSecurityException | IOException e) {
 		    throwInValidSignatureException();
 		}
     }
@@ -55,7 +55,7 @@ public class SignatureValidatorService {
 			if (!signatureValidator.isValid(link, signature, getPublicKey(signature))) {
 			    throwInValidSignatureException();
 			}
-		} catch (GeneralSecurityException e) {
+		} catch (GeneralSecurityException | IOException e) {
 		    throwInValidSignatureException();
 		}
     }
@@ -64,9 +64,9 @@ public class SignatureValidatorService {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid signature");
     }
 
-    private PublicKey getPublicKey(Signature signature) throws GeneralSecurityException {
+    private PublicKey getPublicKey(Signature signature) throws GeneralSecurityException, IOException {
     	KeyPair keyPair = accountService.findKeyPairByKeyId(signature.getKeyId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "signature with keyId " + signature.getKeyId() + " not found"));
-    	return PublicKeyFactory.instance(keyPair.getPublicKey(), keyPair.getAlgorithm());
+    	return PublicKeyFactory.instance(keyPair.getPublicKey());
     }
 
 }

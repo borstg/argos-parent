@@ -2,13 +2,11 @@
   "keys": [
     {
       "keyId": "wrong-data-input",
-      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEAT4JQbpgycBCP2ZN/ZVIffX1vYi2VYwC9lwhqVbGxRH3CL4mLckS/XnArlopIqNtm9RB88/K+RkOEXGWkU62iw==",
-      "algorithm": "EC"
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEAT4JQbpgycBCP2ZN/ZVIffX1vYi2VYwC9lwhqVbGxRH3CL4mLckS/XnArlopIqNtm9RB88/K+RkOEXGWkU62iw=="
     },
     {
       "keyId": "dd39eed990878d0709b8878a2f2bcd784447d4d91e0feb53265334ddde8787bc",
-      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEAT4JQbpgycBCP2ZN/ZVIffX1vYi2VYwC9lwhqVbGxRH3CL4mLckS/XnArlopIqNtm9RB88/K+RkOEXGWkU62iw==",
-      "algorithm": "EC"
+      "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEAT4JQbpgycBCP2ZN/ZVIffX1vYi2VYwC9lwhqVbGxRH3CL4mLckS/XnArlopIqNtm9RB88/K+RkOEXGWkU62iw=="
     }
   ],
   "authorizedKeyIds": [

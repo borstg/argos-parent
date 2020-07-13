@@ -56,7 +56,7 @@ class ServiceAccountAuthenticationProviderTest {
     private ServiceAccountAuthenticationProvider serviceAccountAuthenticationProvider;
     private AccountUserDetailsAdapter userDetails = new AccountUserDetailsAdapter(ServiceAccount.builder()
             .name("test")
-            .activeKeyPair(new ServiceAccountKeyPair(KEYID, null, null, null, ENCRYPTEDPASSWORD))
+            .activeKeyPair(new ServiceAccountKeyPair(KEYID, null, null, ENCRYPTEDPASSWORD))
             .build());
 
     @BeforeEach

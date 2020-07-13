@@ -22,7 +22,6 @@ import com.rabobank.argos.argos4j.LinkBuilder;
 import com.rabobank.argos.argos4j.LinkBuilderSettings;
 import com.rabobank.argos.argos4j.LocalFileCollector;
 import com.rabobank.argos.argos4j.VerifyBuilder;
-import com.rabobank.argos.argos4j.rest.api.model.RestKeyAlgorithm;
 import com.rabobank.argos.argos4j.rest.api.model.RestLabel;
 import com.rabobank.argos.argos4j.rest.api.model.RestLayout;
 import com.rabobank.argos.argos4j.rest.api.model.RestLayoutMetaBlock;
@@ -111,12 +110,10 @@ class Argos4jIT {
         return new RestLayout()
                 .addKeysItem(new RestPublicKey()
                 		.keyId(personalAccount.getKeyId())
-                		.publicKey(personalAccount.getPublicKey())
-                		.algorithm(RestKeyAlgorithm.EC))
+                		.publicKey(personalAccount.getPublicKey()))
                 .addKeysItem(new RestPublicKey()
                 		.keyId(serviceAccount.getKeyId())
-                		.publicKey(serviceAccount.getPublicKey())
-                		.algorithm(RestKeyAlgorithm.EC))
+                		.publicKey(serviceAccount.getPublicKey()))
                 .addAuthorizedKeyIdsItem(personalAccount.getKeyId())
                 .addExpectedEndProductsItem(new RestMatchRule()
                         .destinationSegmentName("layoutSegmentName")

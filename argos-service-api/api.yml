@@ -1327,21 +1327,17 @@ components:
       required:
         - keyId
         - publicKey
-        - algorithm
       properties:
         keyId:
           $ref: '#/components/schemas/KeyId'
         publicKey:
           type: string
           format: byte
-        algorithm:
-          $ref: '#/components/schemas/KeyAlgorithm'
     KeyPair:
       type: object
       required:
         - keyId
         - publicKey
-        - algorithm
         - encryptedPrivateKey
       properties:
         keyId:
@@ -1349,8 +1345,6 @@ components:
         publicKey:
           type: string
           format: byte
-        algorithm:
-          $ref: '#/components/schemas/KeyAlgorithm'
         encryptedPrivateKey:
           type: string
           format: byte
@@ -1359,7 +1353,6 @@ components:
       required:
         - keyId
         - publicKey
-        - algorithm
         - encryptedPrivateKey
         - hashedKeyPassphrase
       properties:
@@ -1368,8 +1361,6 @@ components:
         publicKey:
           type: string
           format: byte
-        algorithm:
-          $ref: '#/components/schemas/KeyAlgorithm'
         encryptedPrivateKey:
           type: string
           format: byte

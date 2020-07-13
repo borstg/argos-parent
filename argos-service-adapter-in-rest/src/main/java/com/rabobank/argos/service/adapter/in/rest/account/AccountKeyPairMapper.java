@@ -15,17 +15,12 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.account;
 
-import com.rabobank.argos.domain.crypto.KeyAlgorithm;
-import com.rabobank.argos.domain.crypto.KeyIdProvider;
 import com.rabobank.argos.domain.crypto.KeyPair;
 import com.rabobank.argos.domain.crypto.PublicKey;
 import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
-import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair.ServiceAccountKeyPairBuilder;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestKeyPair;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestPublicKey;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestServiceAccountKeyPair;
-
-import java.util.Arrays;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -41,34 +36,6 @@ public abstract class AccountKeyPairMapper {
 
     @Mapping(source = "hashedKeyPassphrase", target = "encryptedHashedKeyPassphrase", qualifiedByName = "encryptHashedKeyPassphrase")
     public abstract ServiceAccountKeyPair convertFromRestKeyPair(RestServiceAccountKeyPair keyPair);
-    /*
-        if ( keyPair == null ) {
-            return null;
-        }
-
-        ServiceAccountKeyPairBuilder serviceAccountKeyPairBuilder = ServiceAccountKeyPair.builder();
-
-        byte[] publicKey = keyPair.getPublicKey();
-        if ( publicKey != null ) {
-        	serviceAccountKeyPairBuilder
-        		.keyId(KeyIdProvider.computeKeyId(publicKey))
-        		.publicKey( Arrays.copyOf( publicKey, publicKey.length ))
-        		.algorithm(KeyAlgorithm.valueOf(keyPair.getAlgorithm().name()));
-        }
-        
-        byte[] encryptedPrivateKey = keyPair.getEncryptedPrivateKey();
-        if ( encryptedPrivateKey != null ) {
-        	serviceAccountKeyPairBuilder
-        		.encryptedPrivateKey( Arrays.copyOf( encryptedPrivateKey, encryptedPrivateKey.length ));
-        }
-        
-        String hashedKeyPassphrase = keyPair.getHashedKeyPassphrase();
-        if (hashedKeyPassphrase != null) {
-        	serviceAccountKeyPairBuilder.encryptedHashedKeyPassphrase(encryptedHashedKeyPassphrase);
-        }
-
-        return serviceAccountKeyPairBuilder.build();
-    }*/
 
     public abstract RestServiceAccountKeyPair convertToRestKeyPair(ServiceAccountKeyPair keyPair);
 
@@ -78,7 +45,6 @@ public abstract class AccountKeyPairMapper {
 
     @Mapping(source = "keyId", target = "keyId")
     @Mapping(source = "publicKey", target = "publicKey")
-    @Mapping(source = "algorithm", target = "algorithm")
     public abstract RestPublicKey convertToRestPublicKey(KeyPair keyPair);
     
     @Mapping(source = "keyId", target = "keyId")

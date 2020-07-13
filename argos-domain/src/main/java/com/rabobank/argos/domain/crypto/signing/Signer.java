@@ -24,7 +24,6 @@ import org.apache.commons.codec.binary.Hex;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
-import java.security.Security;
 
 public class Signer {
     

@@ -29,6 +29,8 @@ import java.util.Optional;
 import static com.rabobank.argos.service.domain.verification.Verification.Priority.LINK_METABLOCK_SIGNATURE;
 import static java.util.stream.Collectors.toList;
 
+import java.io.IOException;
+
 
 @Component
 @RequiredArgsConstructor
@@ -64,7 +66,7 @@ public class LinkMetaBlockSignatureVerification implements Verification {
         return keyOptional.map(t -> {
 			try {
 				return t.getJavaPublicKey();
-			} catch (GeneralSecurityException e) {
+			} catch (GeneralSecurityException | IOException e) {
 				log.error(e.getMessage());
 				return null;
 			}
