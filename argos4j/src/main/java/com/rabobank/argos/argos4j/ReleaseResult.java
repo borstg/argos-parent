@@ -15,15 +15,11 @@
  */
 package com.rabobank.argos.argos4j;
 
-import com.rabobank.argos.domain.link.Artifact;
+import lombok.Builder;
+import lombok.Getter;
 
-import java.util.List;
-
-public interface ArtifactListBuilder {
-
-	void addFileCollector(FileCollector collector);
-
-	List<Artifact> collect();
-
-	List<List<Artifact>> collectAsArtifactLists();
+@Builder
+@Getter
+public class ReleaseResult {
+    private boolean isValid;
 }

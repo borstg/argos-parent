@@ -42,7 +42,7 @@ public class ServiceAccountKeyPair extends KeyPair {
     }
     
     public static String calculateHashedPassphrase(String keyId, String passphrase) {
-        MessageDigest md = null;
+        MessageDigest md;
         try {
             md = MessageDigest.getInstance(HashAlgorithm.SHA512.getStringValue());
         } catch (NoSuchAlgorithmException e) {

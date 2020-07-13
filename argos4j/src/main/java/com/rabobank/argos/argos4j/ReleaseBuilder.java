@@ -15,15 +15,9 @@
  */
 package com.rabobank.argos.argos4j;
 
-import com.rabobank.argos.domain.link.Artifact;
+public interface ReleaseBuilder {
 
-import java.util.List;
+    ReleaseBuilder addFileCollector(FileCollector collector);
 
-public interface ArtifactListBuilder {
-
-	void addFileCollector(FileCollector collector);
-
-	List<Artifact> collect();
-
-	List<List<Artifact>> collectAsArtifactLists();
+    ReleaseResult release(char[] keyPassphrase);
 }

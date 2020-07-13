@@ -36,4 +36,6 @@ public interface RestMapper {
     RestLinkMetaBlock convertToRestLinkMetaBlock(LinkMetaBlock metaBlock);
 
     List<RestArtifact> convertToRestArtifacts(List<Artifact> artifacts);
+
+    List<List<RestArtifact>> convertToRestArtifactsList(List<List<Artifact>> artifactsList);
 }
