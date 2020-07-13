@@ -15,15 +15,55 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.release;
 
+import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
+import com.rabobank.argos.domain.release.ReleaseResult;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestReleaseResult;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+
+import java.time.Instant;
+import java.util.Collections;
+import java.util.Date;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 class ReleaseResultMapperTest {
+    protected static final String DOCUMENT_ID = "id";
+    protected static final String PATH = "path";
+    protected static final String HASH = "hash";
+    protected static final String RELEASE_DATE_TIME = "2020-07-30T18:35:24.00Z";
+    private ReleaseResultMapper releaseResultMapper;
+
+    @BeforeEach
+    void setUp() {
+        releaseResultMapper = Mappers.getMapper(ReleaseResultMapper.class);
+
+    }
 
     @Test
     void maptoRestReleaseResult() {
+        ReleaseResult releaseResult = ReleaseResult
+                .builder()
+                .releaseIsValid(true)
+                .releaseDossierMetaData(ReleaseDossierMetaData
+                        .builder()
+                        .releaseDate(Date.from(Instant.parse(RELEASE_DATE_TIME)))
+                        .documentId(DOCUMENT_ID)
+                        .releaseArtifacts(Collections
+                                .singletonList(Collections
+                                        .singleton(HASH)))
+                        .supplyChainPath(PATH)
+                        .build())
+                .build();
+
+        RestReleaseResult restReleaseResult = releaseResultMapper.maptoRestReleaseResult(releaseResult);
+        assertThat(restReleaseResult.getReleaseIsValid(), is(true));
+        assertThat(restReleaseResult.getReleaseDossierMetaData().getDocumentId(), is(DOCUMENT_ID));
+        assertThat(restReleaseResult.getReleaseDossierMetaData().getReleaseDate().toString(), is("2020-07-30T18:35:24Z"));
+        assertThat(restReleaseResult.getReleaseDossierMetaData().getSupplyChainPath(), is(PATH));
+        assertThat(restReleaseResult.getReleaseDossierMetaData().getReleaseArtifacts().iterator().next().iterator().next(), is(HASH));
     }
 
-    @Test
-    void mapToListString() {
-    }
 }

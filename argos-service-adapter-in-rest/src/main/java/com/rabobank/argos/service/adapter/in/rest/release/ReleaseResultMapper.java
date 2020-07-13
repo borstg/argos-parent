@@ -21,7 +21,6 @@ import org.mapstruct.Mapper;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -32,9 +31,10 @@ public abstract class ReleaseResultMapper {
 
     abstract List<String> mapToListString(Set<String> artifactHashes);
 
-    OffsetDateTime mapToZonedOffsetDateTime(Date date) {
+    OffsetDateTime mapToZonedOffsetDateTime(java.util.Date date) {
         return date.toInstant()
                 .atOffset(ZoneOffset.UTC);
+
     }
 
 }
