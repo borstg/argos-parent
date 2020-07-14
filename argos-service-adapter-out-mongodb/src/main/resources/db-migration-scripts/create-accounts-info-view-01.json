@@ -1,41 +1,38 @@
 {
   "create": "accounts-info",
-  "viewOn": "serviceAccounts",
+  "viewOn": "personalaccounts",
   "pipeline": [
     {
       "$facet": {
         "serviceaccounts": [
           {
-            "$lookup": {
-              "from": "hierarchy",
-              "localField": "accountId",
-              "foreignField": "referenceId",
-              "as": "joinedhierarchy"
-            }
+            "$limit": 1.0
           },
           {
             "$project": {
-              "accountId": 1.0,
-              "name": 1.0,
-              "parentLabelId": {
-                "$arrayElemAt": [
-                  "$joinedhierarchy.parentLabelId",
-                  0.0
-                ]
-              },
-              "accountType": {
-                "$arrayElemAt": [
-                  "$joinedhierarchy.type",
-                  0.0
-                ]
-              },
-              "pathToRoot": {
-                "$arrayElemAt": [
-                  "$joinedhierarchy.pathToRoot",
-                  0.0
-                ]
-              },
-              "_class": "com.rabobank.argos.domain.account.AccountInfo"
+              "_id": "$$REMOVE"
+            }
+          },
+          {
+            "$lookup": {
+              "from": "service-accounts-info-tmp",
+              "pipeline": [
+              ],
+              "as": "joinedServiceAccounts"
+            }
+          },
+          {
+            "$unwind": "$joinedServiceAccounts"
+          },
+          {
+            "$project": {
+              "_id": "$joinedServiceAccounts._id",
+              "accountId": "$joinedServiceAccounts.accountId",
+              "parentLabelId": "$joinedServiceAccounts.parentLabelId",
+              "name": "$joinedServiceAccounts.name",
+              "accountType": "$joinedServiceAccounts.accountType",
+              "pathToRoot": "$joinedServiceAccounts.pathToRoot",
+              "_class": "$joinedServiceAccounts._class"
             }
           }
         ],
@@ -53,17 +50,17 @@
               "from": "personalaccounts",
               "pipeline": [
               ],
-              "as": "joinedpersonalaccounts"
+              "as": "joinedPersonalAccounts"
             }
           },
           {
-            "$unwind": "$joinedpersonalaccounts"
+            "$unwind": "$joinedPersonalAccounts"
           },
           {
             "$project": {
-              "_id": "$joinedpersonalaccounts._id",
-              "accountId": "$joinedpersonalaccounts.accountId",
-              "name": "$joinedpersonalaccounts.name",
+              "_id": "joinedPersonalAccounts._id",
+              "accountId": "joinedPersonalAccounts.accountId",
+              "name": "joinedPersonalAccounts.name",
               "accountType": "PERSONAL_ACCOUNT",
               "pathToRoot": [
               ],

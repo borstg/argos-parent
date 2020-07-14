@@ -55,6 +55,15 @@ public class ServiceAccountDatabaseChangelog {
 
     @SneakyThrows
     @ChangeSet(order = "003", id = "ServiceAccountDatabaseChangelog-3", author = "michel")
+    public void createServiceAccountsKeyInfoTempView(MongoTemplate template) {
+        String createAccountsKeyInfoViewCommand = IOUtils.toString(getClass()
+                .getResourceAsStream("/db-migration-scripts/create-service-accounts-key-info-tmp-view-01.json"), UTF_8);
+        template.dropCollection("service-accounts-key-info-tmp");
+        template.executeCommand(createAccountsKeyInfoViewCommand);
+    }
+
+    @SneakyThrows
+    @ChangeSet(order = "004", id = "ServiceAccountDatabaseChangelog-4", author = "michel")
     public void createAccountsKeyInfoView(MongoTemplate template) {
         String createAccountsKeyInfoViewCommand = IOUtils.toString(getClass()
                 .getResourceAsStream("/db-migration-scripts/create-accounts-keyinfo-view-01.json"), UTF_8);
@@ -63,7 +72,16 @@ public class ServiceAccountDatabaseChangelog {
     }
 
     @SneakyThrows
-    @ChangeSet(order = "004", id = "ServiceAccountDatabaseChangelog-4", author = "michel")
+    @ChangeSet(order = "005", id = "ServiceAccountDatabaseChangelog-5", author = "michel")
+    public void createServiceAccountsTempView(MongoTemplate template) {
+        String createAccountsInfoViewCommand = IOUtils.toString(getClass()
+                .getResourceAsStream("/db-migration-scripts/create-service-accounts-info-tmp-view-01.json"), UTF_8);
+        template.dropCollection("service-accounts-info-tmp");
+        template.executeCommand(createAccountsInfoViewCommand);
+    }
+
+    @SneakyThrows
+    @ChangeSet(order = "006", id = "ServiceAccountDatabaseChangelog-6", author = "michel")
     public void createAccountsInfoView(MongoTemplate template) {
         String createAccountsInfoViewCommand = IOUtils.toString(getClass()
                 .getResourceAsStream("/db-migration-scripts/create-accounts-info-view-01.json"), UTF_8);
