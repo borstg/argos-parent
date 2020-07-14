@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -57,10 +58,14 @@ import static org.springframework.data.mongodb.core.query.MongoRegexCreator.Matc
 @RequiredArgsConstructor
 public class ReleaseRepositoryImpl implements ReleaseRepository {
 
-    private static final String ID_FIELD = "_id";
+    protected static final String ID_FIELD = "_id";
     protected static final String METADATA_RELEASE_ARTIFACTS_FIELD = "metadata.releaseArtifacts";
     protected static final String METADATA_SUPPLY_CHAIN_PATH_FIELD = "metadata.supplyChainPath";
     protected static final String COLLECTION_NAME = "fs.files";
+    protected static final String RELEASE_ARTIFACTS_FIELD = "releaseArtifacts";
+    protected static final String SUPPLY_CHAIN_PATH_FIELD = "supplyChainPath";
+    protected static final String RELEASE_DATE_FIELD = "releaseDate";
+    protected static final String METADATA_FIELD = "metadata";
     private final GridFsTemplate gridFsTemplate;
 
     private final MongoTemplate mongoTemplate;
@@ -76,12 +81,12 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
         DBObject metaData = new BasicDBObject();
         Date releaseDate = new Date();
         releaseDossierMetaData.setReleaseDate(releaseDate);
-        metaData.put("releaseArtifacts", releaseDossierMetaData.getReleaseArtifacts());
-        metaData.put("supplyChainPath", releaseDossierMetaData.getSupplyChainPath());
-
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            releaseFileJsonMapper.writeValue(baos, releaseDossier);
-            try (InputStream inputStream = baos.toInputStream()) {
+        metaData.put(RELEASE_ARTIFACTS_FIELD, releaseDossierMetaData.getReleaseArtifacts());
+        metaData.put(SUPPLY_CHAIN_PATH_FIELD, releaseDossierMetaData.getSupplyChainPath());
+        metaData.put(RELEASE_DATE_FIELD, releaseDate);
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            releaseFileJsonMapper.writeValue(outputStream, releaseDossier);
+            try (InputStream inputStream = outputStream.toInputStream()) {
                 String fileName = "release-" + releaseDossierMetaData.getSupplyChainPath() + "-" + releaseDate.toInstant().getEpochSecond() + ".json";
                 ObjectId objectId = gridFsTemplate.store(inputStream, fileName, "application/json", metaData);
                 releaseDossierMetaData.setDocumentId(objectId.toHexString());
@@ -124,10 +129,11 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     private void addAdditionalReleaseArtifacts(List<Set<String>> releasedArtifacts, Criteria criteria) {
         for (int i = 1; i < releasedArtifacts.size(); i++) {
-            criteria.and(METADATA_SUPPLY_CHAIN_PATH_FIELD)
+            List<Criteria> andCriteria = new ArrayList<>();
+            andCriteria.add(Criteria.where(METADATA_RELEASE_ARTIFACTS_FIELD).elemMatch(new Criteria()
                     .elemMatch(new Criteria()
-                            .elemMatch(new Criteria()
-                                    .all(releasedArtifacts.get(i))));
+                            .all(releasedArtifacts.get(i)))));
+            criteria.andOperator(andCriteria.toArray(new Criteria[0]));
         }
     }
 
@@ -140,9 +146,9 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     private static Function<Document, ReleaseDossierMetaData> toMetaDataDossier() {
         return document -> {
-            Document metaData = (Document) document.get("metadata");
+            Document metaData = (Document) document.get(METADATA_FIELD);
             List<Set<String>> releaseArtifacts = metaData
-                    .getList("releaseArtifacts", (Class<List<String>>) (Class<?>) List.class,
+                    .getList(RELEASE_ARTIFACTS_FIELD, (Class<List<String>>) (Class<?>) List.class,
                             Collections.emptyList())
                     .stream()
                     .map(HashSet::new)
@@ -152,8 +158,8 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
                     .documentId(document.getObjectId(ID_FIELD)
                             .toHexString())
                     .releaseArtifacts(releaseArtifacts)
-                    .releaseDate(document.getDate("uploadDate"))
-                    .supplyChainPath(metaData.getString("supplyChainPath"))
+                    .releaseDate(metaData.getDate(RELEASE_DATE_FIELD))
+                    .supplyChainPath(metaData.getString(SUPPLY_CHAIN_PATH_FIELD))
                     .build();
         };
     }

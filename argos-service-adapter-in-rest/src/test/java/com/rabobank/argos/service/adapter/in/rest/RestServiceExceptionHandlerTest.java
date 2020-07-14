@@ -21,6 +21,7 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestError;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestValidationError;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestValidationMessage;
 import com.rabobank.argos.service.adapter.in.rest.layout.LayoutValidationException;
+import com.rabobank.argos.service.domain.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,6 +55,8 @@ class RestServiceExceptionHandlerTest {
     @Mock
     private MethodArgumentNotValidException methodArgumentNotValidException;
 
+    @Mock
+    private NotFoundException notFoundException;
 
     @Mock
     private ConstraintViolationException constraintViolationException;
@@ -159,5 +162,13 @@ class RestServiceExceptionHandlerTest {
         assertThat(response.getStatusCodeValue(), is(400));
         assertThat(response.getBody().getMessages().get(0).getMessage(), is("message"));
         assertThat(response.getBody().getMessages().get(0).getType(), is(RestValidationMessage.TypeEnum.DATA_INPUT));
+    }
+
+    @Test
+    void handleNotFoundException() {
+        when(notFoundException.getMessage()).thenReturn("message");
+        ResponseEntity<RestError> exception = handler.handleNotFoundException(notFoundException);
+        assertThat(exception.getStatusCodeValue(), is(HttpStatus.NOT_FOUND.value()));
+        assertThat(exception.getBody().getMessage(), is("message"));
     }
 }

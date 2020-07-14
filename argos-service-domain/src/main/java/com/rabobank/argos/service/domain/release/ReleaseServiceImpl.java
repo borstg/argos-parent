@@ -72,6 +72,7 @@ public class ReleaseServiceImpl implements ReleaseService {
         ReleaseResult.ReleaseResultBuilder releaseBuilder = ReleaseResult.builder();
         LayoutMetaBlock layoutMetaBlock = layoutMetaBlockRepository.findBySupplyChainId(supplyChainId)
                 .orElseThrow(() -> new NotFoundException("Layout not found"));
+
         List<Artifact> allArtifacts = releaseArtifacts
                 .stream()
                 .flatMap(Collection::stream)

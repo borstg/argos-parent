@@ -126,7 +126,7 @@ public class RestServiceExceptionHandler {
     }
 
     @ExceptionHandler(value = {NotFoundException.class})
-    public ResponseEntity<RestError> handleNotFoundExceptionn(NotFoundException ex) {
+    public ResponseEntity<RestError> handleNotFoundException(NotFoundException ex) {
         return ResponseEntity.status(NOT_FOUND).contentType(APPLICATION_JSON).body(createRestErrorMessage(ex.getMessage()));
     }
 
