@@ -15,6 +15,7 @@
  */
 package com.rabobank.argos.service.security;
 
+import com.rabobank.argos.service.domain.account.FinishedSessionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,17 +50,23 @@ class TokenAuthenticationFilterTest {
     @Mock
     private FilterChain filterChain;
 
+    @Mock
+    private TokenProvider.TokenInfo tokenInfo;
+
     private TokenAuthenticationFilter filter;
+
+    @Mock
+    private FinishedSessionRepository finishedSessionRepository;
 
     @BeforeEach
     void setUp() {
         SecurityContextHolder.getContext().setAuthentication(null);
-        filter = new TokenAuthenticationFilter(tokenProvider);
+        filter = new TokenAuthenticationFilter(tokenProvider, finishedSessionRepository);
     }
 
     @Test
     void doFilterInternal() throws ServletException, IOException {
-        when(tokenProvider.getUserIdFromToken("jwtToken")).thenReturn("id");
+        when(tokenProvider.getTokenInfo("jwtToken")).thenReturn(tokenInfo);
         when(request.getHeader("Authorization")).thenReturn("Bearer jwtToken");
         when(tokenProvider.validateToken("jwtToken")).thenReturn(true);
         filter.doFilterInternal(request, response, filterChain);

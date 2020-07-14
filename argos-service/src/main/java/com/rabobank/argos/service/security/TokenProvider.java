@@ -38,11 +38,26 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class TokenProvider {
+
+    @RequiredArgsConstructor
+    public class TokenInfo {
+        private final Claims claims;
+
+        public String getSessionId() {
+            return claims.getId();
+        }
+
+        public String getAccountId() {
+            return claims.getSubject();
+        }
+
+    }
 
     @Value("${jwt.token.secret}")
     private String secret;
@@ -73,18 +88,19 @@ public class TokenProvider {
         ArgosOAuth2User oAuth2User = (ArgosOAuth2User) authentication.getPrincipal();
         return Jwts.builder()
                 .setSubject(oAuth2User.getAccountId())
+                .setId(UUID.randomUUID().toString())
                 .setIssuedAt(new Date())
                 .setExpiration(Timestamp.valueOf(LocalDateTime.now().plus(timeout)))
                 .signWith(secretKey)
                 .compact();
     }
 
-    public String getUserIdFromToken(String token) {
+    public TokenInfo getTokenInfo(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)
                 .getBody();
-        return claims.getSubject();
+        return new TokenInfo(claims);
     }
 
     public boolean validateToken(String authToken) {

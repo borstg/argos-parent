@@ -44,6 +44,14 @@ public class AccountSecurityContextImpl implements AccountSecurityContext {
     }
 
     @Override
+    public Optional<String> getSessionId() {
+        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                .map(Authentication::getPrincipal)
+                .map(authentication -> (AccountUserDetailsAdapter) authentication)
+                .map(AccountUserDetailsAdapter::getSessionId);
+    }
+
+    @Override
     public Set<Permission> getGlobalPermission() {
         AccountUserDetailsAdapter authentication = getAccountUserDetailsAdapter();
         if (authentication != null) {
@@ -51,7 +59,6 @@ public class AccountSecurityContextImpl implements AccountSecurityContext {
         } else {
             return emptySet();
         }
-
     }
 
     @Override

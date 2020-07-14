@@ -26,17 +26,23 @@ import java.util.Collection;
 public class PersonalAccountAuthenticationToken extends AbstractAuthenticationToken {
 
     private final String accountId;
+    private final String sessionId;
     private final UserDetails principal;
 
-    public PersonalAccountAuthenticationToken(String accountId, UserDetails principal, Collection<? extends GrantedAuthority> authorities) {
+    public PersonalAccountAuthenticationToken(String accountId, String sessionId, UserDetails principal, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.accountId = accountId;
+        this.sessionId = sessionId;
         this.principal = principal;
     }
 
     @Override
     public String getCredentials() {
         return accountId;
+    }
+
+    public String getSessionId() {
+        return sessionId;
     }
 
     @Override

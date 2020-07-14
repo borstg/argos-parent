@@ -33,7 +33,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,11 +44,13 @@ class PersonalAccountAuthenticationProviderTest {
     private PersonalAccountAuthenticationProvider personalAccountAuthenticationProvider;
     private static final String NOT_AUTHENTICATED = "not authenticated";
 
-    private AccountUserDetailsAdapter userDetails = new AccountUserDetailsAdapter(PersonalAccount.builder().name("test").build(), Set.of(Permission.READ));
+    private AccountUserDetailsAdapter userDetails = new AccountUserDetailsAdapter(PersonalAccount.builder().name("test").build(), "sessionId", Set.of(Permission.READ));
 
-    private Authentication authentication = new PersonalAccountAuthenticationToken("id", null, null);
+    private PersonalAccountAuthenticationToken authentication = new PersonalAccountAuthenticationToken("id", null, null, null);
     @Mock
     private LogContextHelper logContextHelper;
+
+
     @BeforeEach
     void setup() {
         personalAccountAuthenticationProvider = new PersonalAccountAuthenticationProvider(personalAccountUserDetailsService, logContextHelper);
@@ -57,7 +58,7 @@ class PersonalAccountAuthenticationProviderTest {
 
     @Test
     void testAuthenticateWithValidCredentials() {
-        when(personalAccountUserDetailsService.loadUserById(eq("id"))).thenReturn(userDetails);
+        when(personalAccountUserDetailsService.loadUserByToken(authentication)).thenReturn(userDetails);
         Authentication authorized = personalAccountAuthenticationProvider.authenticate(authentication);
         assertThat(authorized.isAuthenticated(), is(true));
         assertThat(authorized.getPrincipal(), sameInstance(userDetails));
@@ -67,7 +68,7 @@ class PersonalAccountAuthenticationProviderTest {
 
     @Test
     void testAuthenticateWithInValidCredentials() {
-        when(personalAccountUserDetailsService.loadUserById(eq("id"))).thenThrow(new ArgosError("Personal account with id  not found"));
+        when(personalAccountUserDetailsService.loadUserByToken(authentication)).thenThrow(new ArgosError("Personal account with id  not found"));
         BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> personalAccountAuthenticationProvider.authenticate(authentication));
         assertThat(exception.getMessage(), is(NOT_AUTHENTICATED));
     }

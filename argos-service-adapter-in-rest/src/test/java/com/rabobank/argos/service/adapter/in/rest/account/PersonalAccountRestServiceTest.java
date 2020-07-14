@@ -28,6 +28,7 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestProfile;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestPublicKey;
 import com.rabobank.argos.service.domain.account.AccountSearchParams;
 import com.rabobank.argos.service.domain.account.AccountService;
+import com.rabobank.argos.service.domain.account.FinishedSessionRepository;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
 import com.rabobank.argos.service.domain.security.AccountSecurityContextImpl;
 import org.hamcrest.Matchers;
@@ -112,10 +113,13 @@ class PersonalAccountRestServiceTest {
     @Mock
     private RestPublicKey restPublicKey;
 
+    @Mock
+    private FinishedSessionRepository finishedSessionRepository;
+
     @BeforeEach
     void setUp() {
         personalAccount.setAccountId(ACCOUNT_ID);
-        service = new PersonalAccountRestService(accountSecurityContext, keyPairMapper, accountService, personalAccountMapper, labelRepository);
+        service = new PersonalAccountRestService(accountSecurityContext, keyPairMapper, accountService, personalAccountMapper, labelRepository, finishedSessionRepository);
         keyPair = ArgosKeyHelper.generateKeyPair();
     }
 

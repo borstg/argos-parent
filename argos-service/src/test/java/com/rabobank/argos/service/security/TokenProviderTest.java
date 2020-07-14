@@ -61,7 +61,7 @@ class TokenProviderTest {
         when(userPrincipal.getAccountId()).thenReturn("id");
         String token = tokenProvider.createToken(authentication);
         assertThat(tokenProvider.validateToken(token), is(true));
-        assertThat(tokenProvider.getUserIdFromToken(token), is("id"));
+        assertThat(tokenProvider.getTokenInfo(token).getAccountId(), is("id"));
     }
 
     @Test
