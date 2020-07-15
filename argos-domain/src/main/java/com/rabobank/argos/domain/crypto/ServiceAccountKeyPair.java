@@ -44,7 +44,7 @@ public class ServiceAccountKeyPair extends KeyPair {
     public static String calculateHashedPassphrase(String keyId, String passphrase) {
         MessageDigest md = null;
         try {
-            md = MessageDigest.getInstance(HashAlgorithm.SHA512.toString());
+            md = MessageDigest.getInstance(HashAlgorithm.SHA512.getStringValue());
         } catch (NoSuchAlgorithmException e) {
             throw new ArgosError(e.getMessage());
         }

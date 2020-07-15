@@ -39,7 +39,7 @@ public class SignatureValidator {
 
     private boolean isValid(String signableJson, Signature signature, PublicKey publicKey) {
         try {
-            java.security.Signature publicSignature = java.security.Signature.getInstance(signature.getAlgorithm().toString());
+            java.security.Signature publicSignature = java.security.Signature.getInstance(signature.getAlgorithm().getStringValue());
             publicSignature.initVerify(publicKey);
             publicSignature.update(signableJson.getBytes(UTF_8));
             byte[] signatureBytes = Hex.decodeHex(signature.getSignature());

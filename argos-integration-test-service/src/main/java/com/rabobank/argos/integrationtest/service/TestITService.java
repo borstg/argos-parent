@@ -150,11 +150,7 @@ public class TestITService implements IntegrationTestServiceApi {
         LayoutMetaBlock layoutMetaBlock = layoutMetaBlockMapper.convertFromRestLayoutMetaBlock(restLayoutMetaBlock);
         KeyPair keyPair = getKeyPair(keyId);
         Signature signature = null;
-		try {
-			signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(layoutMetaBlock.getLayout()));
-		} catch (GeneralSecurityException e) {
-			log.error(e.getMessage());
-		}
+		signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(layoutMetaBlock.getLayout()));
         List<Signature> signatures = new ArrayList<>(layoutMetaBlock.getSignatures());
         signatures.add(signature);
         layoutMetaBlock.setSignatures(signatures);
@@ -167,11 +163,7 @@ public class TestITService implements IntegrationTestServiceApi {
 
         KeyPair keyPair = getKeyPair(keyId);
         Signature signature = null;
-		try {
-			signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(linkMetaBlock.getLink()));
-		} catch (GeneralSecurityException e) {
-			log.error(e.getMessage());
-		}
+		signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(linkMetaBlock.getLink()));
         linkMetaBlock.setSignature(signature);
         
         return ResponseEntity.ok(linkMetaBlockMapper.convertToRestLinkMetaBlock(linkMetaBlock));

@@ -66,12 +66,7 @@ public class LinkBuilderImpl implements LinkBuilder {
                 .stepName(linkBuilderSettings.getStepName()).build();
         ArgosServiceClient argosServiceClient = new ArgosServiceClient(settings, signingKeyPassphrase);
         ServiceAccountKeyPair keyPair = Mappers.getMapper(RestMapper.class).convertFromRestServiceAccountKeyPair(argosServiceClient.getKeyPair());
-        Signature signature;
-		try {
-			signature = Signer.sign(keyPair, signingKeyPassphrase, new JsonSigningSerializer().serialize(link));
-		} catch (GeneralSecurityException | ArgosError e) {
-			throw new Argos4jError("The Link object couldn't be signed: "+ e.getMessage());
-		}
+        Signature signature = Signer.sign(keyPair, signingKeyPassphrase, new JsonSigningSerializer().serialize(link));
 
         argosServiceClient.uploadLinkMetaBlockToService(LinkMetaBlock.builder().link(link).signature(signature).build());
     }

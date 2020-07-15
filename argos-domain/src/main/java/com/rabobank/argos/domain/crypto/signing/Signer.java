@@ -29,20 +29,20 @@ public class Signer {
     
     private Signer() {};
 
-    public static Signature sign(KeyPair keyPair, char[] keyPassphrase, String jsonRepresentation) throws GeneralSecurityException {
+    public static Signature sign(KeyPair keyPair, char[] keyPassphrase, String jsonRepresentation) {
     	Signature sig = Signature.builder().keyId(keyPair.getKeyId()).build();
-    	sig.setSignature(createSignature(keyPair.decryptPrivateKey(keyPassphrase), jsonRepresentation, sig.getAlgorithm()));
+    	try {
+			sig.setSignature(createSignature(keyPair.decryptPrivateKey(keyPassphrase), jsonRepresentation, sig.getAlgorithm()));
+		} catch (GeneralSecurityException e) {
+            throw new ArgosError(e.getMessage(), e);
+		}
         return sig;
     }
 
-    private static String createSignature(PrivateKey privateKey, String jsonRepr, SignatureAlgorithm algorithm) {
-        try {
-            java.security.Signature privateSignature = java.security.Signature.getInstance(algorithm.toString());
-            privateSignature.initSign(privateKey);
-            privateSignature.update(jsonRepr.getBytes(StandardCharsets.UTF_8));
-            return Hex.encodeHexString(privateSignature.sign());
-        } catch (GeneralSecurityException e) {
-            throw new ArgosError(e.getMessage(), e);
-        }
+    private static String createSignature(PrivateKey privateKey, String jsonRepr, SignatureAlgorithm algorithm) throws GeneralSecurityException {
+        java.security.Signature privateSignature = java.security.Signature.getInstance(algorithm.getStringValue());
+        privateSignature.initSign(privateKey);
+        privateSignature.update(jsonRepr.getBytes(StandardCharsets.UTF_8));
+        return Hex.encodeHexString(privateSignature.sign());
     }
 }

@@ -17,9 +17,7 @@ package com.rabobank.argos.domain.crypto.signing;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabobank.argos.domain.crypto.KeyAlgorithm;
 import com.rabobank.argos.domain.crypto.PublicKey;
-import com.rabobank.argos.domain.crypto.PublicKeyFactory;
 import com.rabobank.argos.domain.layout.ArtifactType;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.layout.LayoutSegment;

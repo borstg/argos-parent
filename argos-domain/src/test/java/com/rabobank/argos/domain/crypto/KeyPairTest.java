@@ -15,19 +15,24 @@
  */
 package com.rabobank.argos.domain.crypto;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Base64;
 
 import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.util.io.pem.PemGenerationException;
+import org.junit.jupiter.api.Test;
 
 import com.rabobank.argos.domain.crypto.signing.Signer;
 
-public class KeyPairHelper {
+public class KeyPairTest {
 	
 
 	
-	public static void main(String[] args) throws OperatorCreationException, PemGenerationException, GeneralSecurityException {
+	@Test
+	void createKeyPairAndSignature() throws OperatorCreationException, GeneralSecurityException, IOException {
 		String passphrase = "test";
 		KeyPair keyPair = KeyPair.createKeyPair("test".toCharArray());
 		byte[] encodedKey = Base64.getEncoder().encode(keyPair.getEncryptedPrivateKey());
@@ -47,6 +52,9 @@ public class KeyPairHelper {
 				passphrase));
 		Signature signature = Signer.sign(keyPair, passphrase.toCharArray(), "zomaar");
 		System.out.println("signature: "+new String(Base64.getEncoder().encode(signature.getSignature().getBytes())));
+		assertThat(signature.getKeyId(), is(keyPair.getKeyId()));
+		assertThat(signature.getKeyAlgorithm(), is(KeyAlgorithm.valueOf(keyPair.getJavaPublicKey().getAlgorithm())));
+		
 	}
 
 }

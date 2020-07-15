@@ -23,27 +23,25 @@ import com.rabobank.argos.domain.crypto.KeyAlgorithm;
 public enum SignatureAlgorithm {
 	SHA_384_WITH_ECDSA("SHA384withECDSA"), SHA_256_WITH_RSA("SHA256withRSA");;
 	
-	String value;
+	String stringValue;
 	
-	SignatureAlgorithm(String value) {
-		this.value = value;
+	SignatureAlgorithm(String stringValue) {
+		this.stringValue = stringValue;
 	}
 	
-	@Override
-	public String toString() {
-		return this.value;
+	public String getStringValue() {
+	    return stringValue;
 	}
 	
 	public static SignatureAlgorithm getAlgorithm(KeyAlgorithm keyAlgorithm, HashAlgorithm hashAlgorithm) throws GeneralSecurityException {
     	if (KeyAlgorithm.EC.equals(keyAlgorithm)) {
-    		if (HashAlgorithm.SHA384.equals(hashAlgorithm)) {
+    		if (HashAlgorithm.SHA384 == hashAlgorithm) {
     			return SHA_384_WITH_ECDSA;
     		} else {
     			throw new GeneralSecurityException(hashAlgorithm+" not supported");
     		}
     	} else {
     		return SHA_256_WITH_RSA;
-			//throw new GeneralSecurityException(keyAlgorithm+" not supported");  
     	}
 	}
 

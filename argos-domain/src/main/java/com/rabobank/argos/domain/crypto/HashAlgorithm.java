@@ -18,15 +18,14 @@ package com.rabobank.argos.domain.crypto;
 public enum HashAlgorithm {
     SHA256("SHA-256"), SHA384("SHA-384"), SHA512("SHA-512");
 	
-	private String value;
+	private String stringValue;
 	
-	HashAlgorithm(String value) {
-		this.value = value;
+	HashAlgorithm(String stringValue) {
+		this.stringValue = stringValue;
 	}
 	
-	@Override
-	public String toString() {
-		return this.value;
+	public String getStringValue() {
+	    return stringValue;
 	}
 
 }
