@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.MDC;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -79,11 +78,6 @@ class ServiceAccountAuthenticationProviderTest {
         assertThat(authenticatedAccount.isAuthenticated(), is(true));
         verify(logContextHelper).addAccountInfoToLogContext(userDetails);
 
-    }
-
-    private void assertLogContextSet() {
-        assertThat(MDC.get("accountId"), is(userDetails.getAccount().getAccountId()));
-        assertThat(MDC.get("accountName"), is(userDetails.getAccount().getName()));
     }
 
     @Test

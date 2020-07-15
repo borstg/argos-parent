@@ -15,6 +15,7 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.account;
 
+import com.rabobank.argos.domain.account.ArgosSession;
 import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.domain.key.KeyPair;
 import com.rabobank.argos.domain.permission.LocalPermissions;
@@ -40,15 +41,20 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.temporal.ChronoUnit.MINUTES;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,6 +74,7 @@ class PersonalAccountRestServiceTest {
     private static final String ROLE_ID = "roleId";
     private static final String KEY1 = "key1";
     private static final String KEY2 = "key2";
+    private static final String SESSION_ID = "sessionId";
 
     private PersonalAccountRestService service;
     @Mock
@@ -115,6 +122,9 @@ class PersonalAccountRestServiceTest {
 
     @Mock
     private FinishedSessionRepository finishedSessionRepository;
+
+    @Captor
+    private ArgumentCaptor<ArgosSession> argosSessionArgumentCaptor;
 
     @BeforeEach
     void setUp() {
@@ -332,5 +342,16 @@ class PersonalAccountRestServiceTest {
         when(personalAccount.getActiveKeyPair()).thenReturn(null);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.getPersonalAccountKeyById(ACCOUNT_ID));
         assertThat(exception.getMessage(), is("404 NOT_FOUND \"no active keypair found for account: name\""));
+    }
+
+    @Test
+    void logout() {
+        ReflectionTestUtils.setField(service, "timeout", Duration.of(1, MINUTES));
+        when(accountSecurityContext.getSessionId()).thenReturn(Optional.of(SESSION_ID));
+        assertThat(service.logout().getStatusCodeValue(), is(204));
+        verify(finishedSessionRepository).save(argosSessionArgumentCaptor.capture());
+        ArgosSession value = argosSessionArgumentCaptor.getValue();
+        assertThat(value.getSessionId(), is(SESSION_ID));
+        assertThat(value.getExpirationDate(), not(nullValue()));
     }
 }
