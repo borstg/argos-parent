@@ -32,7 +32,7 @@ Feature: Personal Account
     Then match response == expectedResponse
 
   Scenario: get logout should return 204
-    Given path 'api/serviceaccount/me/logout'
+    Given path 'api/personalaccount/me/logout'
     And request ''
     When method PUT
     Then status 204

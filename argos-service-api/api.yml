@@ -772,7 +772,7 @@ paths:
           description: personal account not found
         '500':
           $ref: '#/components/responses/Error'
-  /serviceaccount/me/logout:
+  /personalaccount/me/logout:
     put:
       summary: logout
       operationId: logout
