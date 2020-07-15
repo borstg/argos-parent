@@ -33,6 +33,8 @@ import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.runtime.Network;
 import org.hamcrest.core.IsNull;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -45,6 +47,7 @@ import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 import java.io.IOException;
@@ -60,8 +63,10 @@ import static org.hamcrest.core.Is.is;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ReleaseRepositoryImplTestIT {
+    protected static final List<Set<String>> RELEASE_ARTIFACTS = List.of(Set.of("hash1-1", "hash1-2"), Set.of("hash2-1", "hash2-2"));
     private MongodExecutable mongodExecutable;
     private ReleaseRepositoryImpl releaseRepository;
+    private GridFsTemplate gridFsTemplate;
 
     @BeforeAll
     void setup() throws IOException {
@@ -77,7 +82,7 @@ class ReleaseRepositoryImplTestIT {
         String connectionString = "mongodb://localhost:" + port;
         MongoTemplate mongoTemplate = new MongoTemplate(MongoClients.create(connectionString), "test");
         MongoDbFactory factory = new SimpleMongoClientDbFactory(MongoClients.create(connectionString), "test");
-        GridFsTemplate gridFsTemplate = new GridFsTemplate(factory, getDefaultMongoConverter(factory));
+        gridFsTemplate = new GridFsTemplate(factory, getDefaultMongoConverter(factory));
         ObjectMapper mapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();
         module.addSerializer(PublicKey.class, new PublicKeyJsonSerializer());
@@ -85,6 +90,10 @@ class ReleaseRepositoryImplTestIT {
         releaseRepository = new ReleaseRepositoryImpl(gridFsTemplate, mongoTemplate, mapper);
     }
 
+    @AfterAll
+    void clean() {
+        mongodExecutable.stop();
+    }
 
     private static MongoConverter getDefaultMongoConverter(MongoDbFactory factory) {
         DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
@@ -101,13 +110,41 @@ class ReleaseRepositoryImplTestIT {
 
     @Test
     void storeReleaseAndRetreival() {
-        LayoutMetaBlock layoutMetaBlock = LayoutMetaBlock.builder().supplyChainId("supplychain").build();
-        ReleaseDossier releaseDossier = ReleaseDossier.builder().layoutMetaBlock(layoutMetaBlock).build();
-        ReleaseDossierMetaData releaseDossierMetaData = ReleaseDossierMetaData.builder().releaseArtifacts(List.of(Set.of("hash"))).build();
-        ReleaseDossierMetaData stored = releaseRepository.storeRelease(releaseDossierMetaData, releaseDossier);
+        ReleaseDossierMetaData stored = storeReleaseDossier();
         assertThat(stored.getDocumentId(), is(IsNull.notNullValue()));
         assertThat(stored.getReleaseDate(), is(IsNull.notNullValue()));
         Optional<String> storedFile = releaseRepository.getRawReleaseFileById(stored.getDocumentId());
         assertThat(storedFile.isEmpty(), is(false));
     }
+
+    private ReleaseDossierMetaData storeReleaseDossier() {
+        LayoutMetaBlock layoutMetaBlock = LayoutMetaBlock.builder().supplyChainId("supplychain").build();
+        ReleaseDossier releaseDossier = ReleaseDossier.builder().layoutMetaBlock(layoutMetaBlock).build();
+        ReleaseDossierMetaData releaseDossierMetaData = ReleaseDossierMetaData.builder()
+                .releaseArtifacts(RELEASE_ARTIFACTS)
+                .supplyChainPath("path.to.supplychain").build();
+
+        return releaseRepository.storeRelease(releaseDossierMetaData, releaseDossier);
+    }
+
+
+    @Test
+    void findReleaseByReleasedArtifactsAndPath() {
+        storeReleaseDossier();
+        Optional<ReleaseDossierMetaData> dossierMetaData = releaseRepository
+                .findReleaseByReleasedArtifactsAndPath(RELEASE_ARTIFACTS, "path.to");
+        assertThat(dossierMetaData.isPresent(), is(true));
+
+        Optional<ReleaseDossierMetaData> emptyDossier = releaseRepository
+                .findReleaseByReleasedArtifactsAndPath(List.of(Set.of("hash1-incorrect", "hash1-2"), Set.of("hash2-1", "hash2-2")), null);
+
+        assertThat(emptyDossier.isPresent(), is(false));
+    }
+
+    @AfterEach
+    void removeData() {
+        gridFsTemplate.delete(new Query());
+    }
+
+
 }

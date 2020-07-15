@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseDossierConversionHelper.convertToDocumentList;
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.ID_FIELD;
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.METADATA_FIELD;
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.RELEASE_ARTIFACTS_FIELD;
@@ -52,7 +53,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 
 @ExtendWith(MockitoExtension.class)
 class ReleaseRepositoryImplTest {
@@ -106,10 +106,10 @@ class ReleaseRepositoryImplTest {
     @Test
     void findReleaseByReleasedArtifactsAndPath() {
         List<Set<String>> releasedArtifacts = List.of(Set.of("hash1"), Set.of("hash2"));
-        List<List<String>> storedReleasedArtifacts = List.of(List.of("hash1"), List.of("hash2"));
+        List<Document> storedReleasedArtifacts = convertToDocumentList(releasedArtifacts);
         when(objectId.toHexString()).thenReturn(ID);
         when(document.get(METADATA_FIELD)).thenReturn(metaData);
-        when(metaData.getList(RELEASE_ARTIFACTS_FIELD, (Class<List<String>>) (Class<?>) List.class,
+        when(metaData.getList(RELEASE_ARTIFACTS_FIELD, Document.class,
                 Collections.emptyList())).thenReturn(storedReleasedArtifacts);
         when(document.getObjectId(ID_FIELD)).thenReturn(objectId);
         when(metaData.getDate(RELEASE_DATE_FIELD)).thenReturn(Date.from(Instant.parse(RELEASE_DATE_TIME)));
@@ -123,16 +123,17 @@ class ReleaseRepositoryImplTest {
         assertThat(retrievedReleaseDossierMetaData.get().getReleaseArtifacts(), is(releasedArtifacts));
         assertThat(retrievedReleaseDossierMetaData.get().getReleaseDate(), is(Date.from(Instant.parse(RELEASE_DATE_TIME))));
         verify(mongoTemplate).find(queryArgumentCaptor.capture(), any(), any());
-        assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"metadata.releaseArtifacts\" : { \"$elemMatch\" : { \"$elemMatch\" : { \"$all\" : [\"hash1\"]}}}, \"$and\" : [{ \"metadata.releaseArtifacts\" : { \"$elemMatch\" : { \"$elemMatch\" : { \"$all\" : [\"hash2\"]}}}}], \"metadata.supplyChainPath\" : { \"$regex\" : \"^path\", \"$options\" : \"\"}}, Fields: {}, Sort: {}"));
+        assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"$and\" : [{ \"metadata.releaseArtifacts\" : { \"$elemMatch\" : { \"58833651db311ba4bc11cb26b1900b0f\" : [\"hash2\"]}}}, { \"metadata.releaseArtifacts\" : { \"$elemMatch\" : { \"00c6ee2e21a7548de6260cf72c4f4b5b\" : [\"hash1\"]}}}], \"metadata.supplyChainPath\" : { \"$regex\" : \"^path\", \"$options\" : \"\"}}, Fields: {}, Sort: {}"));
     }
+
 
     @Test
     void findReleaseByReleasedArtifactsAndPathWithMultipleResultsShouldThrowException() {
         List<Set<String>> releasedArtifacts = List.of(Set.of("hash1"), Set.of("hash2"));
-        List<List<String>> storedReleasedArtifacts = List.of(List.of("hash1"), List.of("hash2"));
+        List<Document> storedReleasedArtifacts = convertToDocumentList(releasedArtifacts);
         when(objectId.toHexString()).thenReturn(ID);
         when(document.get(METADATA_FIELD)).thenReturn(metaData);
-        when(metaData.getList(RELEASE_ARTIFACTS_FIELD, (Class<List<String>>) (Class<?>) List.class,
+        when(metaData.getList(RELEASE_ARTIFACTS_FIELD, Document.class,
                 Collections.emptyList())).thenReturn(storedReleasedArtifacts);
         when(document.getObjectId(ID_FIELD)).thenReturn(objectId);
         when(metaData.getDate(RELEASE_DATE_FIELD)).thenReturn(Date.from(Instant.parse(RELEASE_DATE_TIME)));
@@ -149,4 +150,6 @@ class ReleaseRepositoryImplTest {
         when(mongoTemplate.find(any(), any(), any())).thenReturn(Collections.emptyList());
         assertThat(releaseRepository.findReleaseByReleasedArtifactsAndPath(releasedArtifacts, PATH).isEmpty(), is(true));
     }
+
+
 }

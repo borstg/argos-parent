@@ -44,14 +44,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseDossierConversionHelper.convertToDocumentList;
+import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseDossierConversionHelper.createHashFromArtifactList;
 import static org.springframework.data.mongodb.core.query.MongoRegexCreator.MatchMode.STARTING_WITH;
 
 @Component
@@ -81,7 +85,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
         DBObject metaData = new BasicDBObject();
         Date releaseDate = new Date();
         releaseDossierMetaData.setReleaseDate(releaseDate);
-        metaData.put(RELEASE_ARTIFACTS_FIELD, releaseDossierMetaData.getReleaseArtifacts());
+        metaData.put(RELEASE_ARTIFACTS_FIELD, convertToDocumentList(releaseDossierMetaData.getReleaseArtifacts()));
         metaData.put(SUPPLY_CHAIN_PATH_FIELD, releaseDossierMetaData.getSupplyChainPath());
         metaData.put(RELEASE_DATE_FIELD, releaseDate);
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
@@ -102,11 +106,8 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
         }
         Criteria criteria = createInitialCriteria(releasedArtifacts);
 
-        if (releasedArtifacts.size() > 1) {
-            addAdditionalReleaseArtifacts(releasedArtifacts, criteria);
-        }
-
         if (path != null) {
+
             criteria.and(METADATA_SUPPLY_CHAIN_PATH_FIELD)
                     .regex(Objects.requireNonNull(MongoRegexCreator.INSTANCE
                             .toRegularExpression(path, STARTING_WITH)));
@@ -127,41 +128,55 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     }
 
-    private void addAdditionalReleaseArtifacts(List<Set<String>> releasedArtifacts, Criteria criteria) {
-        for (int i = 1; i < releasedArtifacts.size(); i++) {
-            List<Criteria> andCriteria = new ArrayList<>();
-            andCriteria.add(Criteria.where(METADATA_RELEASE_ARTIFACTS_FIELD).elemMatch(new Criteria()
-                    .elemMatch(new Criteria()
-                            .all(releasedArtifacts.get(i)))));
-            criteria.andOperator(andCriteria.toArray(new Criteria[0]));
-        }
+    private Criteria createInitialCriteria(List<Set<String>> releasedArtifacts) {
+
+        Map<String, List<String>> artifactHashes = createArtifactsHashes(releasedArtifacts);
+        Criteria criteria = new Criteria();
+        List<Criteria> andOperations = new ArrayList<>();
+        artifactHashes.forEach((key, value) -> andOperations
+                .add(Criteria.where(METADATA_RELEASE_ARTIFACTS_FIELD)
+                        .elemMatch(Criteria.where(key).is(value))));
+        criteria.andOperator(andOperations.toArray(new Criteria[0]));
+        return criteria;
+
     }
 
-    private Criteria createInitialCriteria(List<Set<String>> releasedArtifacts) {
-        return Criteria.where(METADATA_RELEASE_ARTIFACTS_FIELD)
-                .elemMatch(new Criteria()
-                        .elemMatch(new Criteria()
-                                .all(releasedArtifacts.get(0))));
+    private Map<String, List<String>> createArtifactsHashes(List<Set<String>> releasedArtifacts) {
+        Map<String, List<String>> map = new HashMap<>();
+        releasedArtifacts.forEach(artifactSet -> {
+            List<String> artifactList = new ArrayList<>(artifactSet);
+            Collections.sort(artifactList);
+            map.put(createHashFromArtifactList(artifactList), artifactList);
+        });
+        return map;
     }
 
     private static Function<Document, ReleaseDossierMetaData> toMetaDataDossier() {
         return document -> {
             Document metaData = (Document) document.get(METADATA_FIELD);
-            List<Set<String>> releaseArtifacts = metaData
-                    .getList(RELEASE_ARTIFACTS_FIELD, (Class<List<String>>) (Class<?>) List.class,
-                            Collections.emptyList())
-                    .stream()
-                    .map(HashSet::new)
-                    .collect(Collectors.toList());
+            List<Document> releaseArtifacts = metaData
+                    .getList(RELEASE_ARTIFACTS_FIELD, Document.class,
+                            Collections.emptyList());
             return ReleaseDossierMetaData
                     .builder()
                     .documentId(document.getObjectId(ID_FIELD)
                             .toHexString())
-                    .releaseArtifacts(releaseArtifacts)
+                    .releaseArtifacts(convertToReleaseArtifacts(releaseArtifacts))
                     .releaseDate(metaData.getDate(RELEASE_DATE_FIELD))
                     .supplyChainPath(metaData.getString(SUPPLY_CHAIN_PATH_FIELD))
                     .build();
         };
+    }
+
+    private static List<Set<String>> convertToReleaseArtifacts(List<Document> releaseArtifacts) {
+        return releaseArtifacts.stream()
+                .flatMap(d -> d.values()
+                        .stream()
+                        .map(o -> (List<String>) o)
+                        .map(HashSet::new)
+                ).collect(Collectors.toList());
+
+
     }
 
     @SneakyThrows
