@@ -30,29 +30,6 @@
         "name": "jenkins",
         "steps": [
           {
-            "name": "clean",
-            "authorizedKeyIds": [
-              "6a58de92fc02d7835faba93ee26d91d7e53f03eb8f86e2518632c34596c5ef3f"
-            ],
-            "requiredNumberOfLinks": 1,
-            "expectedMaterials": [
-              {
-                "ruleType": "ALLOW",
-                "pattern": "**"
-              }
-            ],
-            "expectedProducts": [
-              {
-                "ruleType": "DISALLOW",
-                "pattern": "target/**"
-              },
-              {
-                "ruleType": "ALLOW",
-                "pattern": "**"
-              }
-            ]
-          },
-          {
             "name": "build",
             "authorizedKeyIds": [
               "6a58de92fc02d7835faba93ee26d91d7e53f03eb8f86e2518632c34596c5ef3f"
@@ -60,15 +37,13 @@
             "requiredNumberOfLinks": 1,
             "expectedMaterials": [
               {
-                "ruleType": "MATCH",
-                "pattern": "**",
-                "destinationType": "PRODUCTS",
-                "destinationStepName": "clean"
+                "ruleType": "ALLOW",
+                "pattern": "**"
               }
             ],
             "expectedProducts": [
               {
-                "ruleType": "CREATE",
+                "ruleType": "CREATE_OR_MODIFY",
                 "pattern": "target/argos-test-app.war"
               },
               {

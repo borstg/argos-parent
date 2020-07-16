@@ -35,14 +35,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+
 @ExtendWith(MockitoExtension.class)
-class ModifyRuleVerificationTest {
+class CreateOrModifyRuleVerificationTest {
 
-    private static final String ARTIFACT_URI = "uri";
-    private static final String PRODUCT_HASH = "productHash";
-    private static final String MATERIAL_HASH = "materialHash";
-
-    private ModifyRuleVerification verification;
+    private CreateOrModifyRuleVerification verification;
 
     @Mock
     private RuleVerificationContext<? extends Rule> context;
@@ -50,60 +47,61 @@ class ModifyRuleVerificationTest {
     @Mock
     private ArtifactsVerificationContext artifactsContext;
 
-    private Artifact artifact = new Artifact(ARTIFACT_URI, PRODUCT_HASH);
+    private Artifact artifact = new Artifact("artifactUri", "artifactHash");
     private Artifact artifact2 = new Artifact("uri2", "hash2");
-    private Artifact artifact3 = new Artifact("uri3", "hash3");
-    private Artifact productArtifact = new Artifact(ARTIFACT_URI, PRODUCT_HASH);
-    private Artifact materialArtifact = new Artifact(ARTIFACT_URI, MATERIAL_HASH);
+    private Artifact productArtifact = new Artifact("uri", "productHash");
+    private Artifact materialArtifact = new Artifact("uri", "materialHash");
 
     @BeforeEach
     void setUp() {
-        verification = new ModifyRuleVerification();
+        verification = new CreateOrModifyRuleVerification();
     }
 
     @Test
     void getRuleType() {
-        assertThat(verification.getRuleType(), is(RuleType.MODIFY));
+        assertThat(verification.getRuleType(), is(RuleType.CREATE_OR_MODIFY));
     }
 
     @Test
-    void verifyArtifactsHappyFlow() {
-
+    void verifyExpectedArtifacts() {
         when(context.getFilteredArtifacts()).thenReturn(Set.of(artifact));
-        when(context.getProducts()).thenReturn(Set.of(artifact2,productArtifact));
-        when(context.getMaterials()).thenReturn(Set.of(artifact3, materialArtifact));
-
+        when(context.getMaterials()).thenReturn(Set.of());
+        when(context.getProducts()).thenReturn(Set.of(artifact));
         assertThat(verification.verify(context), is(true));
         verify(context, times(1)).consume(Set.of(artifact));
     }
 
     @Test
-    void verifyArtifactsNotModified() {
-
+    void verifyExpectedProductsArtifactInMaterials() {
         when(context.getFilteredArtifacts()).thenReturn(Set.of(artifact));
-        when(context.getProducts()).thenReturn(Set.of(artifact));
-        when(context.getMaterials()).thenReturn(Set.of(artifact));
-
+        when(context.getMaterials()).thenReturn(Set.of());
+        when(context.getProducts()).thenReturn(Set.of());
         assertThat(verification.verify(context), is(false));
         verify(context, times(0)).consume(anySet());
     }
 
     @Test
-    void verifyArtifactsNoProductMatch() {
+    void verifyExpectedProductsArtifactNotInProducts() {
         when(context.getFilteredArtifacts()).thenReturn(Set.of());
         assertThat(verification.verify(context), is(true));
         verify(context, times(1)).consume(Set.of());
     }
 
     @Test
-    void verifyArtifactsNoMaterialMatch() {
-
-        when(context.getProducts()).thenReturn(Set.of(productArtifact));
-        when(context.getMaterials()).thenReturn(Set.of());
-
-        when(context.getFilteredArtifacts()).thenReturn(Set.of(productArtifact));
-
+    void verifyExpectedMaterialsIsNotValid() {
+        when(context.getFilteredArtifacts()).thenReturn(Set.of(artifact));
+        when(context.getMaterials()).thenReturn(Set.of(artifact));
+        when(context.getProducts()).thenReturn(Set.of(artifact));
         assertThat(verification.verify(context), is(false));
-        verify(context, times(0)).consume(anySet());
+        verify(context, times(0)).consume(Set.of(artifact));
+    }
+
+    @Test
+    void verifyModifiedAndCreatedValid() {
+        when(context.getFilteredArtifacts()).thenReturn(Set.of(productArtifact, materialArtifact, artifact2));
+        when(context.getMaterials()).thenReturn(Set.of(artifact, materialArtifact));
+        when(context.getProducts()).thenReturn(Set.of(artifact, productArtifact, artifact2));
+        assertThat(verification.verify(context), is(true));
+        verify(context, times(1)).consume(Set.of(artifact2, productArtifact, materialArtifact));
     }
 }
