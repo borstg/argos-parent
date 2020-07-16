@@ -22,7 +22,7 @@ import java.util.Date;
 public interface FinishedSessionRepository {
     void save(ArgosSession session);
 
-    boolean hadSessionId(String sessionId);
+    boolean hasSessionId(String sessionId);
 
     void deleteExpiredSessions(Date from);
 

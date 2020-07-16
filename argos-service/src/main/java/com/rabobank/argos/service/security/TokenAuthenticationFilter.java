@@ -40,7 +40,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             getJwtFromRequest(request).filter(tokenProvider::validateToken).ifPresent(jwt -> {
                 TokenProvider.TokenInfo tokenInfo = tokenProvider.getTokenInfo(jwt);
                 String sessionId = tokenInfo.getSessionId();
-                if (!finishedSessionRepository.hadSessionId(sessionId)) {
+                if (!finishedSessionRepository.hasSessionId(sessionId)) {
                     String accountId = tokenInfo.getAccountId();
                     PersonalAccountAuthenticationToken authentication = new PersonalAccountAuthenticationToken(accountId, sessionId, null, null);
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
