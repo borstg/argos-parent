@@ -159,7 +159,7 @@
                         </executions>
                         <configuration>
                             <excludedClasses>com.rabobank.argos.domain.hierarchy.TreeNodeVisitor</excludedClasses>
-                            <coverageThreshold>60</coverageThreshold>
+                            <coverageThreshold>55</coverageThreshold>
                         </configuration>
                     </plugin>
                 </plugins>
