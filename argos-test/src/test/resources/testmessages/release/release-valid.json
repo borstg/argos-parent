@@ -1,0 +1,13 @@
+{
+  "releaseIsValid": true,
+  "releaseDossierMetaData": {
+    "documentId": "#string",
+    "releaseDate": "#string",
+    "supplyChainPath": "#string",
+    "releaseArtifacts": [
+      [
+        "#string"
+      ]
+    ]
+  }
+}

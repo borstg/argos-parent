@@ -38,7 +38,7 @@ public class ServiceAccount extends Account {
     @Builder
     public ServiceAccount(String name, ServiceAccountKeyPair activeKeyPair, List<ServiceAccountKeyPair> inactiveKeyPairs, String parentLabelId) {
         super(UUID.randomUUID().toString(), name, null, activeKeyPair, inactiveKeyPairs == null ? emptyList() : inactiveKeyPairs, singletonList(LocalPermissions.builder().labelId(parentLabelId)
-                .permissions(Arrays.asList(Permission.LINK_ADD, Permission.VERIFY)).build()));
+                .permissions(Arrays.asList(Permission.LINK_ADD, Permission.VERIFY, Permission.RELEASE)).build()));
         this.parentLabelId = parentLabelId;
     }
 }

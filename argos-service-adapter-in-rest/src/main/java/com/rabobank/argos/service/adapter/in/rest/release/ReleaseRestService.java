@@ -16,11 +16,16 @@
 package com.rabobank.argos.service.adapter.in.rest.release;
 
 import com.rabobank.argos.domain.link.Artifact;
+import com.rabobank.argos.domain.permission.Permission;
 import com.rabobank.argos.domain.release.ReleaseResult;
 import com.rabobank.argos.service.adapter.in.rest.api.handler.ReleaseApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestReleaseArtifacts;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestReleaseResult;
+import com.rabobank.argos.service.domain.auditlog.AuditLog;
+import com.rabobank.argos.service.domain.auditlog.AuditParam;
 import com.rabobank.argos.service.domain.release.ReleaseService;
+import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
+import com.rabobank.argos.service.domain.security.PermissionCheck;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +34,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Set;
+
+import static com.rabobank.argos.service.adapter.in.rest.supplychain.SupplyChainLabelIdExtractor.SUPPLY_CHAIN_LABEL_ID_EXTRACTOR;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,7 +47,11 @@ public class ReleaseRestService implements ReleaseApi {
     private final ReleaseResultMapper releaseResultMapper;
 
     @Override
-    public ResponseEntity<RestReleaseResult> createRelease(String supplyChainId, @Valid RestReleaseArtifacts restReleaseArtifacts) {
+    @PermissionCheck(permissions = Permission.RELEASE)
+    @AuditLog
+    public ResponseEntity<RestReleaseResult> createRelease(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR)
+                                                           @AuditParam("supplyChainId") String supplyChainId,
+                                                           @AuditParam("releaseArtifacts") @Valid RestReleaseArtifacts restReleaseArtifacts) {
         List<Set<Artifact>> artifacts = artifactMapper.mapToArtifacts(restReleaseArtifacts.getReleaseArtifacts());
         ReleaseResult releaseResult = releaseService.createRelease(supplyChainId, artifacts);
         return ResponseEntity.ok(releaseResultMapper.maptoRestReleaseResult(releaseResult));

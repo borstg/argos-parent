@@ -29,11 +29,10 @@ Feature: Verification
   Scenario: happy flow all rules and commit to audit log
     * def resp = call read('classpath:feature/release/release-template.feature') { releaseRequest:#(defaultReleaseRequest) ,testDir: 'happy-flow',steps:#(defaultSteps),layoutSigningKey:1}
     And match resp.response == defaultValidResponse
-
-    #* def auditlog = call read('classpath:feature/auditlog.feature')
-   # * string stringResponse = auditlog.response
-    #And match stringResponse contains 'performVerification'
-   # And match stringResponse contains 'verifyCommand'
+    * def auditlog = call read('classpath:feature/auditlog.feature')
+    * string stringResponse = auditlog.response
+    And match stringResponse contains 'createRelease'
+    And match stringResponse contains 'releaseArtifacts'
 
   Scenario: products to verify wrong hash
     * def releaseRequest = {releaseArtifacts: [[{uri: 'target/argos-test-0.0.1-SNAPSHOT.jar',hash: '0123456789012345678901234567890012345678901234567890123456789012'}]] }
@@ -133,31 +132,31 @@ Feature: Verification
     When method POST
     Then status 401
 
-#  Scenario: verification without permission VERIFY should return a 403 error
-#    * url karate.properties['server.baseurl']
-#    * def supplyChain = call read('classpath:feature/supplychain/create-supplychain-with-label.feature') { supplyChainName: 'name'}
-#    * def supplyChainPath = '/api/supplychain/'+ supplyChain.response.id
-#    * def accounWithNoVerifyPermission = call read('classpath:feature/account/create-personal-account.feature') {name: 'Verify unauthorized person',email: 'local.noverify@extra.nogo'}
-#    * call read('classpath:feature/account/set-local-permissions.feature') { accountId: #(accounWithNoVerifyPermission.response.id),labelId: #(supplyChain.response.parentLabelId), permissions: ["READ"]}
-#    * configure headers = call read('classpath:headers.js') { token: #(accounWithNoVerifyPermission.response.token)}
-#    Given path supplyChainPath + '/release'
-#    And request defaultReleaseRequest
-#    When method POST
-#    Then status 403
-#
-#  Scenario: SERVICE_ACCOUNT in other root label cannot verify
-#    * url karate.properties['server.baseurl']
-#    * def rootLabel = call read('classpath:feature/label/create-label.feature') { name: 'root1'}
-#    * def otherRootLabel = call read('classpath:feature/label/create-label.feature') { name: 'other_root_label'}
-#    * def personalAccount = defaultTestData.personalAccounts['default-pa1']
-#    * call read('classpath:feature/account/set-local-permissions.feature') {accountId: #(personalAccount.accountId), labelId: #(rootLabel.response.id), permissions: [READ, SERVICE_ACCOUNT_EDIT,TREE_EDIT]}
-#    * call read('classpath:feature/account/set-local-permissions.feature') {accountId: #(personalAccount.accountId), labelId: #(otherRootLabel.response.id), permissions: [READ, SERVICE_ACCOUNT_EDIT,TREE_EDIT]}
-#    * configure headers = call read('classpath:headers.js') { token: #(personalAccount.token)}
-#    * call read('classpath:feature/account/create-service-account-with-key.feature') {accountName: 'sa6', parentLabelId: #(rootLabel.response.id), keyFile: 'sa-keypair1'}
-#    * def otherSupplyChain = call read('classpath:feature/supplychain/create-supplychain.feature') {supplyChainName: other-supply-chain, parentLabelId: #(otherRootLabel.response.id)}
-#    * def keyPair = read('classpath:testmessages/key/sa-keypair1.json')
-#    * configure headers = call read('classpath:headers.js') { username: #(keyPair.keyId),password:#(keyPair.hashedKeyPassphrase)}
-#    Given path '/api/supplychain/'+ otherSupplyChain.response.id + '/release'
-#    And request defaultReleaseRequest
-#    When method POST
-#    Then status 403
+  Scenario: verification without permission RELEASE should return a 403 error
+    * url karate.properties['server.baseurl']
+    * def supplyChain = call read('classpath:feature/supplychain/create-supplychain-with-label.feature') { supplyChainName: 'name'}
+    * def supplyChainPath = '/api/supplychain/'+ supplyChain.response.id
+    * def accounWithNoReleasePermission = call read('classpath:feature/account/create-personal-account.feature') {name: 'Release unauthorized person',email: 'local.noverify@extra.nogo'}
+    * call read('classpath:feature/account/set-local-permissions.feature') { accountId: #(accounWithNoReleasePermission.response.id),labelId: #(supplyChain.response.parentLabelId), permissions: ["READ"]}
+    * configure headers = call read('classpath:headers.js') { token: #(accounWithNoReleasePermission.response.token)}
+    Given path supplyChainPath + '/release'
+    And request defaultReleaseRequest
+    When method POST
+    Then status 403
+
+  Scenario: SERVICE_ACCOUNT in other root label cannot verify
+    * url karate.properties['server.baseurl']
+    * def rootLabel = call read('classpath:feature/label/create-label.feature') { name: 'root1'}
+    * def otherRootLabel = call read('classpath:feature/label/create-label.feature') { name: 'other_root_label'}
+    * def personalAccount = defaultTestData.personalAccounts['default-pa1']
+    * call read('classpath:feature/account/set-local-permissions.feature') {accountId: #(personalAccount.accountId), labelId: #(rootLabel.response.id), permissions: [READ, SERVICE_ACCOUNT_EDIT,TREE_EDIT]}
+    * call read('classpath:feature/account/set-local-permissions.feature') {accountId: #(personalAccount.accountId), labelId: #(otherRootLabel.response.id), permissions: [READ, SERVICE_ACCOUNT_EDIT,TREE_EDIT]}
+    * configure headers = call read('classpath:headers.js') { token: #(personalAccount.token)}
+    * call read('classpath:feature/account/create-service-account-with-key.feature') {accountName: 'sa6', parentLabelId: #(rootLabel.response.id), keyFile: 'sa-keypair1'}
+    * def otherSupplyChain = call read('classpath:feature/supplychain/create-supplychain.feature') {supplyChainName: other-supply-chain, parentLabelId: #(otherRootLabel.response.id)}
+    * def keyPair = read('classpath:testmessages/key/sa-keypair1.json')
+    * configure headers = call read('classpath:headers.js') { username: #(keyPair.keyId),password:#(keyPair.hashedKeyPassphrase)}
+    Given path '/api/supplychain/'+ otherSupplyChain.response.id + '/release'
+    And request defaultReleaseRequest
+    When method POST
+    Then status 403
