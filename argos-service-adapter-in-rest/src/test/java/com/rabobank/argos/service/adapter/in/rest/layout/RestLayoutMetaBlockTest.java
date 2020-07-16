@@ -76,6 +76,7 @@ class RestLayoutMetaBlockTest {
 
     @Test
     void subItemsRestLayout() {
+
         assertThat(validate(new RestLayoutMetaBlock()
                 .addSignaturesItem(createSignature())
                 .layout(new RestLayout()
@@ -95,7 +96,9 @@ class RestLayoutMetaBlockTest {
                 "layout.keys[0].id", "must match \"^[0-9a-f]*$\"",
                 "layout.keys[0].id", "size must be between 64 and 64",
                 "layout.layoutSegments[0].steps[0].authorizedKeyIds", "size must be between 1 and 2147483647",
-                "layout.layoutSegments[0].steps[0].name", "must not be null")));
+                "layout.layoutSegments[0].steps[0].name", "must not be null",
+                "layout.layoutSegments[0].steps[0].requiredNumberOfLinks", "must not be null"
+        )));
     }
 
     @Test
@@ -125,7 +128,8 @@ class RestLayoutMetaBlockTest {
                 "layout.layoutSegments[0].steps[0].expectedMaterials[0].ruleType", "must not be null",
                 "layout.layoutSegments[0].steps[0].expectedProducts[0].pattern", "must not be null",
                 "layout.layoutSegments[0].steps[0].expectedProducts[0].ruleType", "must not be null",
-                "layout.layoutSegments[0].steps[0].name", "must match \"^([A-Za-z0-9_-]*)?$\""
+                "layout.layoutSegments[0].steps[0].name", "must match \"^([A-Za-z0-9_-]*)?$\"",
+                "layout.layoutSegments[0].steps[0].requiredNumberOfLinks", "must not be null"
         )));
     }
 
@@ -143,9 +147,11 @@ class RestLayoutMetaBlockTest {
                         .addKeysItem(new RestPublicKey()
                                 .id("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254")
                                 .key(new byte[]{1})
-                        ).addLayoutSegmentsItem(new RestLayoutSegment()
+                        )
+                        .addLayoutSegmentsItem(new RestLayoutSegment()
                                 .name("segment1")
                                 .addStepsItem(new RestStep()
+                                        .requiredNumberOfLinks(1)
                                         .addExpectedMaterialsItem(new RestRule().ruleType(RestRule.RuleTypeEnum.MATCH).pattern("pattern"))
                                         .addExpectedProductsItem(new RestRule().ruleType(RestRule.RuleTypeEnum.CREATE).pattern("pattern"))
                                         .name("step1")
