@@ -24,6 +24,7 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestVerifyCommand;
 import com.rabobank.argos.service.domain.auditlog.AuditLog;
 import com.rabobank.argos.service.domain.auditlog.AuditParam;
 import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
+import com.rabobank.argos.service.domain.release.ReleaseRepository;
 import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
 import com.rabobank.argos.service.domain.security.PermissionCheck;
 import com.rabobank.argos.service.domain.verification.VerificationProvider;
@@ -37,6 +38,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.util.HashSet;
 import java.util.List;
 
 import static com.rabobank.argos.service.adapter.in.rest.supplychain.SupplyChainLabelIdExtractor.SUPPLY_CHAIN_LABEL_ID_EXTRACTOR;
@@ -51,9 +54,17 @@ public class VerificationRestService implements VerificationApi {
 
     private final LayoutMetaBlockRepository repository;
 
+    private final ReleaseRepository releaseRepository;
+
     private final ArtifactMapper artifactMapper;
 
     private final VerificationResultMapper verificationResultMapper;
+
+    @Override
+    public ResponseEntity<RestVerificationResult> getVerification(String supplyChainId, @NotNull @Valid List<String> artifactHashes, @Valid String path) {
+        boolean isvalid = releaseRepository.artifactsAreReleased(new HashSet<>(artifactHashes), path);
+        return ResponseEntity.ok(new RestVerificationResult().runIsValid(isvalid));
+    }
 
     @Override
     @PermissionCheck(permissions = Permission.VERIFY)

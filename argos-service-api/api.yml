@@ -515,6 +515,47 @@ paths:
         '500':
           $ref: '#/components/responses/Error'
   /supplychain/{supplyChainId}/verification:
+    get:
+      summary: checks verification on a release artifact set
+      operationId: getVerification
+      tags:
+        - verification
+      security:
+        - basicAuth: []
+        - bearerAuth: []
+      parameters:
+        - name: supplyChainId
+          in: path
+          description: supply chain id
+          required: true
+          schema:
+            type: string
+        - name: artifactHashes
+          in: query
+          style: simple
+          explode: true
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: path
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: VerificationResult
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/Error'
     post:
       summary: creates a verification run
       operationId: performVerification
@@ -530,6 +571,7 @@ paths:
           required: true
           schema:
             type: string
+
       requestBody:
         required: true
         content:
