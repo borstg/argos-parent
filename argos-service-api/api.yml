@@ -1266,14 +1266,20 @@ components:
       required:
         - keyId
         - signature
+        - hashAlgorithm
+        - keyAlgorithm
       properties:
         keyId:
           $ref: '#/components/schemas/KeyId'
         signature:
           type: string
-          minLength: 512
+          minLength: 80
           maxLength: 1024
           pattern: '^[0-9a-f]*$'
+        hashAlgorithm:
+          $ref: '#/components/schemas/HashAlgorithm'
+        keyAlgorithm:
+          $ref: '#/components/schemas/KeyAlgorithm'
     Link:
       type: object
       required:
@@ -1316,11 +1322,23 @@ components:
           minLength: 64
           maxLength: 64
           pattern: '^[0-9a-f]*$'
+    PublicKey:
+      type: object
+      required:
+        - keyId
+        - publicKey
+      properties:
+        keyId:
+          $ref: '#/components/schemas/KeyId'
+        publicKey:
+          type: string
+          format: byte
     KeyPair:
       type: object
       required:
         - keyId
         - publicKey
+        - encryptedPrivateKey
       properties:
         keyId:
           $ref: '#/components/schemas/KeyId'
@@ -1335,21 +1353,21 @@ components:
       required:
         - keyId
         - publicKey
-        - hashedKeyPassphrase
         - encryptedPrivateKey
+        - hashedKeyPassphrase
       properties:
         keyId:
           $ref: '#/components/schemas/KeyId'
         publicKey:
           type: string
           format: byte
+        encryptedPrivateKey:
+          type: string
+          format: byte
         hashedKeyPassphrase:
           type: string
           writeOnly: true
           description: used for authentication of a service account via http basic authentication
-        encryptedPrivateKey:
-          type: string
-          format: byte
     SupplyChain:
       type: object
       required:
@@ -1369,17 +1387,6 @@ components:
           minLength: 36
           maxLength: 36
           pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}?$'
-    PublicKey:
-      type: object
-      required:
-        - id
-        - key
-      properties:
-        id:
-          $ref: '#/components/schemas/KeyId'
-        key:
-          type: string
-          format: byte
     LayoutMetaBlock:
       type: object
       required:
@@ -1503,6 +1510,14 @@ components:
       minLength: 64
       maxLength: 64
       pattern: '^[0-9a-f]*$'
+    KeyAlgorithm:
+      enum:
+        - EC
+    HashAlgorithm:
+      enum:
+        - SHA256
+        - SHA384
+        - SHA512
     Rule:
       type: object
       required:
@@ -1514,6 +1529,7 @@ components:
           enum:
             - ALLOW
             - CREATE
+            - CREATE_OR_MODIFY
             - DELETE
             - DISALLOW
             - MATCH

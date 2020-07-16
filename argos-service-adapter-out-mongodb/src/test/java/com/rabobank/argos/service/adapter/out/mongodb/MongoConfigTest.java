@@ -36,11 +36,4 @@ class MongoConfigTest {
     void setUp() {
         config = new MongoConfig();
     }
-
-    @Test
-    void customConversions() {
-        MongoCustomConversions conversions = config.customConversions();
-        assertThat(conversions.hasCustomReadTarget(Binary.class, PublicKey.class), is(true));
-        assertThat(conversions.hasCustomWriteTarget(PublicKey.class, byte[].class), is(true));
-    }
 }

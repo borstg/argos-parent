@@ -17,7 +17,6 @@ package com.rabobank.argos.test;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabobank.argos.argos4j.internal.ArgosServiceClient;
 import com.rabobank.argos.argos4j.rest.api.client.PersonalAccountApi;
 import com.rabobank.argos.argos4j.rest.api.client.ServiceAccountApi;
 import com.rabobank.argos.argos4j.rest.api.model.RestKeyPair;
@@ -27,6 +26,7 @@ import com.rabobank.argos.argos4j.rest.api.model.RestPersonalAccount;
 import com.rabobank.argos.argos4j.rest.api.model.RestServiceAccount;
 import com.rabobank.argos.argos4j.rest.api.model.RestServiceAccountKeyPair;
 import com.rabobank.argos.domain.ArgosError;
+import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.test.rest.api.ApiClient;
 import com.rabobank.argos.test.rest.api.client.IntegrationTestServiceApi;
 import com.rabobank.argos.test.rest.api.model.TestLayoutMetaBlock;
@@ -121,10 +121,11 @@ class TestServiceHelper {
         ServiceAccountApi serviceAccountApi = getServiceAccountApi(defaultTestData.getPersonalAccounts().get("default-pa1").getToken());
         RestServiceAccount sa = serviceAccountApi.createServiceAccount(new RestServiceAccount().parentLabelId(defaultTestData.getDefaultRootLabel().getId()).name(name));
 
-        String hashedKeyPassphrase = ArgosServiceClient.calculatePassphrase(keyPair.getKeyId(), keyPair.getPassphrase());
+        String hashedKeyPassphrase = ServiceAccountKeyPair.calculateHashedPassphrase(keyPair.getKeyId(), keyPair.getPassphrase());
 
         serviceAccountApi.createServiceAccountKeyById(sa.getId(),
-                new RestServiceAccountKeyPair().keyId(keyPair.getKeyId())
+                new RestServiceAccountKeyPair()
+                		.keyId(keyPair.getKeyId())
                         .hashedKeyPassphrase(hashedKeyPassphrase)
                         .encryptedPrivateKey(keyPair.getEncryptedPrivateKey())
                         .publicKey(keyPair.getPublicKey()));

@@ -15,7 +15,7 @@
  */
 package com.rabobank.argos.service.security;
 
-import com.rabobank.argos.domain.account.ServiceAccountKeyPair;
+import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.service.domain.security.AccountUserDetailsAdapter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

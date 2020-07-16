@@ -15,7 +15,7 @@
  */
 package com.rabobank.argos.domain.account;
 
-import com.rabobank.argos.domain.key.KeyPair;
+import com.rabobank.argos.domain.crypto.KeyPair;
 import com.rabobank.argos.domain.permission.LocalPermissions;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;

@@ -17,7 +17,7 @@ package com.rabobank.argos.service.adapter.in.rest.layout;
 
 import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.account.Account;
-import com.rabobank.argos.domain.key.KeyPair;
+import com.rabobank.argos.domain.crypto.KeyPair;
 import com.rabobank.argos.domain.layout.ApprovalConfiguration;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;

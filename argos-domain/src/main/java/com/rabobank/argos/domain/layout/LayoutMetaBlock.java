@@ -15,13 +15,14 @@
  */
 package com.rabobank.argos.domain.layout;
 
-import com.rabobank.argos.domain.Signature;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import java.util.List;
+
+import com.rabobank.argos.domain.crypto.Signature;
 
 @Getter
 @Setter

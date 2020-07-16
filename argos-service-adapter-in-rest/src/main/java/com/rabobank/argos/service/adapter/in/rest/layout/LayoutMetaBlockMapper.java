@@ -21,13 +21,6 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayout;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayoutMetaBlock;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.security.GeneralSecurityException;
-import java.security.PublicKey;
-
-import static com.rabobank.argos.domain.key.RSAPublicKeyFactory.instance;
 
 
 @Mapper(componentModel = "spring", uses = {StepMapper.class})
@@ -39,18 +32,4 @@ public interface LayoutMetaBlockMapper {
     Layout convertFromRestLayout(RestLayout restLayout);
 
     RestLayoutMetaBlock convertToRestLayoutMetaBlock(LayoutMetaBlock metaBlock);
-
-    @Mapping(source = "key", target = "key")
-    default PublicKey convertByteArrayToPublicKey(byte[] publicKey) {
-        try {
-            return instance(publicKey);
-        } catch (GeneralSecurityException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid public key " + e.getMessage());
-        }
-    }
-
-    @Mapping(source = "key", target = "key")
-    default byte[] convertPublicKeyToByteArray(PublicKey publicKey) {
-        return publicKey.getEncoded();
-    }
 }

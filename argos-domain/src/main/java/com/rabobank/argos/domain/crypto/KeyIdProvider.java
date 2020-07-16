@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.domain.key;
+package com.rabobank.argos.domain.crypto;
 
 import java.security.PublicKey;
 
@@ -23,5 +23,9 @@ public interface KeyIdProvider {
     
     public static String computeKeyId(PublicKey publicKey) {
         return DigestUtils.sha256Hex(publicKey.getEncoded());
+    }
+    
+    public static String computeKeyId(byte[] publicKey) {
+        return DigestUtils.sha256Hex(publicKey);
     }
 }

@@ -15,11 +15,12 @@
  */
 package com.rabobank.argos.domain.account;
 
-import com.rabobank.argos.domain.key.KeyPair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.rabobank.argos.domain.crypto.KeyPair;
 
 import java.util.Collections;
 

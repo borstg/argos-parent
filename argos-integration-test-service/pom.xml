@@ -257,7 +257,6 @@
                                     <excludes>META-INF/</excludes>
                                 </artifactItem>
                             </artifactItems>
-
                             <outputDirectory>${project.build.directory}/api</outputDirectory>
                         </configuration>
                     </execution>

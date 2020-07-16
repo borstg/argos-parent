@@ -17,8 +17,6 @@ package com.rabobank.argos.service.adapter.out.mongodb;
 
 import com.github.cloudyrock.mongock.SpringBootMongock;
 import com.github.cloudyrock.mongock.SpringBootMongockBuilder;
-import com.rabobank.argos.service.adapter.out.mongodb.account.converter.ByteArrayToPublicKeyToReadConverter;
-import com.rabobank.argos.service.adapter.out.mongodb.account.converter.PublicKeyToByteArrayWriteConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -37,8 +35,6 @@ public class MongoConfig {
     @Bean
     public MongoCustomConversions customConversions() {
         List<Converter<?, ?>> converterList = new ArrayList<>();
-        converterList.add(new ByteArrayToPublicKeyToReadConverter());
-        converterList.add(new PublicKeyToByteArrayWriteConverter());
         return new MongoCustomConversions(converterList);
     }
 
