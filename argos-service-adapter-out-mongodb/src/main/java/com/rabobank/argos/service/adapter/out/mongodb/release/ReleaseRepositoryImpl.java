@@ -54,8 +54,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseDossierConversionHelper.convertToDocumentList;
-import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseDossierConversionHelper.createHashFromArtifactList;
+import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseDossierMetaDataConversionHelper.convertToDocumentList;
+import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseDossierMetaDataConversionHelper.createHashFromArtifactList;
 import static org.springframework.data.mongodb.core.query.MongoRegexCreator.MatchMode.STARTING_WITH;
 
 @Component

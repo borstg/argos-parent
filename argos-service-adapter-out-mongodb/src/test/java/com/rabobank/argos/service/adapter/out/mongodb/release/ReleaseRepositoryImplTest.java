@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseDossierConversionHelper.convertToDocumentList;
+import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseDossierMetaDataConversionHelper.convertToDocumentList;
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.ID_FIELD;
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.METADATA_FIELD;
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.RELEASE_ARTIFACTS_FIELD;
