@@ -1504,7 +1504,7 @@ components:
       type: object
       required:
         - name
-        - requiredSignatures
+        - requiredNumberOfLinks
         - authorizedKeyIds
         - expectedMaterials
         - expectedProducts
