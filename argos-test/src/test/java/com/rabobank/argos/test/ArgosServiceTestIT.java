@@ -63,7 +63,7 @@ class ArgosServiceTestIT {
 
     @Karate.Test
     Karate layout() {
-        return new Karate().feature("classpath:feature/layout/layout.feature");
+        return new Karate().tags("@michel").feature("classpath:feature/layout/layout.feature");
     }
 
     @Karate.Test

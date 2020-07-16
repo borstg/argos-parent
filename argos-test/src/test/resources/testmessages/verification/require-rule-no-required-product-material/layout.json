@@ -35,10 +35,6 @@
               "b91bec49e7aaaeeda162970c03193baef561c10337483a8bc0741d514dc63b9c"
             ],
             "requiredNumberOfLinks": 1,
-            "expectedCommand": [
-              "expectedCommand 1",
-              "expectedCommand 2"
-            ],
             "expectedMaterials": [
               {
                 "ruleType": "REQUIRE",
@@ -78,9 +74,6 @@
               "a97daeaf3afaed859472a367da7a860b4b90eefb97fe51384bd45e9eed020b5b"
             ],
             "requiredNumberOfLinks": 1,
-            "expectedCommand": [
-              "stepName2 expectedCommand"
-            ],
             "expectedMaterials": [
               {
                 "ruleType": "MATCH",
