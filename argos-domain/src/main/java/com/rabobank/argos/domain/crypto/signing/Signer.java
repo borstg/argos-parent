@@ -27,7 +27,7 @@ import java.security.PrivateKey;
 
 public class Signer {
     
-    private Signer() {};
+    private Signer() {}
 
     public static Signature sign(KeyPair keyPair, char[] keyPassphrase, String jsonRepresentation) {
     	Signature sig = Signature.builder().keyId(keyPair.getKeyId()).build();

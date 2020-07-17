@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import com.rabobank.argos.domain.crypto.signing.Signer;
 
-public class KeyPairTest {
+class KeyPairTest {
 	
 
 	
