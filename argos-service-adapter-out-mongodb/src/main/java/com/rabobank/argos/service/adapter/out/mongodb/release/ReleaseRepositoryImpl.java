@@ -198,7 +198,8 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     @Override
     public boolean artifactsAreReleased(Set<String> releasedArtifacts, String path) {
-        List<Set<String>> releasedArtifactsList = new ArrayList(releasedArtifacts);
+        List<Set<String>> releasedArtifactsList = new ArrayList();
+        releasedArtifactsList.add(releasedArtifacts);
         checkForEmptyArtifacts(releasedArtifactsList);
         Criteria criteria = createArtifactCriteria(releasedArtifactsList);
         addOptionalPathCriteria(path, criteria);

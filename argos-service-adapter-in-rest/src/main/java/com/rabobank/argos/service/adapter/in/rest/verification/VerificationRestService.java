@@ -61,7 +61,8 @@ public class VerificationRestService implements VerificationApi {
     private final VerificationResultMapper verificationResultMapper;
 
     @Override
-    public ResponseEntity<RestVerificationResult> getVerification(String supplyChainId, @NotNull @Valid List<String> artifactHashes, @Valid String path) {
+    @PermissionCheck(permissions = Permission.VERIFY)
+    public ResponseEntity<RestVerificationResult> getVerification(@LabelIdCheckParam(dataExtractor = SUPPLY_CHAIN_LABEL_ID_EXTRACTOR) String supplyChainId, @NotNull @Valid List<String> artifactHashes, @Valid String path) {
         boolean isvalid = releaseRepository.artifactsAreReleased(new HashSet<>(artifactHashes), path);
         return ResponseEntity.ok(new RestVerificationResult().runIsValid(isvalid));
     }

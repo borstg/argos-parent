@@ -33,6 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Collections.singletonList;
@@ -109,5 +110,14 @@ class VerificationRestServiceTest {
                 .thenReturn(Optional.empty());
         ResponseStatusException error = assertThrows(ResponseStatusException.class, () -> verificationRestService.performVerification("supplyChainId", restVerifyCommand));
         assertThat(error.getStatus().value(), is(400));
+    }
+
+
+    @Test
+    void getVerification() {
+        when(releaseRepository.artifactsAreReleased(any(), any())).thenReturn(true);
+        ResponseEntity<RestVerificationResult> result = verificationRestService.getVerification("id", List.of("hash"), "path");
+        assertThat(result.getStatusCode(), is(HttpStatus.OK));
+        assertThat(result.getBody().getRunIsValid(), is(true));
     }
 }
