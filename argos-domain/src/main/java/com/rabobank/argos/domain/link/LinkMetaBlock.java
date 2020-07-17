@@ -15,7 +15,8 @@
  */
 package com.rabobank.argos.domain.link;
 
-import com.rabobank.argos.domain.Signature;
+import com.rabobank.argos.domain.crypto.Signature;
+
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

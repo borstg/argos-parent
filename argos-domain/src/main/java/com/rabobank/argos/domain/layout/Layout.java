@@ -22,6 +22,7 @@ import lombok.ToString;
 
 import java.util.List;
 
+import com.rabobank.argos.domain.crypto.PublicKey;
 import com.rabobank.argos.domain.layout.rule.MatchRule;
 
 @Getter

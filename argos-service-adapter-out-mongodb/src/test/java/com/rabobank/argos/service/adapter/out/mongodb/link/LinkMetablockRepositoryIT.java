@@ -18,7 +18,7 @@ package com.rabobank.argos.service.adapter.out.mongodb.link;
 import com.github.cloudyrock.mongock.SpringMongock;
 import com.github.cloudyrock.mongock.SpringMongockBuilder;
 import com.mongodb.client.MongoClients;
-import com.rabobank.argos.domain.Signature;
+import com.rabobank.argos.domain.crypto.Signature;
 import com.rabobank.argos.domain.layout.ArtifactType;
 import com.rabobank.argos.domain.link.Artifact;
 import com.rabobank.argos.domain.link.Link;

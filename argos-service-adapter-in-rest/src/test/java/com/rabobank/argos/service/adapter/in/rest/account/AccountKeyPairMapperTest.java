@@ -17,8 +17,8 @@ package com.rabobank.argos.service.adapter.in.rest.account;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabobank.argos.domain.account.ServiceAccountKeyPair;
-import com.rabobank.argos.domain.key.KeyPair;
+import com.rabobank.argos.domain.crypto.KeyPair;
+import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestKeyPair;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestServiceAccountKeyPair;
 import org.apache.commons.io.IOUtils;
@@ -34,14 +34,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
-import java.security.PublicKey;
 import java.util.Base64;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,7 +48,6 @@ class AccountKeyPairMapperTest {
     private AccountKeyPairMapper converter;
     private ObjectMapper mapper;
     private String keyPairJson;
-    private byte[] bytePublicKey;
     private String base64EncodedPublicKey;
 
     @Mock
@@ -64,7 +61,6 @@ class AccountKeyPairMapperTest {
         mapper = new ObjectMapper();
         keyPairJson = IOUtils.toString(getClass().getResourceAsStream("/keypair.json"), UTF_8);
         base64EncodedPublicKey = IOUtils.toString(getClass().getResourceAsStream("/testkey.pub"), UTF_8);
-        bytePublicKey = Base64.getDecoder().decode(base64EncodedPublicKey);
     }
 
     @Test
@@ -74,6 +70,7 @@ class AccountKeyPairMapperTest {
         RestServiceAccountKeyPair restSaKeyPair = mapper.readValue(saPairJson, RestServiceAccountKeyPair.class);
         ServiceAccountKeyPair saKeyPair = converter.convertFromRestKeyPair(restSaKeyPair);
         assertThat(saKeyPair.getEncryptedHashedKeyPassphrase(), is("encodedHashedKeyPassphrase"));
+        
         RestServiceAccountKeyPair restServiceAccountKeyPair = converter.convertToRestKeyPair(saKeyPair);
         assertThat(restServiceAccountKeyPair.getHashedKeyPassphrase(), nullValue());
         restServiceAccountKeyPair.setHashedKeyPassphrase("hashedKeyPassphrase");
@@ -85,11 +82,5 @@ class AccountKeyPairMapperTest {
     void convertFromRestKeyPair() throws JsonProcessingException, JSONException {
         KeyPair keyPair = converter.convertFromRestKeyPair(mapper.readValue(keyPairJson, RestKeyPair.class));
         JSONAssert.assertEquals(keyPairJson, mapper.writeValueAsString(converter.convertToRestKeyPair(keyPair)), true);
-    }
-
-    @Test
-    void convertByteArrayToPublicKey() {
-        PublicKey publicKey = converter.convertByteArrayToPublicKey(bytePublicKey);
-        assertEquals(base64EncodedPublicKey, Base64.getEncoder().encodeToString(converter.convertPublicKeyToByteArray(publicKey)));
     }
 }

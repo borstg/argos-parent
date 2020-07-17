@@ -15,9 +15,10 @@
  */
 package com.rabobank.argos.service.domain.verification;
 
-import com.rabobank.argos.domain.Signature;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import com.rabobank.argos.domain.crypto.Signature;
 
 import java.util.Optional;
 

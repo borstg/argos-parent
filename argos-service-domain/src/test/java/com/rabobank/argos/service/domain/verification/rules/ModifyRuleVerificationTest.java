@@ -81,8 +81,8 @@ class ModifyRuleVerificationTest {
     void verifyArtifactsNotModified() {
 
         when(context.getFilteredArtifacts()).thenReturn(Set.of(artifact));
-        when(context.getProducts()).thenReturn(Set.of(productArtifact));
-        when(context.getMaterials()).thenReturn(Set.of(productArtifact));
+        when(context.getProducts()).thenReturn(Set.of(artifact));
+        when(context.getMaterials()).thenReturn(Set.of(artifact));
 
         assertThat(verification.verify(context), is(false));
         verify(context, times(0)).consume(anySet());

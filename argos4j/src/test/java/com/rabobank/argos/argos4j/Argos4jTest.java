@@ -55,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class Argos4jTest {
 
-    public static final char[] KEY_PASSPHRASE = "gBM1Q4sc3kh05E".toCharArray();
+    public static final char[] KEY_PASSPHRASE = "password".toCharArray();
     private Argos4j argos4j;
     private WireMockServer wireMockServer;
 

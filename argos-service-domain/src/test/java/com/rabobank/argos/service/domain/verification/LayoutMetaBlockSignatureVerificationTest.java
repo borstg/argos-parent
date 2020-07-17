@@ -15,16 +15,18 @@
  */
 package com.rabobank.argos.service.domain.verification;
 
-import com.rabobank.argos.domain.Signature;
+import com.rabobank.argos.domain.crypto.Signature;
+import com.rabobank.argos.domain.crypto.signing.SignatureValidator;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
-import com.rabobank.argos.domain.signing.SignatureValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +40,7 @@ class LayoutMetaBlockSignatureVerificationTest {
 
     private static final String KEY_ID = "keyId";
     private static final String SIG = "sig";
+    
     @Mock
     private SignatureValidator signatureValidator;
 
@@ -59,7 +62,7 @@ class LayoutMetaBlockSignatureVerificationTest {
     private Layout layout;
 
     @Mock
-    private com.rabobank.argos.domain.layout.PublicKey domainPublicKey;
+    private com.rabobank.argos.domain.crypto.PublicKey domainPublicKey;
 
     @BeforeEach
     void setUp() {
@@ -72,25 +75,24 @@ class LayoutMetaBlockSignatureVerificationTest {
     }
 
     @Test
-    void verifyOkay() {
-        when(domainPublicKey.getId()).thenReturn(KEY_ID);
-        when(domainPublicKey.getKey()).thenReturn(publicKey);
+    void verifyOkay() throws GeneralSecurityException, IOException {
+        when(domainPublicKey.getKeyId()).thenReturn(KEY_ID);
+        when(domainPublicKey.getJavaPublicKey()).thenReturn(publicKey);
         mockSetup(true);
         assertThat(verification.verify(context).isRunIsValid(), is(true));
     }
 
     @Test
-    void verifyNotOkay() {
-        when(domainPublicKey.getId()).thenReturn(KEY_ID);
-        when(domainPublicKey.getKey()).thenReturn(publicKey);
+    void verifyNotOkay() throws GeneralSecurityException, IOException {
+        when(domainPublicKey.getKeyId()).thenReturn(KEY_ID);
+        when(domainPublicKey.getJavaPublicKey()).thenReturn(publicKey);
         mockSetup(false);
         assertThat(verification.verify(context).isRunIsValid(), is(false));
     }
 
     private void mockSetup(boolean valid) {
         when(layoutMetaBlock.getLayout()).thenReturn(layout);
-        when(signatureValidator.isValid(layout, SIG, publicKey)).thenReturn(valid);
-        when(signature.getSignature()).thenReturn(SIG);
+        when(signatureValidator.isValid(layout, signature, publicKey)).thenReturn(valid);
         when(signature.getKeyId()).thenReturn(KEY_ID);
         when(layout.getKeys()).thenReturn(List.of(domainPublicKey));
         when(context.getLayoutMetaBlock()).thenReturn(layoutMetaBlock);
@@ -101,9 +103,9 @@ class LayoutMetaBlockSignatureVerificationTest {
     void verifyKeyNotFound() {
         when(layoutMetaBlock.getLayout()).thenReturn(layout);
         when(layout.getKeys()).thenReturn(List.of(domainPublicKey));
-        when(domainPublicKey.getId()).thenReturn(KEY_ID);
+        when(domainPublicKey.getKeyId()).thenReturn(KEY_ID);
         when(signature.getKeyId()).thenReturn(KEY_ID);
-        when(domainPublicKey.getId()).thenReturn("other");
+        when(domainPublicKey.getKeyId()).thenReturn("other");
         when(context.getLayoutMetaBlock()).thenReturn(layoutMetaBlock);
         when(layoutMetaBlock.getSignatures()).thenReturn(Collections.singletonList(signature));
         assertThat(verification.verify(context).isRunIsValid(), is(false));

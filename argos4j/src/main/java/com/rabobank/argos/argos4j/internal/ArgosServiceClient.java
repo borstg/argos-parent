@@ -30,6 +30,8 @@ import com.rabobank.argos.argos4j.rest.api.model.RestArtifact;
 import com.rabobank.argos.argos4j.rest.api.model.RestLinkMetaBlock;
 import com.rabobank.argos.argos4j.rest.api.model.RestServiceAccountKeyPair;
 import com.rabobank.argos.argos4j.rest.api.model.RestVerifyCommand;
+import com.rabobank.argos.domain.crypto.HashAlgorithm;
+import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.domain.link.Artifact;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
 import feign.FeignException;
@@ -50,7 +52,7 @@ public class ArgosServiceClient {
         this.settings = settings;
         apiClient = new ApiClient("basicAuth").setBasePath(settings.getArgosServerBaseUrl());
 
-        apiClient.setCredentials(settings.getSigningKeyId(), calculatePassphrase(settings.getSigningKeyId(), new String(signingKeyPassphrase)));
+        apiClient.setCredentials(settings.getSigningKeyId(), ServiceAccountKeyPair.calculateHashedPassphrase(settings.getSigningKeyId(), new String(signingKeyPassphrase)));
         apiClient.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
@@ -91,20 +93,5 @@ public class ArgosServiceClient {
         SupplychainApi supplychainApi = apiClient.buildClient(SupplychainApi.class);
         return supplychainApi.getSupplyChainByPath(settings.getSupplyChainName(), settings.getPath()).getId();
     }
-
-    public static String calculatePassphrase(String keyId, String passphrase) {
-        MessageDigest md = null;
-        try {
-            md = MessageDigest.getInstance("SHA-512");
-        } catch (NoSuchAlgorithmException e) {
-            throw new Argos4jError(e.getMessage());
-        }
-        byte[] passphraseHash = md.digest(passphrase.getBytes());
-        byte [] keyIdBytes = keyId.getBytes();
-        // salt with keyId
-        md.update(keyIdBytes);        
-        return Hex.toHexString(md.digest(passphraseHash));
-    }
-
 
 }

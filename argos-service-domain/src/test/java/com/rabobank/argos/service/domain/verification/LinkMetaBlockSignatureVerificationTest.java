@@ -15,18 +15,20 @@
  */
 package com.rabobank.argos.service.domain.verification;
 
-import com.rabobank.argos.domain.Signature;
+import com.rabobank.argos.domain.crypto.Signature;
+import com.rabobank.argos.domain.crypto.signing.SignatureValidator;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
 import com.rabobank.argos.domain.link.Link;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
-import com.rabobank.argos.domain.signing.SignatureValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.Collections;
 import java.util.List;
@@ -67,7 +69,7 @@ class LinkMetaBlockSignatureVerificationTest {
     private Layout layout;
 
     @Mock
-    private com.rabobank.argos.domain.layout.PublicKey domainPublicKey;
+    private com.rabobank.argos.domain.crypto.PublicKey domainPublicKey;
 
     @BeforeEach
     void setUp() {
@@ -80,14 +82,14 @@ class LinkMetaBlockSignatureVerificationTest {
     }
 
     @Test
-    void verifyOkay() {
+    void verifyOkay() throws GeneralSecurityException, IOException {
         mockSetup(true);
         assertThat(verification.verify(context).isRunIsValid(), is(true));
         verify(context).removeLinkMetaBlocks(Collections.emptyList());
     }
 
     @Test
-    void verifyNotValid() {
+    void verifyNotValid() throws GeneralSecurityException, IOException {
         mockSetup(false);
         assertThat(verification.verify(context).isRunIsValid(), is(true));
         verify(context).removeLinkMetaBlocks(List.of(linkMetaBlock));
@@ -105,17 +107,16 @@ class LinkMetaBlockSignatureVerificationTest {
         verify(context).removeLinkMetaBlocks(List.of(linkMetaBlock));
     }
 
-    private void mockSetup(boolean valid) {
+    private void mockSetup(boolean valid) throws GeneralSecurityException, IOException {
         when(context.getLinkMetaBlocks()).thenReturn(List.of(linkMetaBlock));
         when(linkMetaBlock.getLink()).thenReturn(link);
         when(linkMetaBlock.getSignature()).thenReturn(signature);
         when(signature.getKeyId()).thenReturn(KEY_ID);
-        when(signature.getSignature()).thenReturn(SIG);
-        when(domainPublicKey.getId()).thenReturn(KEY_ID);
-        when(domainPublicKey.getKey()).thenReturn(publicKey);
+        when(domainPublicKey.getKeyId()).thenReturn(KEY_ID);
+        when(domainPublicKey.getJavaPublicKey()).thenReturn(publicKey);
         layout = Layout.builder().keys(List.of(domainPublicKey)).build();
         when(context.getLayoutMetaBlock()).thenReturn(layoutMetaBlock);
         when(layoutMetaBlock.getLayout()).thenReturn(layout);
-        when(signatureValidator.isValid(link, SIG, publicKey)).thenReturn(valid);
+        when(signatureValidator.isValid(link, signature, publicKey)).thenReturn(valid);
     }
 }

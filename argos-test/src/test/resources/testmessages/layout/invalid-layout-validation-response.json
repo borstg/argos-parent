@@ -18,7 +18,7 @@
     {
       "field": "keys",
       "type": "MODEL_CONSISTENCY",
-      "message": "key with id 5ac47ccc386678d0eb76efcdbc0720474586ff12e673d5d0f52537c2a722438c does not match computed key id from public key"
+      "message": "key with id dd39eed990878d0709b8878a2f2bcd784447d4d91e0feb53265334ddde8787bc does not match computed key id from public key"
     },
     {
       "field": "keys",

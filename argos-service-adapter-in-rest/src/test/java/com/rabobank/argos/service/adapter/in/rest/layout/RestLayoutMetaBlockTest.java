@@ -15,6 +15,9 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.layout;
 
+import com.rabobank.argos.domain.crypto.HashAlgorithm;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestHashAlgorithm;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestKeyAlgorithm;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayout;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayoutMetaBlock;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayoutSegment;
@@ -43,11 +46,15 @@ class RestLayoutMetaBlockTest {
 
     @Test
     void emptyRestLayout() {
-        assertThat(validate(new RestLayoutMetaBlock().addSignaturesItem(new RestSignature()).layout(new RestLayout())), contains(expectedErrors(
+        assertThat(validate(new RestLayoutMetaBlock()
+        		.addSignaturesItem(new RestSignature())
+        		.layout(new RestLayout())), contains(expectedErrors(
                 "layout.authorizedKeyIds", "size must be between 1 and 2147483647",
                 "layout.expectedEndProducts", "size must be between 1 and 2147483647",
                 "layout.keys", "size must be between 1 and 2147483647",
                 "layout.layoutSegments", "size must be between 1 and 2147483647",
+                "signatures[0].hashAlgorithm", "must not be null",
+                "signatures[0].keyAlgorithm", "must not be null",
                 "signatures[0].keyId", "must not be null",
                 "signatures[0].signature", "must not be null")));
     }
@@ -55,7 +62,11 @@ class RestLayoutMetaBlockTest {
     @Test
     void emptySubItemsRestLayout() {
         assertThat(validate(new RestLayoutMetaBlock()
-                .addSignaturesItem(new RestSignature().keyId("keyId").signature("signature"))
+                .addSignaturesItem(new RestSignature()
+                		.keyId("keyId")
+                		.signature("signature")
+                		.hashAlgorithm(RestHashAlgorithm.SHA256)
+                		.keyAlgorithm(RestKeyAlgorithm.EC))
                 .layout(new RestLayout()
                         .addAuthorizedKeyIdsItem("authorizedKeyId")
                         .addExpectedEndProductsItem(new RestMatchRule())
@@ -64,14 +75,14 @@ class RestLayoutMetaBlockTest {
                 "layout.expectedEndProducts[0].destinationStepName", "must not be null",
                 "layout.expectedEndProducts[0].destinationType", "must not be null",
                 "layout.expectedEndProducts[0].pattern", "must not be null",
-                "layout.keys[0].id", "must not be null",
-                "layout.keys[0].key", "must not be null",
+                "layout.keys[0].keyId", "must not be null",
+                "layout.keys[0].publicKey", "must not be null",
                 "layout.layoutSegments[0].name", "must not be null",
                 "layout.layoutSegments[0].steps", "size must be between 1 and 2147483647",
                 "signatures[0].keyId", "must match \"^[0-9a-f]*$\"",
                 "signatures[0].keyId", "size must be between 64 and 64",
                 "signatures[0].signature", "must match \"^[0-9a-f]*$\"",
-                "signatures[0].signature", "size must be between 512 and 1024")));
+                "signatures[0].signature", "size must be between 80 and 1024")));
     }
 
     @Test
@@ -87,14 +98,14 @@ class RestLayoutMetaBlockTest {
                                 .destinationType(RestMatchRule.DestinationTypeEnum.PRODUCTS)
                                 .pattern("pattern"))
                         .addKeysItem(new RestPublicKey()
-                                .id("keyId")
-                                .key(new byte[]{1})
+                                .keyId("keyId")
+                                .publicKey(new byte[]{1})
                         ).addLayoutSegmentsItem(new RestLayoutSegment()
                                 .name("segment1")
                                 .addStepsItem(new RestStep())
                         ))), contains(expectedErrors(
-                "layout.keys[0].id", "must match \"^[0-9a-f]*$\"",
-                "layout.keys[0].id", "size must be between 64 and 64",
+                "layout.keys[0].keyId", "must match \"^[0-9a-f]*$\"",
+                "layout.keys[0].keyId", "size must be between 64 and 64",
                 "layout.layoutSegments[0].steps[0].authorizedKeyIds", "size must be between 1 and 2147483647",
                 "layout.layoutSegments[0].steps[0].name", "must not be null",
                 "layout.layoutSegments[0].steps[0].requiredNumberOfLinks", "must not be null"
@@ -113,8 +124,8 @@ class RestLayoutMetaBlockTest {
                                 .destinationType(RestMatchRule.DestinationTypeEnum.PRODUCTS)
                                 .pattern("pattern"))
                         .addKeysItem(new RestPublicKey()
-                                .id("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254")
-                                .key(new byte[]{1})
+                                .keyId("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254")
+                                .publicKey(new byte[]{1})
                         ).addLayoutSegmentsItem(new RestLayoutSegment()
                                 .name("segment 1")
                                 .addStepsItem(new RestStep()
@@ -145,10 +156,9 @@ class RestLayoutMetaBlockTest {
                                 .destinationType(RestMatchRule.DestinationTypeEnum.PRODUCTS)
                                 .pattern("pattern"))
                         .addKeysItem(new RestPublicKey()
-                                .id("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254")
-                                .key(new byte[]{1})
-                        )
-                        .addLayoutSegmentsItem(new RestLayoutSegment()
+                                .keyId("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254")
+                                .publicKey(new byte[]{1})
+                        ).addLayoutSegmentsItem(new RestLayoutSegment()
                                 .name("segment1")
                                 .addStepsItem(new RestStep()
                                         .requiredNumberOfLinks(1)
@@ -162,6 +172,8 @@ class RestLayoutMetaBlockTest {
 
     private RestSignature createSignature() {
         return new RestSignature()
+        		.hashAlgorithm(RestHashAlgorithm.SHA256)
+        		.keyAlgorithm(RestKeyAlgorithm.EC)
                 .keyId("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254")
                 .signature("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254");
     }

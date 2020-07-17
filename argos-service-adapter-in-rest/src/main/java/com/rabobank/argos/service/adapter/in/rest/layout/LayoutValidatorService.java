@@ -15,12 +15,12 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.layout;
 
-import com.rabobank.argos.domain.Signature;
-import com.rabobank.argos.domain.key.KeyIdProvider;
+import com.rabobank.argos.domain.crypto.KeyIdProvider;
+import com.rabobank.argos.domain.crypto.PublicKey;
+import com.rabobank.argos.domain.crypto.Signature;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
 import com.rabobank.argos.domain.layout.LayoutSegment;
-import com.rabobank.argos.domain.layout.PublicKey;
 import com.rabobank.argos.domain.layout.Step;
 import com.rabobank.argos.domain.layout.rule.MatchRule;
 import com.rabobank.argos.service.adapter.in.rest.SignatureValidatorService;
@@ -40,6 +40,8 @@ import java.util.stream.Stream;
 import static com.rabobank.argos.service.adapter.in.rest.api.model.RestValidationMessage.TypeEnum.MODEL_CONSISTENCY;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+
+import java.security.GeneralSecurityException;
 
 @Service
 @RequiredArgsConstructor
@@ -88,14 +90,14 @@ public class LayoutValidatorService {
     }
 
     private void validatePublicKeyId(LayoutValidationReport report, PublicKey publicKey) {
-        if (!publicKey.getId().equals(KeyIdProvider.computeKeyId(publicKey.getKey()))) {
+        if (!publicKey.getKeyId().equals(KeyIdProvider.computeKeyId(publicKey.getPublicKey()))) {
             report.addValidationMessage("keys",
-                    "key with id " + publicKey.getId() + " does not match computed key id from public key");
+                    "key with id " + publicKey.getKeyId() + " does not match computed key id from public key");
         }
     }
 
     private void validateAuthorizedKeysWithPublicKeys(LayoutValidationReport report, Layout layout) {
-        Set<String> publicKeyIds = layout.getKeys().stream().map(PublicKey::getId).collect(toSet());
+        Set<String> publicKeyIds = layout.getKeys().stream().map(PublicKey::getKeyId).collect(toSet());
         Set<String> authorizedKeyIds = Stream.concat(layout.getAuthorizedKeyIds().stream(), layout.getLayoutSegments()
                 .stream().map(LayoutSegment::getSteps).flatMap(List::stream).map(Step::getAuthorizedKeyIds)
                 .flatMap(List::stream)).collect(toSet());
@@ -173,7 +175,9 @@ public class LayoutValidatorService {
         }
 
         layoutMetaBlock.getSignatures()
-                .forEach(signature -> signatureValidatorService.validateSignature(layoutMetaBlock.getLayout(), signature));
+                .forEach(signature -> {
+						signatureValidatorService.validateSignature(layoutMetaBlock.getLayout(), signature);
+				});
     }
 
     private void validateAutorizationKeyIds(LayoutValidationReport report, Layout layout) {

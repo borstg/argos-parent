@@ -16,14 +16,17 @@
 package com.rabobank.argos.integrationtest.service;
 
 import com.rabobank.argos.domain.ArgosError;
-import com.rabobank.argos.domain.Signature;
+import com.rabobank.argos.domain.crypto.KeyIdProvider;
+import com.rabobank.argos.domain.crypto.KeyPair;
+import com.rabobank.argos.domain.crypto.Signature;
 import com.rabobank.argos.domain.account.AuthenticationProvider;
 import com.rabobank.argos.domain.account.PersonalAccount;
-import com.rabobank.argos.domain.key.KeyIdProvider;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
-import com.rabobank.argos.domain.signing.JsonSigningSerializer;
+import com.rabobank.argos.domain.crypto.signing.JsonSigningSerializer;
+import com.rabobank.argos.domain.crypto.signing.Signer;
 import com.rabobank.argos.integrationtest.argos.service.api.handler.IntegrationTestServiceApi;
+import com.rabobank.argos.integrationtest.argos.service.api.model.RestKeyAlgorithm;
 import com.rabobank.argos.integrationtest.argos.service.api.model.RestKeyPair;
 import com.rabobank.argos.integrationtest.argos.service.api.model.RestLayoutMetaBlock;
 import com.rabobank.argos.integrationtest.argos.service.api.model.RestLinkMetaBlock;
@@ -47,6 +50,7 @@ import org.bouncycastle.operator.InputDecryptorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
 import org.bouncycastle.pkcs.PKCSException;
+import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -65,7 +69,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
-import java.security.KeyPair;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -128,19 +132,27 @@ public class TestITService implements IntegrationTestServiceApi {
 
     @Override
     public ResponseEntity<RestKeyPair> createKeyPair(String password) {
-        KeyPair keyPair = generateKeyPair();
-        String keyId = KeyIdProvider.computeKeyId(keyPair.getPublic());
-        byte[] privateKey = addPassword(keyPair.getPrivate().getEncoded(), password);
-        return ResponseEntity.ok(new RestKeyPair().keyId(keyId).encryptedPrivateKey(privateKey).publicKey(keyPair.getPublic().getEncoded()));
+        KeyPair keyPair = null;
+		try {
+			keyPair = KeyPair.createKeyPair(password.toCharArray());
+		} catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | OperatorCreationException
+				| PemGenerationException e) {
+			log.error(e.getMessage());
+		}
+        return ResponseEntity.ok(new RestKeyPair()
+        		.keyId(keyPair.getKeyId())
+        		.publicKey(keyPair.getPublicKey())
+        		.encryptedPrivateKey(keyPair.getEncryptedPrivateKey()));
     }
 
     @Override
     public ResponseEntity<RestLayoutMetaBlock> signLayout(String password, String keyId, RestLayoutMetaBlock restLayoutMetaBlock) {
         LayoutMetaBlock layoutMetaBlock = layoutMetaBlockMapper.convertFromRestLayoutMetaBlock(restLayoutMetaBlock);
-        String signature = createSignature(getPrivateKey(password, keyId), new JsonSigningSerializer().serialize(layoutMetaBlock.getLayout()));
-
+        KeyPair keyPair = getKeyPair(keyId);
+        Signature signature = null;
+		signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(layoutMetaBlock.getLayout()));
         List<Signature> signatures = new ArrayList<>(layoutMetaBlock.getSignatures());
-        signatures.add(Signature.builder().signature(signature).keyId(keyId).build());
+        signatures.add(signature);
         layoutMetaBlock.setSignatures(signatures);
         return ResponseEntity.ok(layoutMetaBlockMapper.convertToRestLayoutMetaBlock(layoutMetaBlock));
     }
@@ -149,8 +161,11 @@ public class TestITService implements IntegrationTestServiceApi {
     public ResponseEntity<RestLinkMetaBlock> signLink(String password, String keyId, RestLinkMetaBlock restLinkMetaBlock) {
         LinkMetaBlock linkMetaBlock = linkMetaBlockMapper.convertFromRestLinkMetaBlock(restLinkMetaBlock);
 
-        String signature = createSignature(getPrivateKey(password, keyId), new JsonSigningSerializer().serialize(linkMetaBlock.getLink()));
-        linkMetaBlock.setSignature(Signature.builder().signature(signature).keyId(keyId).build());
+        KeyPair keyPair = getKeyPair(keyId);
+        Signature signature = null;
+		signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(linkMetaBlock.getLink()));
+        linkMetaBlock.setSignature(signature);
+        
         return ResponseEntity.ok(linkMetaBlockMapper.convertToRestLinkMetaBlock(linkMetaBlock));
 
     }
@@ -194,19 +209,9 @@ public class TestITService implements IntegrationTestServiceApi {
                 .signWith(secretKey)
                 .compact();
     }
-
-    private PrivateKey getPrivateKey(String password, String keyId) {
-        return decryptPrivateKey(accountService.findKeyPairByKeyId(keyId).orElseThrow().getEncryptedPrivateKey(), password.toCharArray());
-    }
-
-    private KeyPair generateKeyPair() {
-        try {
-            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-            generator.initialize(2048);
-            return generator.generateKeyPair();
-        } catch (NoSuchAlgorithmException e) {
-            throw new ArgosError(e.getMessage(), e);
-        }
+    
+    private KeyPair getKeyPair(String keyId) {
+    	return accountService.findKeyPairByKeyId(keyId).orElseThrow();
     }
 
     private byte[] addPassword(byte[] encodedprivkey, String password) {
@@ -242,29 +247,6 @@ public class TestITService implements IntegrationTestServiceApi {
             return encinfo.getEncoded();
         } catch (GeneralSecurityException | IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private static PrivateKey decryptPrivateKey(byte[] encodedPrivateKey, char[] keyPassphrase) {
-        try {
-            PKCS8EncryptedPrivateKeyInfo encPKInfo = new PKCS8EncryptedPrivateKeyInfo(encodedPrivateKey);
-            log.info("EncryptionAlgorithm : {}", encPKInfo.getEncryptionAlgorithm().getAlgorithm());
-            InputDecryptorProvider decProv = new JceOpenSSLPKCS8DecryptorProviderBuilder().setProvider("BC").build(keyPassphrase);
-            PrivateKeyInfo pkInfo = encPKInfo.decryptPrivateKeyInfo(decProv);
-            return new JcaPEMKeyConverter().setProvider("BC").getPrivateKey(pkInfo);
-        } catch (IOException | PKCSException | OperatorCreationException e) {
-            throw new ArgosError(e.getMessage(), e);
-        }
-    }
-
-    private String createSignature(PrivateKey privateKey, String jsonRepr) {
-        try {
-            java.security.Signature privateSignature = java.security.Signature.getInstance("SHA256withRSA");
-            privateSignature.initSign(privateKey);
-            privateSignature.update(jsonRepr.getBytes(StandardCharsets.UTF_8));
-            return Hex.encodeHexString(privateSignature.sign());
-        } catch (GeneralSecurityException e) {
-            throw new ArgosError(e.getMessage(), e);
         }
     }
 
