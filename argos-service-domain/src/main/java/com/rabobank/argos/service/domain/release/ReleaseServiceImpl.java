@@ -16,9 +16,9 @@
 package com.rabobank.argos.service.domain.release;
 
 import com.rabobank.argos.domain.account.AccountKeyInfo;
+import com.rabobank.argos.domain.crypto.PublicKey;
 import com.rabobank.argos.domain.hierarchy.HierarchyMode;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
-import com.rabobank.argos.domain.layout.PublicKey;
 import com.rabobank.argos.domain.link.Artifact;
 import com.rabobank.argos.domain.release.ReleaseDossier;
 import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
@@ -134,7 +134,7 @@ public class ReleaseServiceImpl implements ReleaseService {
                 .getLayout()
                 .getKeys()
                 .stream()
-                .map(PublicKey::getId)
+                .map(PublicKey::getKeyId)
                 .collect(Collectors.toList());
 
         return accountInfoRepository.findByKeyIds(keyIds).stream()

@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.domain;
+package com.rabobank.argos.domain.crypto;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+public enum HashAlgorithm {
+    SHA256("SHA-256"), SHA384("SHA-384"), SHA512("SHA-512");
+	
+	private String stringValue;
+	
+	HashAlgorithm(String stringValue) {
+		this.stringValue = stringValue;
+	}
+	
+	public String getStringValue() {
+	    return stringValue;
+	}
 
-@Builder
-@Setter
-@Getter
-@EqualsAndHashCode(exclude={"signature"})
-@ToString
-public class Signature {
-    private String keyId;
-    private String signature;
 }

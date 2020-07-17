@@ -13,24 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.domain.account;
+package com.rabobank.argos.domain.crypto;
 
-import com.rabobank.argos.domain.key.KeyPair;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.security.PublicKey;
-
-@Getter
-@Setter
-public class ServiceAccountKeyPair extends KeyPair {
-
-    private String encryptedHashedKeyPassphrase;
-
-    @Builder
-    public ServiceAccountKeyPair(String keyId, byte[] encryptedPrivateKey, PublicKey publicKey, String encryptedHashedKeyPassphrase) {
-        super(keyId, encryptedPrivateKey, publicKey);
-        this.encryptedHashedKeyPassphrase = encryptedHashedKeyPassphrase;
-    }
+public enum KeyAlgorithm {
+  EC
 }

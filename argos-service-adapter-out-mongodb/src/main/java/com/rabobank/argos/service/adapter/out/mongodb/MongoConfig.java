@@ -16,13 +16,8 @@
 package com.rabobank.argos.service.adapter.out.mongodb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.cloudyrock.mongock.SpringBootMongock;
 import com.github.cloudyrock.mongock.SpringBootMongockBuilder;
-import com.rabobank.argos.domain.layout.PublicKey;
-import com.rabobank.argos.service.adapter.out.mongodb.account.converter.ByteArrayToPublicKeyToReadConverter;
-import com.rabobank.argos.service.adapter.out.mongodb.account.converter.PublicKeyToByteArrayWriteConverter;
-import com.rabobank.argos.service.adapter.out.mongodb.release.PublicKeyJsonSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -43,8 +38,6 @@ public class MongoConfig {
     @Bean
     public MongoCustomConversions customConversions() {
         List<Converter<?, ?>> converterList = new ArrayList<>();
-        converterList.add(new ByteArrayToPublicKeyToReadConverter());
-        converterList.add(new PublicKeyToByteArrayWriteConverter());
         return new MongoCustomConversions(converterList);
     }
 
@@ -54,9 +47,6 @@ public class MongoConfig {
     @Bean(name = "releaseFileJsonMapper")
     ObjectMapper releaseFileJsonMapper() {
         ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(PublicKey.class, new PublicKeyJsonSerializer());
-        mapper.registerModule(module);
         return mapper;
     }
 

@@ -13,24 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.domain.key;
+package com.rabobank.argos.domain.crypto.signing;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import com.rabobank.argos.domain.layout.Layout;
+import com.rabobank.argos.domain.link.Link;
 
-import java.io.Serializable;
-import java.security.PublicKey;
+public interface SigningSerializer {
 
-@Getter
-@Setter
-@ToString
-@AllArgsConstructor
-@NoArgsConstructor
-public class KeyPair implements Serializable {
-    private String keyId;
-    private byte[] encryptedPrivateKey;
-    private PublicKey publicKey;
+    String serialize(Link link);
+
+    String serialize(Layout layout);
 }

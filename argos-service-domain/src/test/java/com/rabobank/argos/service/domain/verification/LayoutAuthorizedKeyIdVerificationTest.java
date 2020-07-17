@@ -15,13 +15,14 @@
  */
 package com.rabobank.argos.service.domain.verification;
 
-import com.rabobank.argos.domain.Signature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.rabobank.argos.domain.crypto.Signature;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;

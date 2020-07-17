@@ -32,7 +32,7 @@
 	{
 		"id": "Environments/argos/default-sa3",
 		"type": "argos.ServiceAccount",
-		"keyId": "a97daeaf3afaed859472a367da7a860b4b90eefb97fe51384bd45e9eed020b5b",
+		"keyId": "b12d015b7519cdab1b4e2f478787983370f0c535c8e02ff893d716507a0b4eba",
 		"passphrase": "test"
 	},
 	{

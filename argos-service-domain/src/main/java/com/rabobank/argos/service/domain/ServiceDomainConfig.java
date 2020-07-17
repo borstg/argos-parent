@@ -15,9 +15,10 @@
  */
 package com.rabobank.argos.service.domain;
 
-import com.rabobank.argos.domain.signing.SignatureValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.rabobank.argos.domain.crypto.signing.SignatureValidator;
 
 @Configuration
 public class ServiceDomainConfig {

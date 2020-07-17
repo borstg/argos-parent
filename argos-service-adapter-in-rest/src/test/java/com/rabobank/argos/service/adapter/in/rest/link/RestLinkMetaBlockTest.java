@@ -16,6 +16,8 @@
 package com.rabobank.argos.service.adapter.in.rest.link;
 
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestArtifact;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestHashAlgorithm;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestKeyAlgorithm;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLink;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLinkMetaBlock;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestSignature;
@@ -40,10 +42,13 @@ class RestLinkMetaBlockTest {
 
     @Test
     void emptyRestLinkAndRestLinkMetaBlockAndRestSignature() {
-        assertThat(validate(new RestLinkMetaBlock().link(new RestLink()).signature(new RestSignature())), contains(expectedErrors(
+        assertThat(validate(new RestLinkMetaBlock().link(new RestLink())
+        		.signature(new RestSignature())), contains(expectedErrors(
                 "link.layoutSegmentName", "must not be null",
                 "link.runId", "must not be null",
                 "link.stepName", "must not be null",
+                "signature.hashAlgorithm", "must not be null",
+                "signature.keyAlgorithm", "must not be null",
                 "signature.keyId", "must not be null",
                 "signature.signature", "must not be null")));
     }
@@ -59,6 +64,8 @@ class RestLinkMetaBlockTest {
                 .signature(new RestSignature()
                         .signature("signature")
                         .keyId("keyId")
+                        .hashAlgorithm(RestHashAlgorithm.SHA384)
+                        .keyAlgorithm(RestKeyAlgorithm.EC)
                 )), contains(expectedErrors(
                 "link.layoutSegmentName", "must match \"^([A-Za-z0-9_-]*)?$\"",
                 "link.materials[0].hash", "must not be null",
@@ -69,7 +76,7 @@ class RestLinkMetaBlockTest {
                 "signature.keyId", "must match \"^[0-9a-f]*$\"",
                 "signature.keyId", "size must be between 64 and 64",
                 "signature.signature", "must match \"^[0-9a-f]*$\"",
-                "signature.signature", "size must be between 512 and 1024")));
+                "signature.signature", "size must be between 80 and 1024")));
     }
 
     @Test
@@ -104,6 +111,8 @@ class RestLinkMetaBlockTest {
 
     private RestSignature createSignature() {
         return new RestSignature()
+        		.hashAlgorithm(RestHashAlgorithm.SHA256)
+        		.keyAlgorithm(RestKeyAlgorithm.EC)
                 .keyId("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254")
                 .signature("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254");
     }

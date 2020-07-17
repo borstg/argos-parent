@@ -1,7 +1,9 @@
 {
   "signature": {
     "keyId": "keyId1",
-    "signature": "sig1"
+    "signature": "sig1",
+    "keyAlgorithm": "EC",
+    "hashAlgorithm": "SHA384"
   },
   "link": {
     "runId": "69af2dd",

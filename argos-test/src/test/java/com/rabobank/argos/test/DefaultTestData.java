@@ -16,6 +16,7 @@
 package com.rabobank.argos.test;
 
 import com.rabobank.argos.argos4j.rest.api.model.RestLabel;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

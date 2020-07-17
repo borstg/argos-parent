@@ -17,6 +17,7 @@ package com.rabobank.argos.argos4j.internal;
 
 import com.rabobank.argos.argos4j.Argos4jError;
 import com.rabobank.argos.argos4j.FileCollector;
+import com.rabobank.argos.domain.crypto.HashUtil;
 import com.rabobank.argos.domain.link.Artifact;
 
 import java.io.BufferedInputStream;

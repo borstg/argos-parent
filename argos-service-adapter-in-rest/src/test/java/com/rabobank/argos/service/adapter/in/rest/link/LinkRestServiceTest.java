@@ -15,7 +15,7 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.link;
 
-import com.rabobank.argos.domain.Signature;
+import com.rabobank.argos.domain.crypto.Signature;
 import com.rabobank.argos.domain.link.Link;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
 import com.rabobank.argos.domain.supplychain.SupplyChain;

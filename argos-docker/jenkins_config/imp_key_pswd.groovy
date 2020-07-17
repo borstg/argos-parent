@@ -34,7 +34,7 @@ secretKeySa1 = new UsernamePasswordCredentialsImpl(
     CredentialsScope.GLOBAL,
     "default-sa2",
     "default-sa2",
-    "b91bec49e7aaaeeda162970c03193baef561c10337483a8bc0741d514dc63b9c",
+    "6a58de92fc02d7835faba93ee26d91d7e53f03eb8f86e2518632c34596c5ef3f",
     "test")
     
 domain = Domain.global()
