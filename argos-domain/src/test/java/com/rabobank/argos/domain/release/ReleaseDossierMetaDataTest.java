@@ -15,27 +15,28 @@
  */
 package com.rabobank.argos.domain.release;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import org.junit.jupiter.api.Test;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-import static java.lang.String.join;
-import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
-@Builder
-@Getter
-@Setter
-public class ReleaseDossierMetaData {
-    private String documentId;
-    private Date releaseDate;
-    private String supplyChainPath;
-    private List<Set<String>> releaseArtifacts;
+class ReleaseDossierMetaDataTest {
 
-    public static String createHashFromArtifactList(List<String> artifactList) {
-        return sha256Hex(join("", artifactList));
+    protected static final String HASH = "71ed24f24e838b18a4bc53aac2638155692b43289ca9778c37139859fc6e619d";
+    protected static final List<String> ARTIFACT_LIST;
+
+    static {
+        ARTIFACT_LIST = new ArrayList<>();
+        ARTIFACT_LIST.add("string");
+        ARTIFACT_LIST.add("string2");
+    }
+
+    @Test
+    void createHashFromArtifactList() {
+        String result = ReleaseDossierMetaData.createHashFromArtifactList(ARTIFACT_LIST);
+        assertThat(result, is(HASH));
     }
 }

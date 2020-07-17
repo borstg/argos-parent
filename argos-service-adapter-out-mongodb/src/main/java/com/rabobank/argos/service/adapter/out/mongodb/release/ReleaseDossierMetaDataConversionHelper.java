@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.lang.String.join;
-import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
+import static com.rabobank.argos.domain.release.ReleaseDossierMetaData.createHashFromArtifactList;
 
 public class ReleaseDossierMetaDataConversionHelper {
     private ReleaseDossierMetaDataConversionHelper() {
@@ -41,7 +40,4 @@ public class ReleaseDossierMetaDataConversionHelper {
 
     }
 
-    public static String createHashFromArtifactList(List<String> artifactList) {
-        return sha256Hex(join("", artifactList));
-    }
 }

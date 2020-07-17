@@ -39,9 +39,4 @@ class ReleaseDossierMetaDataConversionHelperTest {
         assertThat(document.get(HASH), is(ARTIFACT_LIST));
     }
 
-    @Test
-    void createHashFromArtifactList() {
-        String result = ReleaseDossierMetaDataConversionHelper.createHashFromArtifactList(ARTIFACT_LIST);
-        assertThat(result, is(HASH));
-    }
 }
