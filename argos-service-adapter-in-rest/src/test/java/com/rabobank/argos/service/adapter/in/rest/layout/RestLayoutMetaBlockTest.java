@@ -15,7 +15,6 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.layout;
 
-import com.rabobank.argos.domain.crypto.HashAlgorithm;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestHashAlgorithm;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestKeyAlgorithm;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayout;
@@ -47,8 +46,8 @@ class RestLayoutMetaBlockTest {
     @Test
     void emptyRestLayout() {
         assertThat(validate(new RestLayoutMetaBlock()
-        		.addSignaturesItem(new RestSignature())
-        		.layout(new RestLayout())), contains(expectedErrors(
+                .addSignaturesItem(new RestSignature())
+                .layout(new RestLayout())), contains(expectedErrors(
                 "layout.authorizedKeyIds", "size must be between 1 and 2147483647",
                 "layout.expectedEndProducts", "size must be between 1 and 2147483647",
                 "layout.keys", "size must be between 1 and 2147483647",
@@ -63,10 +62,10 @@ class RestLayoutMetaBlockTest {
     void emptySubItemsRestLayout() {
         assertThat(validate(new RestLayoutMetaBlock()
                 .addSignaturesItem(new RestSignature()
-                		.keyId("keyId")
-                		.signature("signature")
-                		.hashAlgorithm(RestHashAlgorithm.SHA256)
-                		.keyAlgorithm(RestKeyAlgorithm.EC))
+                        .keyId("keyId")
+                        .signature("signature")
+                        .hashAlgorithm(RestHashAlgorithm.SHA256)
+                        .keyAlgorithm(RestKeyAlgorithm.EC))
                 .layout(new RestLayout()
                         .addAuthorizedKeyIdsItem("authorizedKeyId")
                         .addExpectedEndProductsItem(new RestMatchRule())
@@ -106,7 +105,9 @@ class RestLayoutMetaBlockTest {
                 "layout.keys[0].keyId", "must match \"^[0-9a-f]*$\"",
                 "layout.keys[0].keyId", "size must be between 64 and 64",
                 "layout.layoutSegments[0].steps[0].authorizedKeyIds", "size must be between 1 and 2147483647",
-                "layout.layoutSegments[0].steps[0].name", "must not be null")));
+                "layout.layoutSegments[0].steps[0].name", "must not be null",
+                "layout.layoutSegments[0].steps[0].requiredNumberOfLinks", "must not be null"
+        )));
     }
 
     @Test
@@ -136,7 +137,8 @@ class RestLayoutMetaBlockTest {
                 "layout.layoutSegments[0].steps[0].expectedMaterials[0].ruleType", "must not be null",
                 "layout.layoutSegments[0].steps[0].expectedProducts[0].pattern", "must not be null",
                 "layout.layoutSegments[0].steps[0].expectedProducts[0].ruleType", "must not be null",
-                "layout.layoutSegments[0].steps[0].name", "must match \"^([A-Za-z0-9_-]*)?$\""
+                "layout.layoutSegments[0].steps[0].name", "must match \"^([A-Za-z0-9_-]*)?$\"",
+                "layout.layoutSegments[0].steps[0].requiredNumberOfLinks", "must not be null"
         )));
     }
 
@@ -157,6 +159,7 @@ class RestLayoutMetaBlockTest {
                         ).addLayoutSegmentsItem(new RestLayoutSegment()
                                 .name("segment1")
                                 .addStepsItem(new RestStep()
+                                        .requiredNumberOfLinks(1)
                                         .addExpectedMaterialsItem(new RestRule().ruleType(RestRule.RuleTypeEnum.MATCH).pattern("pattern"))
                                         .addExpectedProductsItem(new RestRule().ruleType(RestRule.RuleTypeEnum.CREATE).pattern("pattern"))
                                         .name("step1")
@@ -167,8 +170,8 @@ class RestLayoutMetaBlockTest {
 
     private RestSignature createSignature() {
         return new RestSignature()
-        		.hashAlgorithm(RestHashAlgorithm.SHA256)
-        		.keyAlgorithm(RestKeyAlgorithm.EC)
+                .hashAlgorithm(RestHashAlgorithm.SHA256)
+                .keyAlgorithm(RestKeyAlgorithm.EC)
                 .keyId("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254")
                 .signature("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254");
     }

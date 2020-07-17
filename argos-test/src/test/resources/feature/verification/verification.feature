@@ -87,6 +87,7 @@ Feature: Verification
     * def resp = call read('classpath:feature/verification/verification-template.feature')  { verificationRequest:#(defaultVerificationRequest),testDir: 'create-rule-no-creation',steps:#(defaultSteps),layoutSigningKey:1}
     And match resp.response == {"runIsValid":false}
 
+  @michel
   Scenario: modify-rule-not-modified
     * def resp = call read('classpath:feature/verification/verification-template.feature')  { verificationRequest:#(defaultVerificationRequest),testDir: 'modify-rule-not-modified',steps:#(defaultSteps),layoutSigningKey:1}
     And match resp.response == {"runIsValid":false}

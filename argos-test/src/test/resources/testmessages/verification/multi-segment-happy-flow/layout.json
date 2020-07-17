@@ -35,10 +35,6 @@
               "6a58de92fc02d7835faba93ee26d91d7e53f03eb8f86e2518632c34596c5ef3f"
             ],
             "requiredNumberOfLinks": 1,
-            "expectedCommand": [
-              "expectedCommand 1",
-              "expectedCommand 2"
-            ],
             "expectedMaterials": [
               {
                 "ruleType": "MATCH",
@@ -81,9 +77,6 @@
               "6a58de92fc02d7835faba93ee26d91d7e53f03eb8f86e2518632c34596c5ef3f"
             ],
             "requiredNumberOfLinks": 1,
-            "expectedCommand": [
-              "stepName2 expectedCommand"
-            ],
             "expectedMaterials": [
               {
                 "ruleType": "DISALLOW",
@@ -129,10 +122,6 @@
               "b12d015b7519cdab1b4e2f478787983370f0c535c8e02ff893d716507a0b4eba"
             ],
             "requiredNumberOfLinks": 1,
-            "expectedCommand": [
-              "expectedCommand 1",
-              "expectedCommand 2"
-            ],
             "expectedMaterials": [
               {
                 "ruleType": "REQUIRE",
@@ -168,9 +157,6 @@
               "b12d015b7519cdab1b4e2f478787983370f0c535c8e02ff893d716507a0b4eba"
             ],
             "requiredNumberOfLinks": 1,
-            "expectedCommand": [
-              "stepName2 expectedCommand"
-            ],
             "expectedMaterials": [
               {
                 "ruleType": "MATCH",

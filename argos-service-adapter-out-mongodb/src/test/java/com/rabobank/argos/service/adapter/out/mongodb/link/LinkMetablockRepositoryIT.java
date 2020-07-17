@@ -79,6 +79,7 @@ class LinkMetablockRepositoryIT {
         mongodExecutable.start();
         String connectionString = "mongodb://localhost:" + port;
         MongoTemplate mongoTemplate = new MongoTemplate(MongoClients.create(connectionString), "test");
+
         linkMetaBlockRepository = new LinkMetaBlockRepositoryImpl(mongoTemplate);
         SpringMongock runner = new SpringMongockBuilder(mongoTemplate, "com.rabobank.argos.service.adapter.out.mongodb.link").build();
         

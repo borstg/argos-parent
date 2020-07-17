@@ -38,9 +38,6 @@
         "uri": "argos-frontend.jar",
         "hash": "49e73a11c5e689db448d866ce08848ac5886cac8aa31156ea4de37427aca6163"
       }
-    ],
-    "command": [
-      "stepName2 expectedCommand"
     ]
   }
 }

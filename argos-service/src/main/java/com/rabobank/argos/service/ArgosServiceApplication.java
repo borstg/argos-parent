@@ -27,4 +27,6 @@ public class ArgosServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(ArgosServiceApplication.class, args);
     }
+
+
 }

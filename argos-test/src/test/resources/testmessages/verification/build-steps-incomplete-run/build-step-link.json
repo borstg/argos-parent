@@ -4,10 +4,6 @@
     "layoutSegmentName": "segment1",
     "stepName": "build",
     "materials": [],
-    "products": [],
-    "command": [
-      "expectedCommand 1",
-      "expectedCommand 2"
-    ]
+    "products": []
   }
 }

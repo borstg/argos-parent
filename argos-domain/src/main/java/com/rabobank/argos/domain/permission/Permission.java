@@ -23,6 +23,7 @@ public enum Permission {
     LINK_ADD,
     LAYOUT_ADD,
     VERIFY,
+    RELEASE,
     PERSONAL_ACCOUNT_READ,
     SERVICE_ACCOUNT_EDIT
 }

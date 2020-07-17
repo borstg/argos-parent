@@ -21,6 +21,7 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestError;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestValidationError;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestValidationMessage;
 import com.rabobank.argos.service.adapter.in.rest.layout.LayoutValidationException;
+import com.rabobank.argos.service.domain.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -34,7 +35,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,6 +44,7 @@ import static java.util.Collections.singletonList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @ControllerAdvice
@@ -100,7 +101,7 @@ public class RestServiceExceptionHandler {
 
 
     @ExceptionHandler(value = {ResponseStatusException.class})
-    public ResponseEntity<?> handleResponseStatusException(ResponseStatusException ex) {
+    public ResponseEntity handleResponseStatusException(ResponseStatusException ex) {
         if (BAD_REQUEST == ex.getStatus()) {
             return ResponseEntity.status(ex.getStatus()).contentType(APPLICATION_JSON).body(createValidationError(ex.getReason()));
         } else {
@@ -109,7 +110,7 @@ public class RestServiceExceptionHandler {
     }
 
     @ExceptionHandler(value = {ArgosError.class})
-    public ResponseEntity<?> handleArgosError(ArgosError ex) {
+    public ResponseEntity handleArgosError(ArgosError ex) {
         if (ex.getLevel() == ArgosError.Level.WARNING) {
             log.debug("{}", ex.getMessage(), ex);
             return ResponseEntity.badRequest().contentType(APPLICATION_JSON).body(createValidationError(ex.getMessage()));
@@ -124,6 +125,11 @@ public class RestServiceExceptionHandler {
         return ResponseEntity.status(FORBIDDEN).contentType(APPLICATION_JSON).body(createRestErrorMessage(ex.getMessage()));
     }
 
+    @ExceptionHandler(value = {NotFoundException.class})
+    public ResponseEntity<RestError> handleNotFoundException(NotFoundException ex) {
+        return ResponseEntity.status(NOT_FOUND).contentType(APPLICATION_JSON).body(createRestErrorMessage(ex.getMessage()));
+    }
+
     private RestValidationError createValidationError(LayoutValidationException ex) {
         RestValidationError restValidationError = new RestValidationError();
         List<RestValidationMessage> validationMessages = new ArrayList<>(ex.getValidationMessages());
@@ -133,7 +139,7 @@ public class RestServiceExceptionHandler {
     }
 
     private void sortValidationMessages(List<RestValidationMessage> validationMessages) {
-        Collections.sort(validationMessages, Comparator
+        validationMessages.sort(Comparator
                 .comparing(RestValidationMessage::getField)
                 .thenComparing(RestValidationMessage::getMessage));
     }

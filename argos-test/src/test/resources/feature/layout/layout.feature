@@ -38,7 +38,6 @@ Feature: Layout
     And match stringResponse contains 'supplyChainId'
     And match stringResponse contains 'layout'
 
-
   Scenario: store layout with invalid specifications should return a 400 error
     Given path layoutPath
     And request read('classpath:testmessages/layout/invalid-layout.json')

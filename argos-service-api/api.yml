@@ -547,6 +547,39 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '500':
           $ref: '#/components/responses/Error'
+  /supplychain/{supplyChainId}/release:
+    post:
+      summary: releases a list of artifact sets these sets will be verified
+      operationId: createRelease
+      tags:
+        - release
+      security:
+        - basicAuth: []
+        - bearerAuth: []
+      parameters:
+        - name: supplyChainId
+          in: path
+          description: supply chain id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReleaseArtifacts"
+      responses:
+        '200':
+          description: VerificationResult
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleaseResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/Error'
 
   /hierarchy:
     get:
@@ -1489,7 +1522,7 @@ components:
       type: object
       required:
         - name
-        - requiredSignatures
+        - requiredNumberOfLinks
         - authorizedKeyIds
         - expectedMaterials
         - expectedProducts
@@ -1684,6 +1717,7 @@ components:
         - LINK_ADD
         - LAYOUT_ADD
         - VERIFY
+        - RELEASE
         - PERSONAL_ACCOUNT_READ
         - SERVICE_ACCOUNT_EDIT
     LocalPermissions:
@@ -1822,4 +1856,42 @@ components:
           type: string
         accountType:
           $ref: '#/components/schemas/AccountType'
+    ReleaseArtifacts:
+      type: object
+      properties:
+        releaseArtifacts:
+          type: array
+          minItems: 1
+          items:
+            type: array
+            minItems: 1
+            items:
+              $ref: '#/components/schemas/Artifact'
+    ReleaseResult:
+      type: object
+      properties:
+        releaseIsValid:
+          type: boolean
+        releaseDossierMetaData:
+          $ref: '#/components/schemas/ReleaseDossierMetaData'
+
+    ReleaseDossierMetaData:
+      type: object
+      properties:
+        documentId:
+          type: string
+        releaseDate:
+          type: string
+          format: date-time
+        supplyChainPath:
+          type: string
+        releaseArtifacts:
+          type: array
+          minItems: 1
+          items:
+            type: array
+            minItems: 1
+            items:
+              type: string
+
 

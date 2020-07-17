@@ -4,9 +4,6 @@
     "layoutSegmentName": "segment1",
     "stepName": "fake",
     "materials": [],
-    "products": [],
-    "command": [
-      "stepName2 expectedCommand"
-    ]
+    "products": []
   }
 }

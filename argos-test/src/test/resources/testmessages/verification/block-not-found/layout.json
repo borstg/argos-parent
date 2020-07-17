@@ -35,10 +35,6 @@
               "6a58de92fc02d7835faba93ee26d91d7e53f03eb8f86e2518632c34596c5ef3f"
             ],
             "requiredNumberOfLinks": 1,
-            "expectedCommand": [
-              "expectedCommand 1",
-              "expectedCommand 2"
-            ],
             "expectedMaterials": [
               {
                 "ruleType": "REQUIRE",

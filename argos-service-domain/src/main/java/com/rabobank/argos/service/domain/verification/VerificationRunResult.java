@@ -15,16 +15,21 @@
  */
 package com.rabobank.argos.service.domain.verification;
 
+import com.rabobank.argos.domain.link.LinkMetaBlock;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 @Builder
 public class VerificationRunResult {
     private boolean runIsValid;
+    private final List<LinkMetaBlock> validLinkMetaBlocks;
 
     public static VerificationRunResult valid(boolean runIsValid) {
         return VerificationRunResult.builder().runIsValid(runIsValid).build();
+
     }
 
     public static VerificationRunResult okay() {
