@@ -16,7 +16,6 @@
 package com.rabobank.argos.service.adapter.out.mongodb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.cloudyrock.mongock.SpringBootMongock;
 import com.github.cloudyrock.mongock.SpringBootMongockBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,9 +47,6 @@ public class MongoConfig {
     @Bean(name = "releaseFileJsonMapper")
     ObjectMapper releaseFileJsonMapper() {
         ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(PublicKey.class, new PublicKeyJsonSerializer());
-        mapper.registerModule(module);
         return mapper;
     }
 

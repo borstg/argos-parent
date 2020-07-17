@@ -15,7 +15,6 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.layout;
 
-import com.rabobank.argos.domain.crypto.HashAlgorithm;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestHashAlgorithm;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestKeyAlgorithm;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLayout;
@@ -124,8 +123,8 @@ class RestLayoutMetaBlockTest {
                                 .destinationType(RestMatchRule.DestinationTypeEnum.PRODUCTS)
                                 .pattern("pattern"))
                         .addKeysItem(new RestPublicKey()
-                                .keyId("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254")
-                                .publicKey(new byte[]{1})
+                                .id("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254")
+                                .key(new byte[]{1})
                         ).addLayoutSegmentsItem(new RestLayoutSegment()
                                 .name("segment 1")
                                 .addStepsItem(new RestStep()
@@ -149,14 +148,14 @@ class RestLayoutMetaBlockTest {
         assertThat(validate(new RestLayoutMetaBlock()
                 .addSignaturesItem(createSignature())
                 .layout(new RestLayout()
-                        .addAuthorizedKeyIdsItem("authorizedKeyId")
-                        .addExpectedEndProductsItem(new RestMatchRule()
-                                .destinationSegmentName("segment1")
-                                .destinationStepName("step1")
-                                .destinationType(RestMatchRule.DestinationTypeEnum.PRODUCTS)
-                                .pattern("pattern"))
-                        .addKeysItem(new RestPublicKey()
-                                .keyId("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254")
+                                .addAuthorizedKeyIdsItem("authorizedKeyId")
+                                .addExpectedEndProductsItem(new RestMatchRule()
+                                        .destinationSegmentName("segment1")
+                                        .destinationStepName("step1")
+                                        .destinationType(RestMatchRule.DestinationTypeEnum.PRODUCTS)
+                                        .pattern("pattern"))
+                                .addKeysItem(new RestPublicKey().
+                                .id("c8df0a497ab0df7136c4f97892f17914e6e5e021fdc039f0ea7c27d5a95c1254")
                                 .publicKey(new byte[]{1})
                         ).addLayoutSegmentsItem(new RestLayoutSegment()
                                 .name("segment1")
