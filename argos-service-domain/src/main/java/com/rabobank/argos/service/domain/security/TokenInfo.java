@@ -15,20 +15,18 @@
  */
 package com.rabobank.argos.service.domain.security;
 
-import com.rabobank.argos.domain.account.Account;
-import com.rabobank.argos.domain.permission.Permission;
+import lombok.Builder;
+import lombok.Getter;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.io.Serializable;
+import java.util.Date;
 
-public interface AccountSecurityContext {
-    Optional<Account> getAuthenticatedAccount();
+@Builder
+@Getter
+public class TokenInfo implements Serializable {
+    private final String accountId;
+    private final String sessionId;
+    private final Date issuedAt;
+    private final Date expiration;
 
-    Optional<TokenInfo> getTokenInfo();
-
-    Set<Permission> getGlobalPermission();
-
-    Set<Permission> allLocalPermissions(List<String> labelIds);
 }
-

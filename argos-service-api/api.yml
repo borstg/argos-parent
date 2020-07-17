@@ -816,6 +816,21 @@ paths:
           description: logged out
         '500':
           $ref: '#/components/responses/Error'
+  /personalaccount/me/refresh:
+    get:
+      summary: refresh token
+      operationId: refreshToken
+      tags:
+        - personal account
+      responses:
+        '200':
+          description: new token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '500':
+          $ref: '#/components/responses/Error'
   /personalaccount:
     get:
       summary: search
@@ -1894,4 +1909,11 @@ components:
             items:
               type: string
 
+    Token:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
 

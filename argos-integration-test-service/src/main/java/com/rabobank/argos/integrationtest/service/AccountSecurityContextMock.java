@@ -18,6 +18,7 @@ package com.rabobank.argos.integrationtest.service;
 import com.rabobank.argos.domain.account.Account;
 import com.rabobank.argos.domain.permission.Permission;
 import com.rabobank.argos.service.domain.security.AccountSecurityContext;
+import com.rabobank.argos.service.domain.security.TokenInfo;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -33,7 +34,7 @@ public class AccountSecurityContextMock implements AccountSecurityContext {
     }
 
     @Override
-    public Optional<String> getSessionId() {
+    public Optional<TokenInfo> getTokenInfo() {
         return Optional.empty();
     }
 

@@ -44,11 +44,11 @@ public class AccountSecurityContextImpl implements AccountSecurityContext {
     }
 
     @Override
-    public Optional<String> getSessionId() {
+    public Optional<TokenInfo> getTokenInfo() {
         return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
                 .map(Authentication::getPrincipal)
                 .map(authentication -> (AccountUserDetailsAdapter) authentication)
-                .map(AccountUserDetailsAdapter::getSessionId);
+                .map(AccountUserDetailsAdapter::getTokenInfo);
     }
 
     @Override

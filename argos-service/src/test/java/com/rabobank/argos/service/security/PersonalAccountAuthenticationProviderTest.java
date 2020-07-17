@@ -19,6 +19,7 @@ import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.domain.permission.Permission;
 import com.rabobank.argos.service.domain.security.AccountUserDetailsAdapter;
+import com.rabobank.argos.service.domain.security.TokenInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,9 +45,12 @@ class PersonalAccountAuthenticationProviderTest {
     private PersonalAccountAuthenticationProvider personalAccountAuthenticationProvider;
     private static final String NOT_AUTHENTICATED = "not authenticated";
 
-    private AccountUserDetailsAdapter userDetails = new AccountUserDetailsAdapter(PersonalAccount.builder().name("test").build(), "sessionId", Set.of(Permission.READ));
+    @Mock
+    private TokenInfo tokenInfo;
 
-    private PersonalAccountAuthenticationToken authentication = new PersonalAccountAuthenticationToken("id", null, null, null);
+    private AccountUserDetailsAdapter userDetails = new AccountUserDetailsAdapter(PersonalAccount.builder().name("test").build(), tokenInfo, Set.of(Permission.READ));
+
+    private PersonalAccountAuthenticationToken authentication = new PersonalAccountAuthenticationToken(tokenInfo, null, null);
     @Mock
     private LogContextHelper logContextHelper;
 

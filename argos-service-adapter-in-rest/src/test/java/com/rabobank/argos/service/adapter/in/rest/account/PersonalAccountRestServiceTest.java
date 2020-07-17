@@ -31,6 +31,8 @@ import com.rabobank.argos.service.domain.account.AccountService;
 import com.rabobank.argos.service.domain.account.FinishedSessionRepository;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
 import com.rabobank.argos.service.domain.security.AccountSecurityContextImpl;
+import com.rabobank.argos.service.domain.security.TokenInfo;
+import com.rabobank.argos.service.domain.security.TokenProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.hamcrest.Matchers;
@@ -42,22 +44,18 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static java.time.temporal.ChronoUnit.MINUTES;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -79,6 +77,7 @@ class PersonalAccountRestServiceTest {
     private static final String KEY2 = "key2";
     private static final char[] PRIVAT_KEY_PASSPHRASE = "test".toCharArray();
     private static final String SESSION_ID = "sessionId";
+    private static final Date EXPIRATION_DATE = new Date();
 
     private PersonalAccountRestService service;
     @Mock
@@ -130,11 +129,18 @@ class PersonalAccountRestServiceTest {
     @Captor
     private ArgumentCaptor<ArgosSession> argosSessionArgumentCaptor;
 
+    @Mock
+    private TokenProvider tokenProvider;
+
+    @Mock
+    private TokenInfo tokenInfo;
+
     @BeforeEach
     void setUp() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, OperatorCreationException, PemGenerationException {
         personalAccount.setAccountId(ACCOUNT_ID);
         keyPair = KeyPair.createKeyPair(PRIVAT_KEY_PASSPHRASE);
-        service = new PersonalAccountRestService(accountSecurityContext, keyPairMapper, accountService, personalAccountMapper, labelRepository, finishedSessionRepository);
+
+        service = new PersonalAccountRestService(accountSecurityContext, keyPairMapper, accountService, personalAccountMapper, labelRepository, finishedSessionRepository, tokenProvider);
     }
 
     @Test
@@ -350,12 +356,13 @@ class PersonalAccountRestServiceTest {
 
     @Test
     void logout() {
-        ReflectionTestUtils.setField(service, "timeout", Duration.of(1, MINUTES));
-        when(accountSecurityContext.getSessionId()).thenReturn(Optional.of(SESSION_ID));
+        when(tokenInfo.getSessionId()).thenReturn(SESSION_ID);
+        when(tokenInfo.getExpiration()).thenReturn(EXPIRATION_DATE);
+        when(accountSecurityContext.getTokenInfo()).thenReturn(Optional.of(tokenInfo));
         assertThat(service.logout().getStatusCodeValue(), is(204));
         verify(finishedSessionRepository).save(argosSessionArgumentCaptor.capture());
         ArgosSession value = argosSessionArgumentCaptor.getValue();
         assertThat(value.getSessionId(), is(SESSION_ID));
-        assertThat(value.getExpirationDate(), not(nullValue()));
+        assertThat(value.getExpirationDate(), is(EXPIRATION_DATE));
     }
 }

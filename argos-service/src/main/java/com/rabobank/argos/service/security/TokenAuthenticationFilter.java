@@ -15,9 +15,14 @@
  */
 package com.rabobank.argos.service.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestError;
 import com.rabobank.argos.service.domain.account.FinishedSessionRepository;
+import com.rabobank.argos.service.domain.security.TokenInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -32,28 +37,33 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
-    private final TokenProvider tokenProvider;
+    private final TokenProviderImpl tokenProvider;
     private final FinishedSessionRepository finishedSessionRepository;
+    private final ObjectMapper mapper;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        try {
-            getJwtFromRequest(request).filter(tokenProvider::validateToken).ifPresent(jwt -> {
-                TokenProvider.TokenInfo tokenInfo = tokenProvider.getTokenInfo(jwt);
-                String sessionId = tokenInfo.getSessionId();
-                if (!finishedSessionRepository.hasSessionId(sessionId)) {
-                    String accountId = tokenInfo.getAccountId();
-                    PersonalAccountAuthenticationToken authentication = new PersonalAccountAuthenticationToken(accountId, sessionId, null, null);
+        Optional<TokenInfo> optionalTokenInfo = getJwtFromRequest(request).filter(tokenProvider::validateToken).map(tokenProvider::getTokenInfo);
+        if (optionalTokenInfo.isPresent()) {
+            TokenInfo tokenInfo = optionalTokenInfo.get();
+            if (!tokenProvider.sessionExpired(tokenInfo) && !finishedSessionRepository.hasSessionId(tokenInfo.getSessionId())) {
+                if (!"/api/personalaccount/me/refresh".equals(request.getRequestURI()) && tokenProvider.shouldRefresh(tokenInfo)) {
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    mapper.writeValue(response.getWriter(), new RestError().message("refresh token"));
+                } else {
+                    PersonalAccountAuthenticationToken authentication = new PersonalAccountAuthenticationToken(tokenInfo, null, null);
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                    log.debug("successfully resolved bearer token for account {}", accountId);
+                    log.debug("successfully resolved bearer token for account {}", tokenInfo.getAccountId());
+                    filterChain.doFilter(request, response);
                 }
-            });
-
-        } catch (Exception ex) {
-            log.error("Could not set user authentication in security context", ex);
+            } else {
+                filterChain.doFilter(request, response);
+            }
+        } else {
+            filterChain.doFilter(request, response);
         }
 
-        filterChain.doFilter(request, response);
     }
 
     private Optional<String> getJwtFromRequest(HttpServletRequest request) {

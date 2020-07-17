@@ -15,6 +15,7 @@
  */
 package com.rabobank.argos.service.security;
 
+import com.rabobank.argos.service.domain.security.TokenInfo;
 import lombok.EqualsAndHashCode;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,24 +26,22 @@ import java.util.Collection;
 @EqualsAndHashCode(callSuper = true)
 public class PersonalAccountAuthenticationToken extends AbstractAuthenticationToken {
 
-    private final String accountId;
-    private final String sessionId;
+    private final TokenInfo tokenInfo;
     private final UserDetails principal;
 
-    public PersonalAccountAuthenticationToken(String accountId, String sessionId, UserDetails principal, Collection<? extends GrantedAuthority> authorities) {
+    public PersonalAccountAuthenticationToken(TokenInfo tokenInfo, UserDetails principal, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
-        this.accountId = accountId;
-        this.sessionId = sessionId;
+        this.tokenInfo = tokenInfo;
         this.principal = principal;
     }
 
     @Override
     public String getCredentials() {
-        return accountId;
+        return tokenInfo.getAccountId();
     }
 
-    public String getSessionId() {
-        return sessionId;
+    public TokenInfo getTokenInfo() {
+        return tokenInfo;
     }
 
     @Override

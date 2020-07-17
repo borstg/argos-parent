@@ -54,7 +54,10 @@ management:
 
 jwt:
   token:
-    expiration: PT48H
+    expiration: PT12H
+    refreshInterval: PT15M
+    sessionTimout: PT5M
+
     # replace with the result of com.rabobank.argos.service.security.TokenProvider.main
     secret: Z2LcVpgCuGtpb5rBDNIIWGe8RXqYGWDpWFjWhYQUS2Z8rjE2/GTJlu0s6BRYG0Mn0kV8StC9cFE83Jkl68RCkw==
 

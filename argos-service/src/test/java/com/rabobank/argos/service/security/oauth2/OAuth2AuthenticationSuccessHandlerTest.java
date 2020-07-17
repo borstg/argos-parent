@@ -15,7 +15,7 @@
  */
 package com.rabobank.argos.service.security.oauth2;
 
-import com.rabobank.argos.service.security.TokenProvider;
+import com.rabobank.argos.service.security.TokenProviderImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -39,7 +40,7 @@ import static org.mockito.Mockito.when;
 class OAuth2AuthenticationSuccessHandlerTest {
 
     @Mock
-    private TokenProvider tokenProvider;
+    private TokenProviderImpl tokenProvider;
 
     @Mock
     private HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
@@ -55,6 +56,9 @@ class OAuth2AuthenticationSuccessHandlerTest {
     @Mock
     private Authentication authentication;
 
+    @Mock
+    private ArgosOAuth2User argosOAuth2User;
+
 
     @BeforeEach
     void setUp() {
@@ -64,7 +68,9 @@ class OAuth2AuthenticationSuccessHandlerTest {
 
     @Test
     void onAuthenticationSuccess() throws IOException {
-        when(tokenProvider.createToken(authentication)).thenReturn("token");
+        when(authentication.getPrincipal()).thenReturn(argosOAuth2User);
+        when(argosOAuth2User.getAccountId()).thenReturn("accountId");
+        when(tokenProvider.createToken(eq("accountId"))).thenReturn("token");
         when(httpCookieOAuth2AuthorizationRequestRepository.getRedirectUri(request)).thenReturn(Optional.of("http://notused/uri?someExtraParam=extra"));
         successHandler.onAuthenticationSuccess(request, response, authentication);
         verify(response).encodeRedirectURL("https://host:89/uri?someExtraParam=extra&token=token");
@@ -75,6 +81,8 @@ class OAuth2AuthenticationSuccessHandlerTest {
 
     @Test
     void onAuthenticationIsCommitted() throws IOException {
+        when(authentication.getPrincipal()).thenReturn(argosOAuth2User);
+        when(argosOAuth2User.getAccountId()).thenReturn("accountId");
         when(response.isCommitted()).thenReturn(true);
         successHandler.onAuthenticationSuccess(request, response, authentication);
         verifyNoMoreInteractions(response);

@@ -51,7 +51,7 @@ public class PersonalAccountUserDetailsService {
                 .filter(role -> role.getPermissions() != null)
                 .flatMap(PersonalAccountUserDetailsService::apply)
                 .collect(Collectors.toSet());
-        return new AccountUserDetailsAdapter(personalAccount, token.getSessionId(), globalPermissions);
+        return new AccountUserDetailsAdapter(personalAccount, token.getTokenInfo(), globalPermissions);
     }
 
 }

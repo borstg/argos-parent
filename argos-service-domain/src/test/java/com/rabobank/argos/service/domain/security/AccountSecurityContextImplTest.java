@@ -34,6 +34,7 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,6 +51,9 @@ class AccountSecurityContextImplTest {
 
     @Mock
     private Account account;
+
+    @Mock
+    private TokenInfo tokenInfo;
 
     @BeforeEach
     void setUp() {
@@ -110,10 +114,10 @@ class AccountSecurityContextImplTest {
 
     @Test
     void getSessionId() {
-        when(accountUserDetailsAdapter.getSessionId()).thenReturn("sessionId");
+        when(accountUserDetailsAdapter.getTokenInfo()).thenReturn(tokenInfo);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         when(authentication.getPrincipal()).thenReturn(accountUserDetailsAdapter);
-        assertThat(context.getSessionId(), is(Optional.of("sessionId")));
+        assertThat(context.getTokenInfo().get(), sameInstance(tokenInfo));
     }
 
     @AfterEach

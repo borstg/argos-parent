@@ -15,7 +15,9 @@
  */
 package com.rabobank.argos.service.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabobank.argos.service.domain.account.FinishedSessionRepository;
+import com.rabobank.argos.service.domain.security.TokenInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +41,7 @@ import static org.mockito.Mockito.when;
 class TokenAuthenticationFilterTest {
 
     @Mock
-    private TokenProvider tokenProvider;
+    private TokenProviderImpl tokenProvider;
 
     @Mock
     private HttpServletRequest request;
@@ -51,7 +53,7 @@ class TokenAuthenticationFilterTest {
     private FilterChain filterChain;
 
     @Mock
-    private TokenProvider.TokenInfo tokenInfo;
+    private TokenInfo tokenInfo;
 
     private TokenAuthenticationFilter filter;
 
@@ -61,7 +63,7 @@ class TokenAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         SecurityContextHolder.getContext().setAuthentication(null);
-        filter = new TokenAuthenticationFilter(tokenProvider, finishedSessionRepository);
+        filter = new TokenAuthenticationFilter(tokenProvider, finishedSessionRepository, new ObjectMapper());
     }
 
     @Test

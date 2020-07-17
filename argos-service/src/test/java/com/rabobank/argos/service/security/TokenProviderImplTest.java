@@ -15,15 +15,12 @@
  */
 package com.rabobank.argos.service.security;
 
-import com.rabobank.argos.service.security.oauth2.ArgosOAuth2User;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
@@ -32,35 +29,25 @@ import java.time.temporal.ChronoUnit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasLength;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TokenProviderTest {
+class TokenProviderImplTest {
 
     public static final String SECRET = "Zrf3tmpRczYszNFS92mFC/JEuxiwhRAe5fO/GdbqL2g9wa2V7bi0VKRuy/VantPuzN/xo43t36zZUGgJNdjD9w==";
-    private TokenProvider tokenProvider;
-
-    @Mock
-    private Authentication authentication;
-
-    @Mock
-    private ArgosOAuth2User userPrincipal;
+    private TokenProviderImpl tokenProvider;
 
     @BeforeEach
     void setUp() {
-        tokenProvider = new TokenProvider();
+        tokenProvider = new TokenProviderImpl();
         ReflectionTestUtils.setField(tokenProvider, "secret", SECRET);
         ReflectionTestUtils.setField(tokenProvider, "timeout", Duration.of(1, ChronoUnit.MINUTES));
         tokenProvider.init();
     }
 
-
     @Test
     void createToken() {
-        TokenProvider.main(new String[]{});
-        when(authentication.getPrincipal()).thenReturn(userPrincipal);
-        when(userPrincipal.getAccountId()).thenReturn("id");
-        String token = tokenProvider.createToken(authentication);
+        TokenProviderImpl.main(new String[]{});
+        String token = tokenProvider.createToken("id");
         assertThat(tokenProvider.validateToken(token), is(true));
         assertThat(tokenProvider.getTokenInfo(token).getAccountId(), is("id"));
         assertThat(tokenProvider.getTokenInfo(token).getSessionId(), hasLength(36));
@@ -73,9 +60,7 @@ class TokenProviderTest {
 
     @Test
     void validateTokenWrongKey() {
-        when(authentication.getPrincipal()).thenReturn(userPrincipal);
-        when(userPrincipal.getAccountId()).thenReturn("id");
-        String token = tokenProvider.createToken(authentication);
+        String token = tokenProvider.createToken("id");
         ReflectionTestUtils.setField(tokenProvider, "secretKey", Keys.secretKeyFor(SignatureAlgorithm.HS512));
         assertThat(tokenProvider.validateToken(token), is(false));
     }
@@ -83,9 +68,7 @@ class TokenProviderTest {
     @Test
     void validateTokenExpired() {
         ReflectionTestUtils.setField(tokenProvider, "timeout", Duration.of(1, ChronoUnit.NANOS));
-        when(authentication.getPrincipal()).thenReturn(userPrincipal);
-        when(userPrincipal.getAccountId()).thenReturn("id");
-        String token = tokenProvider.createToken(authentication);
+        String token = tokenProvider.createToken("id");
         assertThat(tokenProvider.validateToken(token), is(false));
     }
 }
