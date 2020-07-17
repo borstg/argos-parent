@@ -15,6 +15,7 @@
  */
 package com.rabobank.argos.domain.account;
 
+import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.domain.permission.LocalPermissions;
 import com.rabobank.argos.domain.permission.Permission;
 import org.junit.jupiter.api.Test;

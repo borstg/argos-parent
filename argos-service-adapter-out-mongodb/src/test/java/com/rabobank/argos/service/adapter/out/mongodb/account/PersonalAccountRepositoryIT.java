@@ -19,7 +19,7 @@ import com.github.cloudyrock.mongock.SpringMongock;
 import com.github.cloudyrock.mongock.SpringMongockBuilder;
 import com.mongodb.client.MongoClients;
 import com.rabobank.argos.domain.account.PersonalAccount;
-import com.rabobank.argos.domain.key.KeyPair;
+import com.rabobank.argos.domain.crypto.KeyPair;
 import com.rabobank.argos.service.domain.account.AccountSearchParams;
 import com.rabobank.argos.service.domain.account.PersonalAccountRepository;
 import de.flapdoodle.embed.mongo.Command;
@@ -58,11 +58,13 @@ class PersonalAccountRepositoryIT {
                     new KeyPair("keyId2", null, null),
                     new KeyPair("keyId3", null, null))).build();
     private static final String KLAASJE = "Klaasje";
-    private static final PersonalAccount KLAASJE_ACCOUNT = PersonalAccount.builder().name(KLAASJE).email("klaasje@klaas.nl")
+    private static final PersonalAccount KLAASJE_ACCOUNT = PersonalAccount.builder()
+    		.name(KLAASJE).email("klaasje@klaas.nl")
             .activeKeyPair(new KeyPair("keyId4", null, null))
-            .inactiveKeyPairs(List.of(
-                    new KeyPair("keyId5", null, null),
-                    new KeyPair("keyId6", null, null))).build();
+            .inactiveKeyPairs(
+            		List.of(new KeyPair("keyId5", null, null),
+                    new KeyPair("keyId6", null, null)))
+            .build();
     private MongodExecutable mongodExecutable;
     private PersonalAccountRepository personalAccountRepository;
 

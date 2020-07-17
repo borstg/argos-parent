@@ -17,10 +17,9 @@ package com.rabobank.argos.service.adapter.in.rest.account;
 
 import com.rabobank.argos.domain.account.ArgosSession;
 import com.rabobank.argos.domain.account.PersonalAccount;
-import com.rabobank.argos.domain.key.KeyPair;
+import com.rabobank.argos.domain.crypto.KeyPair;
 import com.rabobank.argos.domain.permission.LocalPermissions;
 import com.rabobank.argos.domain.permission.Permission;
-import com.rabobank.argos.service.adapter.in.rest.ArgosKeyHelper;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestKeyPair;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestLocalPermissions;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestPermission;
@@ -32,6 +31,9 @@ import com.rabobank.argos.service.domain.account.AccountService;
 import com.rabobank.argos.service.domain.account.FinishedSessionRepository;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
 import com.rabobank.argos.service.domain.security.AccountSecurityContextImpl;
+
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +46,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -74,6 +78,7 @@ class PersonalAccountRestServiceTest {
     private static final String ROLE_ID = "roleId";
     private static final String KEY1 = "key1";
     private static final String KEY2 = "key2";
+    private static final char[] PRIVAT_KEY_PASSPHRASE = "test".toCharArray();
     private static final String SESSION_ID = "sessionId";
 
     private PersonalAccountRestService service;
@@ -127,8 +132,10 @@ class PersonalAccountRestServiceTest {
     private ArgumentCaptor<ArgosSession> argosSessionArgumentCaptor;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, OperatorCreationException, PemGenerationException {
         personalAccount.setAccountId(ACCOUNT_ID);
+        service = new PersonalAccountRestService(accountSecurityContext, keyPairMapper, accountService, personalAccountMapper, labelRepository);
+        keyPair = KeyPair.createKeyPair(PRIVAT_KEY_PASSPHRASE);
         service = new PersonalAccountRestService(accountSecurityContext, keyPairMapper, accountService, personalAccountMapper, labelRepository, finishedSessionRepository);
         keyPair = ArgosKeyHelper.generateKeyPair();
     }

@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -43,7 +44,6 @@ import com.rabobank.argos.service.domain.verification.StepAuthorizedKeyIdVerific
 import com.rabobank.argos.service.domain.verification.Verification;
 import com.rabobank.argos.service.domain.verification.VerificationContextsProvider;
 import com.rabobank.argos.service.domain.verification.VerificationProvider;
-import com.rabobank.argos.service.domain.verification.helper.ArgosTestSigner;
 import com.rabobank.argos.service.domain.verification.rules.AllowRuleVerification;
 import com.rabobank.argos.service.domain.verification.rules.CreateRuleVerification;
 import com.rabobank.argos.service.domain.verification.rules.DeleteRuleVerification;
@@ -51,14 +51,19 @@ import com.rabobank.argos.service.domain.verification.rules.DisallowRuleVerifica
 import com.rabobank.argos.service.domain.verification.rules.MatchRuleVerification;
 import com.rabobank.argos.service.domain.verification.rules.ModifyRuleVerification;
 import com.rabobank.argos.service.domain.verification.rules.RequireRuleVerification;
-import com.rabobank.argos.domain.Signature;
-import com.rabobank.argos.domain.key.KeyIdProvider;
-import com.rabobank.argos.domain.key.KeyPair;
+import com.rabobank.argos.domain.crypto.KeyAlgorithm;
+import com.rabobank.argos.domain.crypto.KeyIdProvider;
+import com.rabobank.argos.domain.crypto.KeyPair;
+import com.rabobank.argos.domain.crypto.PublicKey;
+import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
+import com.rabobank.argos.domain.crypto.Signature;
+import com.rabobank.argos.domain.crypto.signing.JsonSigningSerializer;
+import com.rabobank.argos.domain.crypto.signing.SignatureValidator;
+import com.rabobank.argos.domain.crypto.signing.Signer;
 import com.rabobank.argos.domain.layout.ArtifactType;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
 import com.rabobank.argos.domain.layout.LayoutSegment;
-import com.rabobank.argos.domain.layout.PublicKey;
 import com.rabobank.argos.domain.layout.Step;
 import com.rabobank.argos.domain.layout.Step.StepBuilder;
 import com.rabobank.argos.domain.layout.rule.MatchRule;
@@ -68,8 +73,6 @@ import com.rabobank.argos.domain.link.Artifact;
 import com.rabobank.argos.domain.link.Link;
 import com.rabobank.argos.domain.link.Link.LinkBuilder;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
-import com.rabobank.argos.domain.signing.JsonSigningSerializer;
-import com.rabobank.argos.domain.signing.SignatureValidator;
 
 @ExtendWith(MockitoExtension.class)
 class VerificationTest {
@@ -94,14 +97,16 @@ class VerificationTest {
     private String SEGMENT1 = "segment1";
     private String SEGMENT2 = "segment2";
     
-    private final java.security.KeyPair bobSignKey = ArgosTestSigner.generateKey();
-    private final java.security.KeyPair aliceSignKey = ArgosTestSigner.generateKey();
-    private final java.security.KeyPair carlSignKey = ArgosTestSigner.generateKey();
+    private char[] PASSWORD = "password".toCharArray();
     
-    private final KeyPair bobKey = new KeyPair(KeyIdProvider.computeKeyId(bobSignKey.getPublic()), null, bobSignKey.getPublic());
-    private final KeyPair aliceKey = new KeyPair(KeyIdProvider.computeKeyId(aliceSignKey.getPublic()), null, aliceSignKey.getPublic());
-    private final KeyPair carlKey = new KeyPair(KeyIdProvider.computeKeyId(carlSignKey.getPublic()), null, carlSignKey.getPublic());
-        
+    private KeyPair bobKey;
+    private KeyPair aliceKey;
+    private KeyPair carlKey;
+    
+    private PublicKey bobPublicKey;
+    private PublicKey alicePublicKey;
+    private PublicKey carlPublicKey;
+    
     StepBuilder segment1Step1Builder;
     LinkBuilder segment1Step1LinkBuilder;
     StepBuilder segment2Step1Builder;
@@ -111,6 +116,12 @@ class VerificationTest {
     
     @BeforeEach
     void setup() throws Exception {
+    	bobKey = KeyPair.createKeyPair(PASSWORD);
+        aliceKey = KeyPair.createKeyPair(PASSWORD);
+        carlKey = KeyPair.createKeyPair(PASSWORD);
+        bobPublicKey = new PublicKey(bobKey.getKeyId(), bobKey.getPublicKey());
+        alicePublicKey = new PublicKey(aliceKey.getKeyId(), aliceKey.getPublicKey());
+        carlPublicKey = new PublicKey(carlKey.getKeyId(), carlKey.getPublicKey());
         rulesVerification = new RulesVerification(List.of(
                 new AllowRuleVerification(), 
                 new CreateRuleVerification(),
@@ -154,7 +165,7 @@ class VerificationTest {
     }
 
     @Test
-    void happyFlow() throws JsonParseException, JsonMappingException, IOException {        
+    void happyFlow() throws JsonParseException, JsonMappingException, IOException, GeneralSecurityException {        
         Artifact artifact1 = new Artifact("file1", "hash1");
         
         Step step1 = segment1Step1Builder
@@ -164,9 +175,7 @@ class VerificationTest {
                 .requiredNumberOfLinks(1).build();
         Layout layout = Layout.builder()
                 .authorizedKeyIds(List.of(bobKey.getKeyId()))
-                .keys(List.of(
-                        PublicKey.builder().id(bobKey.getKeyId()).key(bobKey.getPublicKey()).build(), 
-                        PublicKey.builder().id(aliceKey.getKeyId()).key(aliceKey.getPublicKey()).build()))
+                .keys(List.of(bobPublicKey,alicePublicKey))
                 .expectedEndProducts(List.of(MatchRule.builder()
                         .destinationSegmentName("segment1")
                         .destinationStepName("step1")
@@ -175,7 +184,7 @@ class VerificationTest {
                 .layoutSegments(List.of(LayoutSegment.builder()
                         .name("segment1").steps(List.of(step1)).build()))
                 .build();
-        Signature signature = ArgosTestSigner.sign(bobSignKey, new JsonSigningSerializer().serialize(layout));
+        Signature signature = Signer.sign(bobKey, PASSWORD, new JsonSigningSerializer().serialize(layout));
         LayoutMetaBlock layoutMetaBlock  = LayoutMetaBlock.builder().supplyChainId(SUPPLYCHAIN_ID).layout(layout).signatures(List.of(signature)).build();
         
         Link segment1Step1Link = segment1Step1LinkBuilder
@@ -184,7 +193,7 @@ class VerificationTest {
                 .products(List.of(artifact1))
                 .build();
         
-        signature = ArgosTestSigner.sign(aliceSignKey, new JsonSigningSerializer().serialize(segment1Step1Link));
+        signature = Signer.sign(aliceKey, PASSWORD, new JsonSigningSerializer().serialize(segment1Step1Link));
         LinkMetaBlock alicesStep1Block  = LinkMetaBlock.builder().link(segment1Step1Link).signature(signature).build();
         EnumMap<ArtifactType, Set<Artifact>> artifactTypeHashes = new EnumMap<>(ArtifactType.class);
         artifactTypeHashes.put(ArtifactType.PRODUCTS, Set.of(artifact1));
@@ -201,7 +210,7 @@ class VerificationTest {
     }
     
     @Test
-    void allRules() throws JsonParseException, JsonMappingException, IOException {        
+    void allRules() throws JsonParseException, JsonMappingException, IOException, GeneralSecurityException {        
         Artifact artifact1 = new Artifact("file1", "hash1");
         Artifact artifact21 = new Artifact("file2", "hash21");
         Artifact artifact22 = new Artifact("file2", "hash22");
@@ -231,9 +240,7 @@ class VerificationTest {
         
         Layout layout = Layout.builder()
                 .authorizedKeyIds(List.of(bobKey.getKeyId()))
-                .keys(List.of(
-                        PublicKey.builder().id(bobKey.getKeyId()).key(bobKey.getPublicKey()).build(), 
-                        PublicKey.builder().id(aliceKey.getKeyId()).key(aliceKey.getPublicKey()).build()))
+                .keys(List.of(bobPublicKey,alicePublicKey))
                 .expectedEndProducts(List.of(MatchRule.builder()
                         .destinationSegmentName("segment1")
                         .destinationStepName("step1")
@@ -243,7 +250,7 @@ class VerificationTest {
                         .name("segment1").steps(List.of(step1)).build()))
                 .build();
         
-        Signature signature = ArgosTestSigner.sign(bobSignKey, new JsonSigningSerializer().serialize(layout));
+        Signature signature = Signer.sign(bobKey, PASSWORD, new JsonSigningSerializer().serialize(layout));
         LayoutMetaBlock layoutMetaBlock  = LayoutMetaBlock.builder().supplyChainId(SUPPLYCHAIN_ID).layout(layout).signatures(List.of(signature)).build();
         
         Link segment1Step1Link = segment1Step1LinkBuilder
@@ -252,7 +259,7 @@ class VerificationTest {
                 .products(List.of(artifact1, artifact22, artifact5))
                 .build();
         
-        signature = ArgosTestSigner.sign(aliceSignKey, new JsonSigningSerializer().serialize(segment1Step1Link));
+        signature = Signer.sign(aliceKey, PASSWORD, new JsonSigningSerializer().serialize(segment1Step1Link));
         LinkMetaBlock alicesStep1Block  = LinkMetaBlock.builder().link(segment1Step1Link).signature(signature).build();
 
         EnumMap<ArtifactType, Set<Artifact>> artifactTypeHashes = new EnumMap<>(ArtifactType.class);
@@ -271,7 +278,7 @@ class VerificationTest {
     }
     
     @Test
-    void matchRuleWithDirs() throws JsonParseException, JsonMappingException, IOException {
+    void matchRuleWithDirs() throws JsonParseException, JsonMappingException, IOException, GeneralSecurityException {
         Artifact artifact1Dir1 = new Artifact("dir1/file1", "hash1");
         Artifact artifact1Dir2 = new Artifact("dir2/file1", "hash1");
         Artifact artifact1 = new Artifact("dir1/file1", "hash1");
@@ -303,9 +310,7 @@ class VerificationTest {
         
         Layout layout = Layout.builder()
                 .authorizedKeyIds(List.of(bobKey.getKeyId()))
-                .keys(List.of(
-                        PublicKey.builder().id(bobKey.getKeyId()).key(bobKey.getPublicKey()).build(), 
-                        PublicKey.builder().id(aliceKey.getKeyId()).key(aliceKey.getPublicKey()).build()))
+                .keys(List.of(bobPublicKey,alicePublicKey))
                 .expectedEndProducts(List.of(MatchRule.builder()
                         .destinationSegmentName(SEGMENT1)
                         .destinationStepName("step1")
@@ -322,7 +327,7 @@ class VerificationTest {
                             .build()))
                 .build();
         
-        Signature signature = ArgosTestSigner.sign(bobSignKey, new JsonSigningSerializer().serialize(layout));
+        Signature signature = Signer.sign(bobKey, PASSWORD, new JsonSigningSerializer().serialize(layout));
         LayoutMetaBlock layoutMetaBlock  = LayoutMetaBlock.builder().supplyChainId(SUPPLYCHAIN_ID).layout(layout).signatures(List.of(signature)).build();
         
         Link segment1Step1Link = segment1Step1LinkBuilder
@@ -337,9 +342,9 @@ class VerificationTest {
                 .products(List.of(artifact1Dir2))
                 .build();
         
-        signature = ArgosTestSigner.sign(aliceSignKey, new JsonSigningSerializer().serialize(segment1Step1Link));
+        signature = Signer.sign(aliceKey, PASSWORD, new JsonSigningSerializer().serialize(segment1Step1Link));
         LinkMetaBlock alicesSegment1Step1Block  = LinkMetaBlock.builder().link(segment1Step1Link).signature(signature).build();
-        signature = ArgosTestSigner.sign(aliceSignKey, new JsonSigningSerializer().serialize(segment2Step1Link));
+        signature = Signer.sign(aliceKey, PASSWORD, new JsonSigningSerializer().serialize(segment2Step1Link));
         LinkMetaBlock alicesSegment2Step1Block  = LinkMetaBlock.builder().link(segment2Step1Link).signature(signature).build();
 
         EnumMap<ArtifactType, Set<Artifact>> artifactTypeHashes1 = new EnumMap<>(ArtifactType.class);

@@ -16,7 +16,7 @@
 package com.rabobank.argos.service.adapter.in.rest.account;
 
 import com.rabobank.argos.domain.account.ServiceAccount;
-import com.rabobank.argos.domain.account.ServiceAccountKeyPair;
+import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestServiceAccount;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestServiceAccountKeyPair;
 import com.rabobank.argos.service.domain.DeleteService;

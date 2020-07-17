@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.domain.signing;
+package com.rabobank.argos.domain.crypto.signing;
 
 import com.rabobank.argos.domain.ArgosError;
+import com.rabobank.argos.domain.crypto.Signature;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.link.Link;
 import org.apache.commons.codec.DecoderException;
@@ -23,26 +24,25 @@ import org.apache.commons.codec.binary.Hex;
 
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-import java.security.Signature;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class SignatureValidator {
 
-    public boolean isValid(Link link, String signature, PublicKey publicKey) {
+    public boolean isValid(Link link, Signature signature, PublicKey publicKey) {
         return isValid(new JsonSigningSerializer().serialize(link), signature, publicKey);
     }
 
-    public boolean isValid(Layout layout, String signature, PublicKey publicKey) {
+    public boolean isValid(Layout layout, Signature signature, PublicKey publicKey) {
         return isValid(new JsonSigningSerializer().serialize(layout), signature, publicKey);
     }
 
-    private boolean isValid(String signableJson, String signature, PublicKey publicKey) {
+    private boolean isValid(String signableJson, Signature signature, PublicKey publicKey) {
         try {
-            Signature publicSignature = Signature.getInstance("SHA256withRSA");
+            java.security.Signature publicSignature = java.security.Signature.getInstance(signature.getAlgorithm().getStringValue());
             publicSignature.initVerify(publicKey);
             publicSignature.update(signableJson.getBytes(UTF_8));
-            byte[] signatureBytes = Hex.decodeHex(signature);
+            byte[] signatureBytes = Hex.decodeHex(signature.getSignature());
             return publicSignature.verify(signatureBytes);
         } catch (GeneralSecurityException | DecoderException e) {
             throw new ArgosError(e.getMessage(), e);

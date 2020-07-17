@@ -18,6 +18,7 @@ package com.rabobank.argos.argos4j.internal;
 
 import com.rabobank.argos.argos4j.Argos4jError;
 import com.rabobank.argos.argos4j.LocalFileCollector;
+import com.rabobank.argos.domain.crypto.HashUtil;
 import com.rabobank.argos.domain.link.Artifact;
 import lombok.extern.slf4j.Slf4j;
 

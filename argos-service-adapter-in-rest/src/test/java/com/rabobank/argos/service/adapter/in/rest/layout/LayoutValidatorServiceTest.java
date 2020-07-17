@@ -15,23 +15,28 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.layout;
 
-import com.rabobank.argos.domain.Signature;
+import com.rabobank.argos.domain.crypto.KeyPair;
+import com.rabobank.argos.domain.crypto.PublicKey;
+import com.rabobank.argos.domain.crypto.Signature;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
 import com.rabobank.argos.domain.layout.LayoutSegment;
-import com.rabobank.argos.domain.layout.PublicKey;
 import com.rabobank.argos.domain.layout.Step;
 import com.rabobank.argos.domain.layout.rule.MatchRule;
-import com.rabobank.argos.service.adapter.in.rest.ArgosKeyHelper;
 import com.rabobank.argos.service.adapter.in.rest.SignatureValidatorService;
 import com.rabobank.argos.service.domain.account.AccountService;
 import com.rabobank.argos.service.domain.supplychain.SupplyChainRepository;
+
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -84,13 +89,16 @@ class LayoutValidatorServiceTest {
     @Mock
     private MatchRule matchRule2;
 
-    private PublicKey publicKey1 = ArgosKeyHelper.generateArgosPublickKey();
+    private PublicKey publicKey1;
 
-    private PublicKey publicKey2 = ArgosKeyHelper.generateArgosPublickKey();
+    private PublicKey publicKey2;
 
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, OperatorCreationException, PemGenerationException {
+        publicKey1 = KeyPair.createKeyPair("test".toCharArray());
+        publicKey2 = KeyPair.createKeyPair("test".toCharArray());
+
         service = new LayoutValidatorService(supplyChainRepository, signatureValidatorService, accountService);
         when(layoutMetaBlock.getLayout()).thenReturn(layout);
     }
@@ -103,7 +111,7 @@ class LayoutValidatorServiceTest {
         when(supplyChainRepository.exists(SUPPLY_CHAIN_ID)).thenReturn(true);
         when(layoutMetaBlock.getSignatures()).thenReturn(singletonList(signature));
 
-        when(layout.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey1.getId()));
+        when(layout.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey1.getKeyId()));
         when(layout.getLayoutSegments()).thenReturn(List.of(layoutSegment));
         when(layoutSegment.getSteps()).thenReturn(singletonList(step));
         when(layoutSegment.getName()).thenReturn("segmentName");
@@ -111,10 +119,10 @@ class LayoutValidatorServiceTest {
         when(layout.getExpectedEndProducts()).thenReturn(singletonList(matchRule));
         when(matchRule.getDestinationSegmentName()).thenReturn("segmentName");
         when(matchRule.getDestinationStepName()).thenReturn("stepName");
-        when(step.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey2.getId()));
+        when(step.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey2.getKeyId()));
 
-        when(accountService.keyPairExists(publicKey1.getId())).thenReturn(true);
-        when(accountService.keyPairExists(publicKey2.getId())).thenReturn(true);
+        when(accountService.keyPairExists(publicKey1.getKeyId())).thenReturn(true);
+        when(accountService.keyPairExists(publicKey2.getKeyId())).thenReturn(true);
 
         service.validate(layoutMetaBlock);
         verify(signatureValidatorService).validateSignature(layout, signature);
@@ -130,16 +138,16 @@ class LayoutValidatorServiceTest {
         mockPublicKeys();
         when(layoutMetaBlock.getSupplyChainId()).thenReturn(SUPPLY_CHAIN_ID);
         when(supplyChainRepository.exists(SUPPLY_CHAIN_ID)).thenReturn(true);
-        when(signature.getKeyId()).thenReturn(publicKey1.getId());
+        when(signature.getKeyId()).thenReturn(publicKey1.getKeyId());
         when(layoutMetaBlock.getSignatures()).thenReturn(Arrays.asList(signature, signature));
 
-        when(layout.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey1.getId()));
+        when(layout.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey1.getKeyId()));
         when(layout.getLayoutSegments()).thenReturn(List.of(layoutSegment));
         when(layoutSegment.getSteps()).thenReturn(singletonList(step));
-        when(step.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey2.getId()));
+        when(step.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey2.getKeyId()));
 
-        when(accountService.keyPairExists(publicKey1.getId())).thenReturn(true);
-        when(accountService.keyPairExists(publicKey2.getId())).thenReturn(true);
+        when(accountService.keyPairExists(publicKey1.getKeyId())).thenReturn(true);
+        when(accountService.keyPairExists(publicKey2.getKeyId())).thenReturn(true);
 
         LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> {
             service.validate(layoutMetaBlock);
@@ -159,13 +167,13 @@ class LayoutValidatorServiceTest {
         when(layoutMetaBlock.getSupplyChainId()).thenReturn(SUPPLY_CHAIN_ID);
         when(supplyChainRepository.exists(SUPPLY_CHAIN_ID)).thenReturn(true);
 
-        when(layout.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey1.getId()));
+        when(layout.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey1.getKeyId()));
         when(layout.getLayoutSegments()).thenReturn(List.of(layoutSegment));
         when(layoutSegment.getSteps()).thenReturn(singletonList(step));
-        when(step.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey2.getId()));
+        when(step.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey2.getKeyId()));
 
-        when(accountService.keyPairExists(publicKey1.getId())).thenReturn(true);
-        when(accountService.keyPairExists(publicKey2.getId())).thenReturn(true);
+        when(accountService.keyPairExists(publicKey1.getKeyId())).thenReturn(true);
+        when(accountService.keyPairExists(publicKey2.getKeyId())).thenReturn(true);
 
         LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> {
             service.validate(layoutMetaBlock);
@@ -186,11 +194,11 @@ class LayoutValidatorServiceTest {
         when(layoutMetaBlock.getSupplyChainId()).thenReturn(SUPPLY_CHAIN_ID);
         when(supplyChainRepository.exists(SUPPLY_CHAIN_ID)).thenReturn(true);
 
-        when(layout.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey2.getId()));
+        when(layout.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey2.getKeyId()));
         when(layout.getLayoutSegments()).thenReturn(List.of(layoutSegment));
         when(layoutSegment.getSteps()).thenReturn(singletonList(step));
-        when(step.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey2.getId()));
-        when(accountService.keyPairExists(publicKey2.getId())).thenReturn(true);
+        when(step.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey2.getKeyId()));
+        when(accountService.keyPairExists(publicKey2.getKeyId())).thenReturn(true);
         LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> {
             service.validate(layoutMetaBlock);
         });
@@ -210,18 +218,18 @@ class LayoutValidatorServiceTest {
         when(layoutMetaBlock.getSupplyChainId()).thenReturn(SUPPLY_CHAIN_ID);
         when(supplyChainRepository.exists(SUPPLY_CHAIN_ID)).thenReturn(true);
 
-        publicKey1.setId("otherKeyId");
-        when(layout.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey1.getId()));
+        publicKey1.setKeyId("otherKeyId");
+        when(layout.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey1.getKeyId()));
         when(layout.getLayoutSegments()).thenReturn(List.of(layoutSegment));
         when(layoutSegment.getSteps()).thenReturn(singletonList(step));
-        when(step.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey1.getId()));
-        when(accountService.keyPairExists(publicKey1.getId())).thenReturn(true);
+        when(step.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey1.getKeyId()));
+        when(accountService.keyPairExists(publicKey1.getKeyId())).thenReturn(true);
         LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> {
             service.validate(layoutMetaBlock);
         });
         assertThat(layoutValidationException.getValidationMessages(), hasSize(1));
         assertThat(layoutValidationException.getValidationMessages().get(0).getField(), is("keys"));
-        assertThat(layoutValidationException.getValidationMessages().get(0).getMessage(), is(String.format("key with id %s does not match computed key id from public key", publicKey1.getId())));
+        assertThat(layoutValidationException.getValidationMessages().get(0).getMessage(), is(String.format("key with id %s does not match computed key id from public key", publicKey1.getKeyId())));
         assertThat(layoutValidationException.getValidationMessages().get(0).getType(), is(MODEL_CONSISTENCY));
 
     }
@@ -231,20 +239,20 @@ class LayoutValidatorServiceTest {
         when(layoutMetaBlock.getSupplyChainId()).thenReturn(SUPPLY_CHAIN_ID);
         when(supplyChainRepository.exists(SUPPLY_CHAIN_ID)).thenReturn(true);
 
-        when(layout.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey1.getId()));
+        when(layout.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey1.getKeyId()));
         when(layout.getLayoutSegments()).thenReturn(List.of(layoutSegment));
         when(layoutSegment.getSteps()).thenReturn(singletonList(step));
-        when(step.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey2.getId()));
+        when(step.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey2.getKeyId()));
 
-        when(accountService.keyPairExists(publicKey1.getId())).thenReturn(true);
-        when(accountService.keyPairExists(publicKey2.getId())).thenReturn(false);
+        when(accountService.keyPairExists(publicKey1.getKeyId())).thenReturn(true);
+        when(accountService.keyPairExists(publicKey2.getKeyId())).thenReturn(false);
 
         LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> {
             service.validate(layoutMetaBlock);
         });
         assertThat(layoutValidationException.getValidationMessages(), hasSize(2));
         assertThat(layoutValidationException.getValidationMessages().get(0).getField(), is("keys"));
-        assertThat(layoutValidationException.getValidationMessages().get(0).getMessage(), is(String.format("keyId %s not found", publicKey2.getId())));
+        assertThat(layoutValidationException.getValidationMessages().get(0).getMessage(), is(String.format("keyId %s not found", publicKey2.getKeyId())));
 
     }
 
@@ -253,10 +261,10 @@ class LayoutValidatorServiceTest {
         when(layoutMetaBlock.getSupplyChainId()).thenReturn(SUPPLY_CHAIN_ID);
         when(supplyChainRepository.exists(SUPPLY_CHAIN_ID)).thenReturn(true);
 
-        when(accountService.keyPairExists(publicKey1.getId())).thenReturn(true);
+        when(accountService.keyPairExists(publicKey1.getKeyId())).thenReturn(true);
 
-        when(layout.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey1.getId()));
-        when(accountService.keyPairExists(publicKey1.getId())).thenReturn(false);
+        when(layout.getAuthorizedKeyIds()).thenReturn(singletonList(publicKey1.getKeyId()));
+        when(accountService.keyPairExists(publicKey1.getKeyId())).thenReturn(false);
 
         LayoutValidationException layoutValidationException = assertThrows(LayoutValidationException.class, () -> {
             service.validate(layoutMetaBlock);
@@ -264,7 +272,7 @@ class LayoutValidatorServiceTest {
 
         assertThat(layoutValidationException.getValidationMessages(), hasSize(2));
         assertThat(layoutValidationException.getValidationMessages().get(0).getField(), is("keys"));
-        assertThat(layoutValidationException.getValidationMessages().get(0).getMessage(), is(String.format(String.format("keyId %s not found", publicKey1.getId()))));
+        assertThat(layoutValidationException.getValidationMessages().get(0).getMessage(), is(String.format(String.format("keyId %s not found", publicKey1.getKeyId()))));
         assertThat(layoutValidationException.getValidationMessages().get(0).getType(), is(MODEL_CONSISTENCY));
 
     }

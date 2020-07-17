@@ -108,8 +108,12 @@ class Argos4jIT {
 
     private RestLayout createLayout() {
         return new RestLayout()
-                .addKeysItem(new RestPublicKey().id(personalAccount.getKeyId()).key(personalAccount.getPublicKey()))
-                .addKeysItem(new RestPublicKey().id(serviceAccount.getKeyId()).key(serviceAccount.getPublicKey()))
+                .addKeysItem(new RestPublicKey()
+                		.keyId(personalAccount.getKeyId())
+                		.publicKey(personalAccount.getPublicKey()))
+                .addKeysItem(new RestPublicKey()
+                		.keyId(serviceAccount.getKeyId())
+                		.publicKey(serviceAccount.getPublicKey()))
                 .addAuthorizedKeyIdsItem(personalAccount.getKeyId())
                 .addExpectedEndProductsItem(new RestMatchRule()
                         .destinationSegmentName("layoutSegmentName")

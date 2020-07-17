@@ -17,7 +17,7 @@ package com.rabobank.argos.service.security;
 
 import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.account.ServiceAccount;
-import com.rabobank.argos.domain.account.ServiceAccountKeyPair;
+import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.service.domain.security.AccountUserDetailsAdapter;
 import com.rabobank.argos.service.security.ServiceAccountAuthenticationToken.ServiceAccountCredentials;
 import org.junit.jupiter.api.BeforeEach;

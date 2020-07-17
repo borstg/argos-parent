@@ -18,6 +18,8 @@ package com.rabobank.argos.argos4j.internal.mapper;
 
 import com.rabobank.argos.argos4j.rest.api.model.RestArtifact;
 import com.rabobank.argos.argos4j.rest.api.model.RestLinkMetaBlock;
+import com.rabobank.argos.argos4j.rest.api.model.RestServiceAccountKeyPair;
+import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.domain.link.Artifact;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
 import org.mapstruct.Mapper;
@@ -28,6 +30,8 @@ import java.util.List;
 public interface RestMapper {
 
     LinkMetaBlock convertFromRestLinkMetaBlock(RestLinkMetaBlock metaBlock);
+    
+    ServiceAccountKeyPair convertFromRestServiceAccountKeyPair(RestServiceAccountKeyPair keyPair);
 
     RestLinkMetaBlock convertToRestLinkMetaBlock(LinkMetaBlock metaBlock);
 

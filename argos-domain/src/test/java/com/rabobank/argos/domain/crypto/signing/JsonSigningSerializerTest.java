@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.domain.signing;
+package com.rabobank.argos.domain.crypto.signing;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabobank.argos.domain.key.RSAPublicKeyFactory;
+import com.rabobank.argos.domain.crypto.PublicKey;
 import com.rabobank.argos.domain.layout.ArtifactType;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.layout.LayoutSegment;
-import com.rabobank.argos.domain.layout.PublicKey;
 import com.rabobank.argos.domain.layout.Step;
 import com.rabobank.argos.domain.layout.rule.MatchRule;
 import com.rabobank.argos.domain.layout.rule.Rule;
@@ -41,7 +40,7 @@ import static org.hamcrest.core.Is.is;
 
 class JsonSigningSerializerTest {
 
-    private final static String PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoDIw5p3LYjFLr+JFvWOz0KQ22x538O2BoQO4e4EorYYkSMHn00pabqAQ9z6+nA+l43+Jxb5eJrHoroV4YZN8WDMsjY0eB1Q1K6hl3SHgeqTvA2i2GlpDg7zLRnP9YWbUwbWP+UWtRFK0x1lCCkSmxsP2HAom/T11/MMd/kitVt0rGsq8wQH7PLsOZ8zPh4sQ0iyCVLil6+VF6zsT83dKFocdfZWAywkQ6sVZbuzFCe+pLQktwTz1Ir8mMQi6sPh57b5yyFCSVstK1lKf+OQTtuuQzYz2bvpr9zkXr0O80IdTXOnoO1vM1lJuRPT3J0Zcr2nYdbmIskp4ZQyezXMqawIDAQAB";
+    private final static String PUBLIC_KEY = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEjdjAZjwvCrYGEv/zKVAhSItOV91OpPGmMPNCR3Dr0oryke0PhRO6HCbb+kS5NOJUEaGHbFeJUujpn/zQQIVlkQ==";
 
     @Test
     void serializeLink() throws IOException {
@@ -61,13 +60,9 @@ class JsonSigningSerializerTest {
 
     @Test
     void serializeLayout() throws IOException, GeneralSecurityException {
-
-
-        java.security.PublicKey publicKey = RSAPublicKeyFactory.instance(Base64.getDecoder().decode(PUBLIC_KEY));
-
-
-        String serialized = new JsonSigningSerializer().serialize(Layout.builder()
-                .keys(Arrays.asList(PublicKey.builder().id("keyId").key(publicKey).build()))
+    	
+    	Layout layout = Layout.builder()
+                .keys(Arrays.asList(new PublicKey("keyId", Base64.getDecoder().decode(PUBLIC_KEY))))
                 .expectedEndProducts(singletonList(MatchRule.builder()
                         .destinationSegmentName("destinationSegmentName")
                         .destinationType(ArtifactType.PRODUCTS)
@@ -105,8 +100,8 @@ class JsonSigningSerializerTest {
                                         .build()
                         )).build()))
                 .authorizedKeyIds(Arrays.asList("key2", "key1"))
-                .build()
-        );
+                .build();
+        String serialized = new JsonSigningSerializer().serialize(layout);
         assertThat(serialized, is(getExpectedJson("/expectedLayoutSigning.json")));
     }
 

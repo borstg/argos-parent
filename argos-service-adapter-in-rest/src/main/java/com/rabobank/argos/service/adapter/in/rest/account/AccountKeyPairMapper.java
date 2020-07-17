@@ -15,23 +15,18 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.account;
 
-import com.rabobank.argos.domain.account.ServiceAccountKeyPair;
-import com.rabobank.argos.domain.key.KeyPair;
+import com.rabobank.argos.domain.crypto.KeyPair;
+import com.rabobank.argos.domain.crypto.PublicKey;
+import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestKeyPair;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestPublicKey;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestServiceAccountKeyPair;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.security.GeneralSecurityException;
-import java.security.PublicKey;
-
-import static com.rabobank.argos.domain.key.RSAPublicKeyFactory.instance;
 
 @Mapper(componentModel = "spring")
 public abstract class AccountKeyPairMapper {
@@ -40,7 +35,7 @@ public abstract class AccountKeyPairMapper {
     private PasswordEncoder passwordEncoder;
 
     @Mapping(source = "hashedKeyPassphrase", target = "encryptedHashedKeyPassphrase", qualifiedByName = "encryptHashedKeyPassphrase")
-    public abstract ServiceAccountKeyPair convertFromRestKeyPair(RestServiceAccountKeyPair restKeyPair);
+    public abstract ServiceAccountKeyPair convertFromRestKeyPair(RestServiceAccountKeyPair keyPair);
 
     public abstract RestServiceAccountKeyPair convertToRestKeyPair(ServiceAccountKeyPair keyPair);
 
@@ -48,26 +43,16 @@ public abstract class AccountKeyPairMapper {
 
     public abstract RestKeyPair convertToRestKeyPair(KeyPair keyPair);
 
-    @Mapping(source = "keyId", target = "id")
-    @Mapping(source = "publicKey", target = "key")
+    @Mapping(source = "keyId", target = "keyId")
+    @Mapping(source = "publicKey", target = "publicKey")
     public abstract RestPublicKey convertToRestPublicKey(KeyPair keyPair);
+    
+    @Mapping(source = "keyId", target = "keyId")
+    @Mapping(source = "publicKey", target = "publicKey")
+    public abstract PublicKey convertFromRestPublicKey(RestPublicKey publicKey);
 
     @Named("encryptHashedKeyPassphrase")
     public String encryptHashedKeyPassphrase(String hashedKeyPassphrase) {
         return passwordEncoder.encode(hashedKeyPassphrase);
-    }
-
-    @Mapping(source = "publicKey", target = "publicKey")
-    public PublicKey convertByteArrayToPublicKey(byte[] publicKey) {
-        try {
-            return instance(publicKey);
-        } catch (GeneralSecurityException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid public key " + e.getMessage());
-        }
-    }
-
-    @Mapping(source = "publicKey", target = "publicKey")
-    public byte[] convertPublicKeyToByteArray(PublicKey publicKey) {
-        return publicKey.getEncoded();
     }
 }
