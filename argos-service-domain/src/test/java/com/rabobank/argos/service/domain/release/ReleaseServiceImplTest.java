@@ -18,11 +18,11 @@ package com.rabobank.argos.service.domain.release;
 import com.rabobank.argos.domain.account.AccountKeyInfo;
 import com.rabobank.argos.domain.account.AccountType;
 import com.rabobank.argos.domain.account.KeyInfo;
+import com.rabobank.argos.domain.crypto.PublicKey;
 import com.rabobank.argos.domain.hierarchy.HierarchyMode;
 import com.rabobank.argos.domain.hierarchy.TreeNode;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
-import com.rabobank.argos.domain.layout.PublicKey;
 import com.rabobank.argos.domain.link.Artifact;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
 import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
@@ -134,7 +134,7 @@ class ReleaseServiceImplTest {
         when(verificationRunResult.isRunIsValid()).thenReturn(true);
         when(layoutMetaBlock.getLayout()).thenReturn(layout);
         when(layout.getKeys()).thenReturn(Collections.singletonList(publicKey));
-        when(publicKey.getId()).thenReturn("keyId");
+        when(publicKey.getKeyId()).thenReturn("keyId");
         AccountKeyInfo accountKeyInfo = AccountKeyInfo
                 .builder()
                 .accountId("id")

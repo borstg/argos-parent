@@ -16,10 +16,8 @@
 package com.rabobank.argos.service.adapter.out.mongodb.release;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.mongodb.client.MongoClients;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
-import com.rabobank.argos.domain.layout.PublicKey;
 import com.rabobank.argos.domain.release.ReleaseDossier;
 import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
 import de.flapdoodle.embed.mongo.Command;
@@ -84,9 +82,6 @@ class ReleaseRepositoryImplTestIT {
         MongoDbFactory factory = new SimpleMongoClientDbFactory(MongoClients.create(connectionString), "test");
         gridFsTemplate = new GridFsTemplate(factory, getDefaultMongoConverter(factory));
         ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(PublicKey.class, new PublicKeyJsonSerializer());
-        mapper.registerModule(module);
         releaseRepository = new ReleaseRepositoryImpl(gridFsTemplate, mongoTemplate, mapper);
     }
 
