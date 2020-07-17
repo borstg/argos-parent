@@ -27,7 +27,7 @@ import static org.hamcrest.Matchers.is;
 
 class ReleaseDossierMetaDataConversionHelperTest {
 
-    protected static final String HASH = "673d0de055dfbb9ed400f13cb1ca5fac";
+    protected static final String HASH = "71ed24f24e838b18a4bc53aac2638155692b43289ca9778c37139859fc6e619d";
     protected static final List<String> ARTIFACT_LIST = List.of("string", "string2");
 
     @Test

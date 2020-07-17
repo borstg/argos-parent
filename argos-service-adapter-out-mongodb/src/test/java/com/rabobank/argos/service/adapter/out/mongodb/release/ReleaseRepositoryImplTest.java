@@ -123,7 +123,7 @@ class ReleaseRepositoryImplTest {
         assertThat(retrievedReleaseDossierMetaData.get().getReleaseArtifacts(), is(releasedArtifacts));
         assertThat(retrievedReleaseDossierMetaData.get().getReleaseDate(), is(Date.from(Instant.parse(RELEASE_DATE_TIME))));
         verify(mongoTemplate).find(queryArgumentCaptor.capture(), any(), any());
-        assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"$and\" : [{ \"metadata.releaseArtifacts\" : { \"$elemMatch\" : { \"58833651db311ba4bc11cb26b1900b0f\" : [\"hash2\"]}}}, { \"metadata.releaseArtifacts\" : { \"$elemMatch\" : { \"00c6ee2e21a7548de6260cf72c4f4b5b\" : [\"hash1\"]}}}], \"metadata.supplyChainPath\" : { \"$regex\" : \"^path\", \"$options\" : \"\"}}, Fields: {}, Sort: {}"));
+        assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"$and\" : [{ \"metadata.releaseArtifacts\" : { \"$elemMatch\" : { \"e7bf382f6e5915b3f88619b866223ebf1d51c4c5321cccde2e9ff700a3259086\" : [\"hash2\"]}}}, { \"metadata.releaseArtifacts\" : { \"$elemMatch\" : { \"af316ecb91a8ee7ae99210702b2d4758f30cdde3bf61e3d8e787d74681f90a6e\" : [\"hash1\"]}}}], \"metadata.supplyChainPath\" : { \"$regex\" : \"^path\", \"$options\" : \"\"}}, Fields: {}, Sort: {}"));
     }
 
 
