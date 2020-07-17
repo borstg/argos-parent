@@ -30,8 +30,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.MongoRegexCreator;
@@ -74,10 +72,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     private final MongoTemplate mongoTemplate;
 
-    @Autowired
-    @Qualifier("releaseFileJsonMapper")
     private final ObjectMapper releaseFileJsonMapper;
-
 
     @SneakyThrows
     @Override

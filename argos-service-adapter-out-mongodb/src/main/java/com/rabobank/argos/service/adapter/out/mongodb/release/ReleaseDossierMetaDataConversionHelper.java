@@ -24,7 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.String.join;
-import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
+import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
 
 public class ReleaseDossierMetaDataConversionHelper {
     private ReleaseDossierMetaDataConversionHelper() {
@@ -42,6 +42,6 @@ public class ReleaseDossierMetaDataConversionHelper {
     }
 
     public static String createHashFromArtifactList(List<String> artifactList) {
-        return md5Hex(join("", artifactList));
+        return sha256Hex(join("", artifactList));
     }
 }
