@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-Feature: Verification
+Feature: Verification2.0
 
   Background:
     * call read('classpath:feature/reset.feature')
@@ -26,3 +26,4 @@ Feature: Verification
 
   Scenario: successfull release should return successfull verify
     * def resp = call read('classpath:feature/release/release-template.feature') { releaseRequest:#(defaultReleaseRequest) ,testDir: 'happy-flow',steps:#(defaultSteps),layoutSigningKey:1}
+    Given path '/api/supplychain'
