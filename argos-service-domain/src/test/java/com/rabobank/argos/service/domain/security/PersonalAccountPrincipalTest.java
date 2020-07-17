@@ -48,16 +48,16 @@ class PersonalAccountPrincipalTest {
     @Test
     void getId() {
         when(personalAccount.getAccountId()).thenReturn("id");
-        assertThat(new AccountUserDetailsAdapter(personalAccount, globalPermissions).getId(), is("id"));
+        assertThat(new AccountUserDetailsAdapter(personalAccount, "sessionId", globalPermissions).getId(), is("id"));
     }
 
     @Test
     void getPassword() {
-        assertThat(new AccountUserDetailsAdapter(personalAccount, globalPermissions).getPassword(), is(""));
+        assertThat(new AccountUserDetailsAdapter(personalAccount, "sessionId", globalPermissions).getPassword(), is(""));
     }
 
     @Test
     void getAuthorities() {
-        assertThat(new AccountUserDetailsAdapter(personalAccount, globalPermissions).getAuthorities(), contains(new SimpleGrantedAuthority("ROLE_USER")));
+        assertThat(new AccountUserDetailsAdapter(personalAccount, "sessionId", globalPermissions).getAuthorities(), contains(new SimpleGrantedAuthority("ROLE_USER")));
     }
 }

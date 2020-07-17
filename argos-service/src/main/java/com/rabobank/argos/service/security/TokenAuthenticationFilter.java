@@ -15,6 +15,7 @@
  */
 package com.rabobank.argos.service.security;
 
+import com.rabobank.argos.service.domain.account.FinishedSessionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,15 +33,20 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
+    private final FinishedSessionRepository finishedSessionRepository;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             getJwtFromRequest(request).filter(tokenProvider::validateToken).ifPresent(jwt -> {
-                String accountId = tokenProvider.getUserIdFromToken(jwt);
-                PersonalAccountAuthenticationToken authentication = new PersonalAccountAuthenticationToken(accountId, null, null);
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                log.debug("successfully resolved bearer token for account {}", accountId);
+                TokenProvider.TokenInfo tokenInfo = tokenProvider.getTokenInfo(jwt);
+                String sessionId = tokenInfo.getSessionId();
+                if (!finishedSessionRepository.hasSessionId(sessionId)) {
+                    String accountId = tokenInfo.getAccountId();
+                    PersonalAccountAuthenticationToken authentication = new PersonalAccountAuthenticationToken(accountId, sessionId, null, null);
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    log.debug("successfully resolved bearer token for account {}", accountId);
+                }
             });
 
         } catch (Exception ex) {

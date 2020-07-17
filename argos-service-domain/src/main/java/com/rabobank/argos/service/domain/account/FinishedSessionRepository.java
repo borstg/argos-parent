@@ -13,22 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.service.domain.security;
+package com.rabobank.argos.service.domain.account;
 
-import com.rabobank.argos.domain.account.Account;
-import com.rabobank.argos.domain.permission.Permission;
+import com.rabobank.argos.domain.account.ArgosSession;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.Date;
 
-public interface AccountSecurityContext {
-    Optional<Account> getAuthenticatedAccount();
+public interface FinishedSessionRepository {
+    void save(ArgosSession session);
 
-    Optional<String> getSessionId();
+    boolean hasSessionId(String sessionId);
 
-    Set<Permission> getGlobalPermission();
+    void deleteExpiredSessions(Date from);
 
-    Set<Permission> allLocalPermissions(List<String> labelIds);
 }
-

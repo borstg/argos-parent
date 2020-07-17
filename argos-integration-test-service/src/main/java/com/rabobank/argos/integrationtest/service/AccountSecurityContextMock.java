@@ -33,6 +33,11 @@ public class AccountSecurityContextMock implements AccountSecurityContext {
     }
 
     @Override
+    public Optional<String> getSessionId() {
+        return Optional.empty();
+    }
+
+    @Override
     public Set<Permission> getGlobalPermission() {
         return Collections.emptySet();
     }
