@@ -25,7 +25,7 @@ Feature: Verification
     * def defaultValidResponse =  read('classpath:testmessages/release/release-valid.json')
     * def releaseInvalidResponse = read('classpath:testmessages/release/release-invalid.json')
 
-  @michel
+l
   Scenario: happy flow all rules and commit to audit log
     * def resp = call read('classpath:feature/release/release-template.feature') { releaseRequest:#(defaultReleaseRequest) ,testDir: 'happy-flow',steps:#(defaultSteps),layoutSigningKey:1}
     And match resp.response == defaultValidResponse
