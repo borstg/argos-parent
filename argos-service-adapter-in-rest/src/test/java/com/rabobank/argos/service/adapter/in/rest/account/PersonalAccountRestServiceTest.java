@@ -31,7 +31,6 @@ import com.rabobank.argos.service.domain.account.AccountService;
 import com.rabobank.argos.service.domain.account.FinishedSessionRepository;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
 import com.rabobank.argos.service.domain.security.AccountSecurityContextImpl;
-
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.hamcrest.Matchers;
@@ -134,10 +133,8 @@ class PersonalAccountRestServiceTest {
     @BeforeEach
     void setUp() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, OperatorCreationException, PemGenerationException {
         personalAccount.setAccountId(ACCOUNT_ID);
-        service = new PersonalAccountRestService(accountSecurityContext, keyPairMapper, accountService, personalAccountMapper, labelRepository);
         keyPair = KeyPair.createKeyPair(PRIVAT_KEY_PASSPHRASE);
         service = new PersonalAccountRestService(accountSecurityContext, keyPairMapper, accountService, personalAccountMapper, labelRepository, finishedSessionRepository);
-        keyPair = ArgosKeyHelper.generateKeyPair();
     }
 
     @Test
