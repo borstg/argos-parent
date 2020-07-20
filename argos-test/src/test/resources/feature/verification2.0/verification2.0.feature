@@ -26,12 +26,8 @@ Feature: Verification2.0
 
   Scenario: successfull release should return successfull verify
     * def resp = call read('classpath:feature/release/release-template.feature') { releaseRequest:#(defaultReleaseRequest) ,testDir: 'happy-flow',steps:#(defaultSteps),layoutSigningKey:1}
-    Given path '/api/supplychain'
-    And param name = 'name'
-    And param path = 'default_root_label'
-    When method GET
-    Then status 200
-    Given path '/api/supplychain/'+response.id+'/verification'
+    * configure headers = {'Content-Type': 'application/json'}
+    Given path '/api/supplychain/verification'
     And param artifactHashes = '49e73a11c5e689db448d866ce08848ac5886cac8aa31156ea4de37427aca6162'
     And param path = 'default_root_label'
     When method GET
@@ -40,32 +36,12 @@ Feature: Verification2.0
 
   Scenario: successfull release with incorrect hash should return unsuccessfull verify
     * def resp = call read('classpath:feature/release/release-template.feature') { releaseRequest:#(defaultReleaseRequest) ,testDir: 'happy-flow',steps:#(defaultSteps),layoutSigningKey:1}
-    Given path '/api/supplychain'
-    And param name = 'name'
-    And param path = 'default_root_label'
-    When method GET
-    Then status 200
-    Given path '/api/supplychain/'+response.id+'/verification'
+    * configure headers = {'Content-Type': 'application/json'}
+    Given path '/api/supplychain/verification'
     And param artifactHashes = '49e73a11c5e689db448d866ce08848ac5886cac8aa31156ea4de37427aca6163'
     And param path = 'default_root_label'
     When method GET
     Then status 200
     And match response == {"runIsValid":false}
 
-  Scenario: verification without permission VERIFY should return a 403 error
-    * def resp = call read('classpath:feature/release/release-template.feature') { releaseRequest:#(defaultReleaseRequest) ,testDir: 'happy-flow',steps:#(defaultSteps),layoutSigningKey:1}
-    * def supplyChain = call read('classpath:feature/supplychain/create-supplychain-with-label.feature') { supplyChainName: 'name'}
-    * def supplyChainPath = '/api/supplychain/'+ supplyChain.response.id
-    * def accounWithNoVerifyPermission = call read('classpath:feature/account/create-personal-account.feature') {name: 'Verify unauthorized person',email: 'local.noverify@extra.nogo'}
-    * call read('classpath:feature/account/set-local-permissions.feature') { accountId: #(accounWithNoVerifyPermission.response.id),labelId: #(supplyChain.response.parentLabelId), permissions: ["READ"]}
-    Given path '/api/supplychain'
-    And param name = 'name'
-    And param path = 'default_root_label'
-    When method GET
-    Then status 200
-    * configure headers = call read('classpath:headers.js') { token: #(accounWithNoVerifyPermission.response.token)}
-    Given path '/api/supplychain/'+response.id+'/verification'
-    And param artifactHashes = '49e73a11c5e689db448d866ce08848ac5886cac8aa31156ea4de37427aca6162'
-    And param path = 'default_root_label'
-    When method GET
-    Then status 403
+
