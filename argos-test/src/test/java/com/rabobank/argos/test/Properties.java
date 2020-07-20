@@ -25,12 +25,7 @@ public class Properties {
     private final String apiBaseUrl;
     private static Properties INSTANCE;
     private final String jenkinsBaseUrl;
-    private final String xlDeployBaseUrl;
-    private final String xlDeployUser;
-    private final String xlDeployPassword;
-    private final String tomcatBaseUrl;
     private final String integrationTestServiceBaseUrl;
-    private final String nexusDarSnapshotUrl;
     private final String nexusWarSnapshotUrl;
     private final String argosTestAppBranch;
     private final String oauthStubUrl;
@@ -48,12 +43,7 @@ public class Properties {
         Config conf = ConfigFactory.load();
         apiBaseUrl = conf.getString("argos-service.rest-api.base-url");
         jenkinsBaseUrl = conf.getString("jenkins.base-url");
-        xlDeployBaseUrl = conf.getString("xldeploy.base-url");
-        xlDeployUser = conf.getString("xldeploy.user");
-        xlDeployPassword = conf.getString("xldeploy.password");
-        tomcatBaseUrl = conf.getString("tomcat.base-url");
         integrationTestServiceBaseUrl = conf.getString("argos-integration-test-service.rest-api.base-url");
-        nexusDarSnapshotUrl = conf.getString("nexus.dar-snapshot-url");
         nexusWarSnapshotUrl = conf.getString("nexus.war-snapshot-url");
         argosTestAppBranch = conf.getString("argos-test-app.branch");
         oauthStubUrl = conf.getString("argos-oauth-stub.rest-api.base-url");
