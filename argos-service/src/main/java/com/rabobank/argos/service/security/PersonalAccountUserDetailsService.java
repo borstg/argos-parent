@@ -42,16 +42,16 @@ public class PersonalAccountUserDetailsService {
         return role.getPermissions().stream();
     }
 
-    UserDetails loadUserById(String id) {
-        PersonalAccount personalAccount = personalAccountRepository.findByAccountId(id)
-                .orElseThrow(() -> new ArgosError("Personal account with id " + id + " not found"));
+    UserDetails loadUserByToken(PersonalAccountAuthenticationToken token) {
+        PersonalAccount personalAccount = personalAccountRepository.findByAccountId(token.getCredentials())
+                .orElseThrow(() -> new ArgosError("Personal account with id " + token.getCredentials() + " not found"));
         Set<Permission> globalPermissions = roleRepository
                 .findByIds(personalAccount.getRoleIds())
                 .stream()
                 .filter(role -> role.getPermissions() != null)
                 .flatMap(PersonalAccountUserDetailsService::apply)
                 .collect(Collectors.toSet());
-        return new AccountUserDetailsAdapter(personalAccount, globalPermissions);
+        return new AccountUserDetailsAdapter(personalAccount, token.getSessionId(), globalPermissions);
     }
 
 }

@@ -15,6 +15,7 @@
  */
 package com.rabobank.argos.service.security;
 
+import com.rabobank.argos.service.domain.account.FinishedSessionRepository;
 import com.rabobank.argos.service.security.oauth2.CustomOAuth2UserService;
 import com.rabobank.argos.service.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.rabobank.argos.service.security.oauth2.OAuth2AuthenticationFailureHandler;
@@ -61,13 +62,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final ServiceAccountUserDetailsService serviceAccountUserDetailsService;
 
+    private final FinishedSessionRepository finishedSessionRepository;
+
     private TokenAuthenticationFilter tokenAuthenticationFilter() {
-        return new TokenAuthenticationFilter(tokenProvider);
+        return new TokenAuthenticationFilter(tokenProvider, finishedSessionRepository);
     }
 
     private KeyIdBasicAuthenticationFilter keyIdBasicAuthenticationFilter() {
         return new KeyIdBasicAuthenticationFilter(new BasicAuthenticationConverter());
     }
+
     /*
       By default, Spring OAuth2 uses HttpSessionOAuth2AuthorizationRequestRepository to save
       the authorization request. But, since our service is stateless, we can't save it in

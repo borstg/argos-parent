@@ -13,29 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.domain.release;
+package com.rabobank.argos.service.domain.account;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import com.rabobank.argos.domain.account.ArgosSession;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
-import static java.lang.String.join;
-import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
+public interface FinishedSessionRepository {
+    void save(ArgosSession session);
 
-@Builder
-@Getter
-@Setter
-public class ReleaseDossierMetaData {
-    private String documentId;
-    private Date releaseDate;
-    private String supplyChainPath;
-    private List<Set<String>> releaseArtifacts;
+    boolean hasSessionId(String sessionId);
 
-    public static String createHashFromArtifactList(List<String> artifactList) {
-        return sha256Hex(join("", artifactList));
-    }
+    void deleteExpiredSessions(Date from);
+
 }

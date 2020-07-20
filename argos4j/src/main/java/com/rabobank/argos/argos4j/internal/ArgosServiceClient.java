@@ -30,16 +30,12 @@ import com.rabobank.argos.argos4j.rest.api.model.RestArtifact;
 import com.rabobank.argos.argos4j.rest.api.model.RestLinkMetaBlock;
 import com.rabobank.argos.argos4j.rest.api.model.RestServiceAccountKeyPair;
 import com.rabobank.argos.argos4j.rest.api.model.RestVerifyCommand;
-import com.rabobank.argos.domain.crypto.HashAlgorithm;
 import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.domain.link.Artifact;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
 import feign.FeignException;
-import org.bouncycastle.util.encoders.Hex;
 import org.mapstruct.factory.Mappers;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 

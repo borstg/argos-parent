@@ -13,27 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.service.adapter.out.mongodb;
+package com.rabobank.argos.domain.release;
 
-import org.bson.types.Binary;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 
-import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-@ExtendWith(MockitoExtension.class)
-class MongoConfigTest {
+class ReleaseDossierMetaDataTest {
 
-    private MongoConfig config;
+    protected static final String HASH = "71ed24f24e838b18a4bc53aac2638155692b43289ca9778c37139859fc6e619d";
+    protected static final List<String> ARTIFACT_LIST;
 
-    @BeforeEach
-    void setUp() {
-        config = new MongoConfig();
+    static {
+        ARTIFACT_LIST = new ArrayList<>();
+        ARTIFACT_LIST.add("string");
+        ARTIFACT_LIST.add("string2");
+    }
+
+    @Test
+    void createHashFromArtifactList() {
+        String result = ReleaseDossierMetaData.createHashFromArtifactList(ARTIFACT_LIST);
+        assertThat(result, is(HASH));
     }
 }

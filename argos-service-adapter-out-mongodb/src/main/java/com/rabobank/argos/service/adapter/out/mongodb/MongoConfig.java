@@ -15,7 +15,6 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.cloudyrock.mongock.SpringBootMongock;
 import com.github.cloudyrock.mongock.SpringBootMongockBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,11 +43,6 @@ public class MongoConfig {
     @Value("${spring.data.mongodb.uri}")
     private String mongoURI;
 
-    @Bean(name = "releaseFileJsonMapper")
-    ObjectMapper releaseFileJsonMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper;
-    }
 
     @Bean
     public SpringBootMongock mongogock(MongoTemplate mongoTemplate, ApplicationContext springContext) {

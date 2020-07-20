@@ -41,8 +41,6 @@ import static com.rabobank.argos.service.adapter.in.rest.api.model.RestValidatio
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-import java.security.GeneralSecurityException;
-
 @Service
 @RequiredArgsConstructor
 public class LayoutValidatorService {
@@ -175,9 +173,7 @@ public class LayoutValidatorService {
         }
 
         layoutMetaBlock.getSignatures()
-                .forEach(signature -> {
-						signatureValidatorService.validateSignature(layoutMetaBlock.getLayout(), signature);
-				});
+                .forEach(signature -> signatureValidatorService.validateSignature(layoutMetaBlock.getLayout(), signature));
     }
 
     private void validateAutorizationKeyIds(LayoutValidationReport report, Layout layout) {

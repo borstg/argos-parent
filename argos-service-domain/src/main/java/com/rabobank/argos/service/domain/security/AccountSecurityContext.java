@@ -24,6 +24,9 @@ import java.util.Set;
 
 public interface AccountSecurityContext {
     Optional<Account> getAuthenticatedAccount();
+
+    Optional<String> getSessionId();
+
     Set<Permission> getGlobalPermission();
 
     Set<Permission> allLocalPermissions(List<String> labelIds);

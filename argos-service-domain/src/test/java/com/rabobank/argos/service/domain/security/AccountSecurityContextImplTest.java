@@ -108,6 +108,14 @@ class AccountSecurityContextImplTest {
         assertThat(permissions.isEmpty(), is(true));
     }
 
+    @Test
+    void getSessionId() {
+        when(accountUserDetailsAdapter.getSessionId()).thenReturn("sessionId");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        when(authentication.getPrincipal()).thenReturn(accountUserDetailsAdapter);
+        assertThat(context.getSessionId(), is(Optional.of("sessionId")));
+    }
+
     @AfterEach
     void tearDown() {
         SecurityContextHolder.getContext().setAuthentication(null);

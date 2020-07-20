@@ -49,6 +49,9 @@ class PersonalAccountUserDetailsServiceTest {
     @Mock
     private RoleRepository roleRepository;
 
+    @Mock
+    private PersonalAccountAuthenticationToken token;
+
     @BeforeEach
     void setUp() {
         personalAccountUserDetailsService = new PersonalAccountUserDetailsService(personalAccountRepository, roleRepository);
@@ -60,7 +63,8 @@ class PersonalAccountUserDetailsServiceTest {
         when(roleRepository.findByIds(any())).thenReturn(List.of(role));
         when(personalAccountRepository.findByAccountId("id")).thenReturn(Optional.of(personalAccount));
         when(personalAccount.getName()).thenReturn("name");
-        UserDetails userDetails = personalAccountUserDetailsService.loadUserById("id");
+        when(token.getCredentials()).thenReturn("id");
+        UserDetails userDetails = personalAccountUserDetailsService.loadUserByToken(token);
         assertThat(userDetails.getUsername(), is("name"));
     }
 
@@ -70,14 +74,16 @@ class PersonalAccountUserDetailsServiceTest {
         when(roleRepository.findByIds(any())).thenReturn(List.of(role));
         when(personalAccountRepository.findByAccountId("id")).thenReturn(Optional.of(personalAccount));
         when(personalAccount.getName()).thenReturn("name");
-        UserDetails userDetails = personalAccountUserDetailsService.loadUserById("id");
+        when(token.getCredentials()).thenReturn("id");
+        UserDetails userDetails = personalAccountUserDetailsService.loadUserByToken(token);
         assertThat(userDetails.getUsername(), is("name"));
     }
 
     @Test
     void loadUserByIdNotFound() {
         when(personalAccountRepository.findByAccountId("id")).thenReturn(Optional.empty());
-        ArgosError argosError = assertThrows(ArgosError.class, () -> personalAccountUserDetailsService.loadUserById("id"));
+        when(token.getCredentials()).thenReturn("id");
+        ArgosError argosError = assertThrows(ArgosError.class, () -> personalAccountUserDetailsService.loadUserByToken(token));
         assertThat(argosError.getMessage(), is("Personal account with id id not found"));
     }
 }

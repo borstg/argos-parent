@@ -30,8 +30,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.MongoRegexCreator;
@@ -54,8 +52,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.rabobank.argos.domain.release.ReleaseDossierMetaData.createHashFromArtifactList;
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseDossierMetaDataConversionHelper.convertToDocumentList;
-import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseDossierMetaDataConversionHelper.createHashFromArtifactList;
 import static org.springframework.data.mongodb.core.query.MongoRegexCreator.MatchMode.STARTING_WITH;
 
 @Component
@@ -74,10 +72,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     private final MongoTemplate mongoTemplate;
 
-    @Autowired
-    @Qualifier("releaseFileJsonMapper")
     private final ObjectMapper releaseFileJsonMapper;
-
 
     @SneakyThrows
     @Override

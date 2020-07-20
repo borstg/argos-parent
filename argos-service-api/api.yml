@@ -847,6 +847,17 @@ paths:
           description: personal account not found
         '500':
           $ref: '#/components/responses/Error'
+  /personalaccount/me/logout:
+    put:
+      summary: logout
+      operationId: logout
+      tags:
+        - personal account
+      responses:
+        '204':
+          description: logged out
+        '500':
+          $ref: '#/components/responses/Error'
   /personalaccount:
     get:
       summary: search

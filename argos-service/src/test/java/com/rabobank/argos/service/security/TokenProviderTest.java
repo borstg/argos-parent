@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasLength;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
@@ -61,7 +62,8 @@ class TokenProviderTest {
         when(userPrincipal.getAccountId()).thenReturn("id");
         String token = tokenProvider.createToken(authentication);
         assertThat(tokenProvider.validateToken(token), is(true));
-        assertThat(tokenProvider.getUserIdFromToken(token), is("id"));
+        assertThat(tokenProvider.getTokenInfo(token).getAccountId(), is("id"));
+        assertThat(tokenProvider.getTokenInfo(token).getSessionId(), hasLength(36));
     }
 
     @Test

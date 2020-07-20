@@ -31,6 +31,16 @@ Feature: Personal Account
     Then status 200
     Then match response == expectedResponse
 
+  Scenario: get logout should return 204
+    Given path 'api/personalaccount/me/logout'
+    And request ''
+    When method PUT
+    Then status 204
+    * def expectedResponse = read('classpath:testmessages/personal-account/admin-account-response.json')
+    Given path '/api/personalaccount/me'
+    When method GET
+    Then status 401
+
   Scenario: createKey should return 204 and commit to audit log
     Given path '/api/personalaccount/me/key'
     And request read('classpath:testmessages/key/personal-keypair.json')

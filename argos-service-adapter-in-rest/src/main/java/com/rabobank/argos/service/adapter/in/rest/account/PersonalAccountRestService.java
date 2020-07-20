@@ -17,6 +17,7 @@ package com.rabobank.argos.service.adapter.in.rest.account;
 
 
 import com.rabobank.argos.domain.account.Account;
+import com.rabobank.argos.domain.account.ArgosSession;
 import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.domain.crypto.KeyIdProvider;
 import com.rabobank.argos.domain.crypto.KeyPair;
@@ -31,6 +32,7 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestProfile;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestPublicKey;
 import com.rabobank.argos.service.domain.account.AccountSearchParams;
 import com.rabobank.argos.service.domain.account.AccountService;
+import com.rabobank.argos.service.domain.account.FinishedSessionRepository;
 import com.rabobank.argos.service.domain.auditlog.AuditLog;
 import com.rabobank.argos.service.domain.auditlog.AuditParam;
 import com.rabobank.argos.service.domain.hierarchy.LabelRepository;
@@ -38,6 +40,7 @@ import com.rabobank.argos.service.domain.security.AccountSecurityContext;
 import com.rabobank.argos.service.domain.security.LabelIdCheckParam;
 import com.rabobank.argos.service.domain.security.PermissionCheck;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,6 +49,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -61,6 +67,10 @@ public class PersonalAccountRestService implements PersonalAccountApi {
     private final AccountService accountService;
     private final PersonalAccountMapper personalAccountMapper;
     private final LabelRepository labelRepository;
+    private final FinishedSessionRepository finishedSessionRepository;
+
+    @Value("#{T(java.time.Duration).parse('${jwt.token.expiration}')}")
+    private Duration timeout;
 
 
     @PreAuthorize("hasRole('USER')")
@@ -70,6 +80,14 @@ public class PersonalAccountRestService implements PersonalAccountApi {
                 .map(account -> (PersonalAccount) account)
                 .map(personalAccountMapper::convertToRestProfile)
                 .map(ResponseEntity::ok).orElseThrow(this::accountNotFound);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @Override
+    public ResponseEntity<Void> logout() {
+        accountSecurityContext.getSessionId()
+                .ifPresent(sessionId -> finishedSessionRepository.save(new ArgosSession(sessionId, Timestamp.valueOf(LocalDateTime.now().plus(timeout)))));
+        return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasRole('USER')")

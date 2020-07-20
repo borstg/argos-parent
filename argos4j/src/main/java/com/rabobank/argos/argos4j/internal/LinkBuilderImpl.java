@@ -15,13 +15,11 @@
  */
 package com.rabobank.argos.argos4j.internal;
 
-import com.rabobank.argos.argos4j.Argos4jError;
 import com.rabobank.argos.argos4j.Argos4jSettings;
 import com.rabobank.argos.argos4j.FileCollector;
 import com.rabobank.argos.argos4j.LinkBuilder;
 import com.rabobank.argos.argos4j.LinkBuilderSettings;
 import com.rabobank.argos.argos4j.internal.mapper.RestMapper;
-import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.domain.crypto.Signature;
 import com.rabobank.argos.domain.crypto.signing.JsonSigningSerializer;
@@ -31,7 +29,6 @@ import com.rabobank.argos.domain.link.Link;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
 import lombok.RequiredArgsConstructor;
 
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 
 import org.mapstruct.factory.Mappers;
