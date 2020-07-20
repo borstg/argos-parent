@@ -80,9 +80,7 @@ public class TokenProviderImpl implements TokenProvider {
 
     @Override
     public Optional<String> refreshToken(TokenInfo tokenInfo) {
-
-        LocalDateTime issuedAt = toLocalDateTime(tokenInfo.getIssuedAt());
-        if (LocalDateTime.now().isBefore(issuedAt.plus(refreshInterval).plus(sessionTimeout))) {
+        if (!sessionExpired(tokenInfo)) {
             return Optional.of(Jwts.builder()
                     .setSubject(tokenInfo.getAccountId())
                     .setId(tokenInfo.getSessionId())

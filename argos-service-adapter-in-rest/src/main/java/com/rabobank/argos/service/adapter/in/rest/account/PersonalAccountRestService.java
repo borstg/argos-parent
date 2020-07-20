@@ -57,6 +57,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.rabobank.argos.domain.ArgosError.Level.WARNING;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -92,7 +94,7 @@ public class PersonalAccountRestService implements PersonalAccountApi {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<RestToken> refreshToken() {
         TokenInfo tokenInfo = accountSecurityContext.getTokenInfo().orElseThrow(() -> new ArgosError("no token info"));
-        return tokenProvider.refreshToken(tokenInfo).map(token -> ResponseEntity.ok(new RestToken().token(token))).orElseThrow(() -> new ArgosError("expired"));
+        return tokenProvider.refreshToken(tokenInfo).map(token -> ResponseEntity.ok(new RestToken().token(token))).orElseThrow(() -> new ArgosError("expired", WARNING));
     }
 
     @PreAuthorize("hasRole('USER')")

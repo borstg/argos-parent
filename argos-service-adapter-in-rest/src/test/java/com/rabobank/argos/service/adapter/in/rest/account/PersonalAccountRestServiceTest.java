@@ -15,6 +15,7 @@
  */
 package com.rabobank.argos.service.adapter.in.rest.account;
 
+import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.account.ArgosSession;
 import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.domain.crypto.KeyPair;
@@ -26,6 +27,7 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestPermission;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestPersonalAccount;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestProfile;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestPublicKey;
+import com.rabobank.argos.service.adapter.in.rest.api.model.RestToken;
 import com.rabobank.argos.service.domain.account.AccountSearchParams;
 import com.rabobank.argos.service.domain.account.AccountService;
 import com.rabobank.argos.service.domain.account.FinishedSessionRepository;
@@ -364,5 +366,31 @@ class PersonalAccountRestServiceTest {
         ArgosSession value = argosSessionArgumentCaptor.getValue();
         assertThat(value.getSessionId(), is(SESSION_ID));
         assertThat(value.getExpirationDate(), is(EXPIRATION_DATE));
+    }
+
+    @Test
+    void refreshToken() {
+        when(accountSecurityContext.getTokenInfo()).thenReturn(Optional.of(tokenInfo));
+        when(tokenProvider.refreshToken(tokenInfo)).thenReturn(Optional.of("token"));
+        ResponseEntity<RestToken> restTokenResponse = service.refreshToken();
+        assertThat(restTokenResponse.getStatusCodeValue(), is(200));
+        assertThat(restTokenResponse.getBody().getToken(), is("token"));
+    }
+
+    @Test
+    void refreshTokenExpired() {
+        when(accountSecurityContext.getTokenInfo()).thenReturn(Optional.of(tokenInfo));
+        when(tokenProvider.refreshToken(tokenInfo)).thenReturn(Optional.empty());
+        ArgosError exception = assertThrows(ArgosError.class, () -> service.refreshToken());
+        assertThat(exception.getMessage(), is("expired"));
+        assertThat(exception.getLevel(), is(ArgosError.Level.WARNING));
+    }
+
+    @Test
+    void refreshTokenNoTokenInfo() {
+        when(accountSecurityContext.getTokenInfo()).thenReturn(Optional.empty());
+        ArgosError exception = assertThrows(ArgosError.class, () -> service.refreshToken());
+        assertThat(exception.getMessage(), is("no token info"));
+        assertThat(exception.getLevel(), is(ArgosError.Level.ERROR));
     }
 }
