@@ -24,16 +24,24 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {ArgosServiceApplication.class})
-class OAuth2ProvidersTest {
+class OAuth2ProvidersTestIT {
     @Autowired
     OAuth2Providers oAuth2Providers;
 
     @Test
     void testParsing() {
-        //  auth2Providers.
-        assertThat(oAuth2Providers.getProvider(), is("argos-service"));
+        assertThat(oAuth2Providers.getProvider().isEmpty(), is(false));
+        assertThat(oAuth2Providers.getProvider().get("azure"), is(notNullValue()));
+        OAuth2Providers.Oauth2Provider oauth2Provider = oAuth2Providers.getProvider().get("azure");
+        assertThat(oauth2Provider.getAuthorizationUri(), is("http://localhost:8087/oauth2/v2.0/authorize"));
+        assertThat(oauth2Provider.getTokenUri(), is("http://localhost:8087/oauth2/v2.0/token"));
+        assertThat(oauth2Provider.getUserInfoUri(), is("http://localhost:8087/v1.0/me"));
+        assertThat(oauth2Provider.getUserIdAttribute(), is("id"));
+        assertThat(oauth2Provider.getUserEmailAttribute(), is("userPrincipalName"));
+        assertThat(oauth2Provider.getUserNameAttribute(), is("displayName"));
     }
 }
