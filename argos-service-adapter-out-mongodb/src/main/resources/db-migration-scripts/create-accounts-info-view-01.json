@@ -58,9 +58,9 @@
           },
           {
             "$project": {
-              "_id": "joinedPersonalAccounts._id",
-              "accountId": "joinedPersonalAccounts.accountId",
-              "name": "joinedPersonalAccounts.name",
+              "_id": "$joinedPersonalAccounts._id",
+              "accountId": "$joinedPersonalAccounts.accountId",
+              "name": "$joinedPersonalAccounts.name",
               "accountType": "PERSONAL_ACCOUNT",
               "pathToRoot": [
               ],

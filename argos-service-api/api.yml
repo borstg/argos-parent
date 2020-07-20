@@ -1757,7 +1757,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ArtifactCollectorSpecification"
-          minItems: 1
     ApprovalConfiguration:
       type: object
       required:
