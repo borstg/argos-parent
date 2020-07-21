@@ -47,8 +47,15 @@ import static org.mockito.Mockito.when;
 class CustomOAuth2UserServiceTest {
 
     private static final String ACCOUNT_ID = "accountId";
+    protected static final String AZURE = "azure";
     @Mock
     private AccountService accountService;
+
+    @Mock
+    private OAuth2Providers oAuth2Providers;
+
+    @Mock
+    private OAuth2Providers.OAuth2Provider oauth2Provider;
 
     @Mock
     private DefaultOAuth2UserService defaultOAuth2UserService;
@@ -72,14 +79,14 @@ class CustomOAuth2UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        clientRegistration = ClientRegistration.withRegistrationId("azure")
+        clientRegistration = ClientRegistration.withRegistrationId(AZURE)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .clientId("clientId")
                 .redirectUriTemplate("template")
                 .authorizationUri("/")
                 .tokenUri("/")
                 .build();
-        userService = new CustomOAuth2UserService(accountService);
+        userService = new CustomOAuth2UserService(accountService, oAuth2Providers);
         ReflectionTestUtils.setField(userService, "defaultOAuth2UserService", defaultOAuth2UserService);
     }
 
@@ -114,7 +121,7 @@ class CustomOAuth2UserServiceTest {
         PersonalAccount createdPersonalAccount = userArgumentCaptor.getValue();
         assertThat(createdPersonalAccount.getName(), is("displayName"));
         assertThat(createdPersonalAccount.getEmail(), is("userprincipalname"));
-        assertThat(createdPersonalAccount.getProvider(), is(AuthenticationProvider.AZURE));
+        assertThat(createdPersonalAccount.getProviderName(), is(AuthenticationProvider.AZURE));
         assertThat(createdPersonalAccount.getProviderId(), is("providerId"));
     }
 
@@ -127,6 +134,7 @@ class CustomOAuth2UserServiceTest {
     }
 
     private void setupMocks() {
+        when(oAuth2Providers.getProvider()).thenReturn(Map.of(AZURE, oauth2Provider));
         when(oAuth2User.getAttributes()).thenReturn(Map.of("userPrincipalName", "userPrincipalName", "displayName", "displayName", "id", "providerId"));
         when(defaultOAuth2UserService.loadUser(oAuth2UserRequest)).thenReturn(oAuth2User);
         when(oAuth2UserRequest.getClientRegistration()).thenReturn(clientRegistration);

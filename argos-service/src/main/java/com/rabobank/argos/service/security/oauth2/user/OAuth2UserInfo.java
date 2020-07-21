@@ -15,19 +15,44 @@
  */
 package com.rabobank.argos.service.security.oauth2.user;
 
+import com.rabobank.argos.service.security.oauth2.OAuth2Providers;
+
 import java.util.Map;
 
-public abstract class OAuth2UserInfo {
+public class OAuth2UserInfo {
 
-    protected Map<String, Object> attributes;
+    private Map<String, Object> attributes;
+    private String providerName;
+    private OAuth2Providers.OAuth2Provider oauth2Provider;
 
-    public OAuth2UserInfo(Map<String, Object> attributes) {
+    public OAuth2UserInfo(String providerName, Map<String, Object> attributes, OAuth2Providers.OAuth2Provider oauth2Provider) {
         this.attributes = attributes;
+        this.providerName = providerName;
+        this.oauth2Provider = oauth2Provider;
     }
 
-    public abstract String getId();
+    public String getProviderName() {
+        return providerName;
+    }
 
-    public abstract String getName();
+    public String getId() {
 
-    public abstract String getEmail();
+        return (String) attributes
+                .getOrDefault(oauth2Provider
+                        .getUserIdAttribute(), null);
+    }
+
+    public String getName() {
+        return (String) attributes
+                .getOrDefault(oauth2Provider
+                        .getUserNameAttribute(), null);
+
+    }
+
+    public String getEmail() {
+        return (String) attributes
+                .getOrDefault(oauth2Provider
+                        .getUserEmailAttribute(), null);
+
+    }
 }

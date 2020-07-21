@@ -25,10 +25,10 @@ import java.util.Map;
 @ConfigurationProperties("spring.security.oauth2.client")
 @Data
 public class OAuth2Providers {
-    private Map<String, Oauth2Provider> provider;
+    private Map<String, OAuth2Provider> provider;
 
     @Data
-    public static class Oauth2Provider {
+    public static class OAuth2Provider {
         private String authorizationUri;
         private String tokenUri;
         private String userInfoUri;

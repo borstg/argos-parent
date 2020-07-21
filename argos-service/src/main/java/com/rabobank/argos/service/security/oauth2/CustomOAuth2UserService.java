@@ -16,11 +16,10 @@
 package com.rabobank.argos.service.security.oauth2;
 
 import com.rabobank.argos.domain.ArgosError;
-import com.rabobank.argos.domain.account.AuthenticationProvider;
 import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.service.domain.account.AccountService;
+import com.rabobank.argos.service.security.oauth2.OAuth2Providers.OAuth2Provider;
 import com.rabobank.argos.service.security.oauth2.user.OAuth2UserInfo;
-import com.rabobank.argos.service.security.oauth2.user.OAuth2UserInfoFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -31,13 +30,15 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final AccountService accountService;
-
+    private final OAuth2Providers auth2Providers;
     private DefaultOAuth2UserService defaultOAuth2UserService = new DefaultOAuth2UserService();
 
     @Override
@@ -54,14 +55,22 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     }
 
     private ArgosOAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest, OAuth2User oAuth2User) {
-        AuthenticationProvider authenticationProvider = AuthenticationProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId().toUpperCase());
         if (oAuth2User.getAttributes() == null || oAuth2User.getAttributes().isEmpty()) {
             throw new ArgosError("invalid response from oauth profile service");
         }
-        OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(authenticationProvider, oAuth2User.getAttributes());
+
+        String providerName = oAuth2UserRequest.getClientRegistration().getRegistrationId();
+
+        Optional<OAuth2Provider> oauth2Provider = Optional.ofNullable(auth2Providers
+                .getProvider()
+                .getOrDefault(oAuth2UserRequest.getClientRegistration().getRegistrationId(), null));
+
+        OAuth2UserInfo oAuth2UserInfo = oauth2Provider
+                .map(p -> new OAuth2UserInfo(providerName, oAuth2User.getAttributes(), p))
+                .orElseThrow(() -> new ArgosError("no provider is configured for: " + providerName));
 
         if (!StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {
-            return accountService.authenticateUser(convertToPersonalAccount(authenticationProvider, oAuth2UserInfo))
+            return accountService.authenticateUser(convertToPersonalAccount(oAuth2UserInfo))
                     .map(account -> new ArgosOAuth2User(oAuth2User, account.getAccountId()))
                     .orElseThrow(() -> new ArgosError("account not authenticated"));
         } else {
@@ -69,12 +78,12 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         }
     }
 
-    private PersonalAccount convertToPersonalAccount(AuthenticationProvider authenticationProvider, OAuth2UserInfo oAuth2UserInfo) {
+    private PersonalAccount convertToPersonalAccount(OAuth2UserInfo oAuth2UserInfo) {
         return PersonalAccount.builder()
                 .name(oAuth2UserInfo.getName())
                 .email(oAuth2UserInfo.getEmail())
                 .providerId(oAuth2UserInfo.getId())
-                .provider(authenticationProvider)
+                .providerName(oAuth2UserInfo.getProviderName())
                 .build();
     }
 

@@ -15,12 +15,11 @@
  */
 package com.rabobank.argos.domain.account;
 
+import com.rabobank.argos.domain.crypto.KeyPair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.rabobank.argos.domain.crypto.KeyPair;
 
 import java.util.Collections;
 
@@ -50,7 +49,7 @@ class PersonalAccountTest {
                 .email(EMAIL)
                 .activeKeyPair(activeKeyPair)
                 .inactiveKeyPairs(Collections.singletonList(keyPair))
-                .provider(AuthenticationProvider.AZURE)
+                .providerName("azure")
                 .providerId(PROVIDER_ID)
                 .roleIds(Collections.singletonList(ROLE_ID))
                 .build();
@@ -60,7 +59,7 @@ class PersonalAccountTest {
         assertThat(account.getName(), is(NAME));
         assertThat(account.getEmail(), is(EMAIL));
         assertThat(account.getActiveKeyPair(), sameInstance(activeKeyPair));
-        assertThat(account.getProvider(), is(AuthenticationProvider.AZURE));
+        assertThat(account.getProviderName(), is(AuthenticationProvider.AZURE));
         assertThat(account.getInactiveKeyPairs(), contains(keyPair));
         assertThat(account.getProviderId(), is(PROVIDER_ID));
         assertThat(account.getRoleIds(), contains(ROLE_ID));

@@ -36,7 +36,7 @@ class OAuth2ProvidersTestIT {
     void testParsing() {
         assertThat(oAuth2Providers.getProvider().isEmpty(), is(false));
         assertThat(oAuth2Providers.getProvider().get("azure"), is(notNullValue()));
-        OAuth2Providers.Oauth2Provider oauth2Provider = oAuth2Providers.getProvider().get("azure");
+        OAuth2Providers.OAuth2Provider oauth2Provider = oAuth2Providers.getProvider().get("azure");
         assertThat(oauth2Provider.getAuthorizationUri(), is("http://localhost:8087/oauth2/v2.0/authorize"));
         assertThat(oauth2Provider.getTokenUri(), is("http://localhost:8087/oauth2/v2.0/token"));
         assertThat(oauth2Provider.getUserInfoUri(), is("http://localhost:8087/v1.0/me"));
