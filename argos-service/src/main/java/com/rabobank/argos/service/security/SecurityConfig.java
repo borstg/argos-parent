@@ -126,7 +126,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 .and()
                 .authorizeRequests()
-                .antMatchers("/swagger/**", "/actuator/**", "/api/auth/**", "/api/oauth2/**")
+                .antMatchers("/swagger/**", "/actuator/**", "/api/auth/**", "/api/oauth2/**", "/api/supplychain/verification/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()

@@ -96,17 +96,11 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     @Override
     public Optional<ReleaseDossierMetaData> findReleaseByReleasedArtifactsAndPath(List<Set<String>> releasedArtifacts, String path) {
-        if (releasedArtifacts.isEmpty()) {
-            throw new ArgosError("releasedArtifacts cannot be empty", ArgosError.Level.WARNING);
-        }
-        Criteria criteria = createInitialCriteria(releasedArtifacts);
+        checkForEmptyArtifacts(releasedArtifacts);
 
-        if (path != null) {
+        Criteria criteria = createArtifactCriteria(releasedArtifacts);
 
-            criteria.and(METADATA_SUPPLY_CHAIN_PATH_FIELD)
-                    .regex(Objects.requireNonNull(MongoRegexCreator.INSTANCE
-                            .toRegularExpression(path, STARTING_WITH)));
-        }
+        addOptionalPathCriteria(path, criteria);
 
         List<Document> documents = mongoTemplate.find(new Query(criteria), Document.class, COLLECTION_NAME);
 
@@ -123,7 +117,21 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     }
 
-    private Criteria createInitialCriteria(List<Set<String>> releasedArtifacts) {
+    private void checkForEmptyArtifacts(List<Set<String>> releasedArtifacts) {
+        if (releasedArtifacts.isEmpty()) {
+            throw new ArgosError("releasedArtifacts cannot be empty", ArgosError.Level.WARNING);
+        }
+    }
+
+    private void addOptionalPathCriteria(String path, Criteria criteria) {
+        if (path != null) {
+            criteria.and(METADATA_SUPPLY_CHAIN_PATH_FIELD)
+                    .regex(Objects.requireNonNull(MongoRegexCreator.INSTANCE
+                            .toRegularExpression(path, STARTING_WITH)));
+        }
+    }
+
+    private Criteria createArtifactCriteria(List<Set<String>> releasedArtifacts) {
 
         Map<String, List<String>> artifactHashes = createArtifactsHashes(releasedArtifacts);
         Criteria criteria = new Criteria();
@@ -181,6 +189,16 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
         assert file != null;
         String releaseFileJson = IOUtils.toString(gridFsTemplate.getResource(file).getInputStream(), StandardCharsets.UTF_8.name());
         return Optional.ofNullable(releaseFileJson);
+    }
+
+    @Override
+    public boolean artifactsAreReleased(Set<String> releasedArtifacts, String path) {
+        List<Set<String>> releasedArtifactsList = new ArrayList();
+        releasedArtifactsList.add(releasedArtifacts);
+        checkForEmptyArtifacts(releasedArtifactsList);
+        Criteria criteria = createArtifactCriteria(releasedArtifactsList);
+        addOptionalPathCriteria(path, criteria);
+        return mongoTemplate.exists(new Query(criteria), COLLECTION_NAME);
     }
 
 }
