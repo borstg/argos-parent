@@ -59,7 +59,7 @@ class AccountInfoRepositoryImplTest {
     }
 
     @Test
-    public void findByKeyIds() {
+    void findByKeyIds() {
         when(template.find(any(), eq(AccountKeyInfo.class), eq(ACCOUNTS_KEYINFO_VIEW))).thenReturn(Collections.singletonList(accountKeyInfo));
         accountInfoRepository.findByKeyIds(Collections.singletonList("keyId"));
         verify(template).find(queryArgumentCaptor.capture(), eq(AccountKeyInfo.class), eq(ACCOUNTS_KEYINFO_VIEW));
@@ -67,7 +67,7 @@ class AccountInfoRepositoryImplTest {
     }
 
     @Test
-    public void findByNameIdPathToRootAndAccountType() {
+    void findByNameIdPathToRootAndAccountType() {
         when(template.find(any(), eq(AccountInfo.class), eq(ACCOUNTS_INFO_VIEW))).thenReturn(Collections.singletonList(accountInfo));
         accountInfoRepository.findByNameIdPathToRootAndAccountType("name", Collections.singletonList("id"), AccountType.SERVICE_ACCOUNT);
         verify(template).find(queryArgumentCaptor.capture(), eq(AccountInfo.class), eq(ACCOUNTS_INFO_VIEW));

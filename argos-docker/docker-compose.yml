@@ -87,26 +87,6 @@ services:
       - 9080:8080
     depends_on:
       - nexus
-      - xldeploy
-
-  xldeploy:
-    build:
-      context: .
-      dockerfile: XLDeployDockerfile
-    environment:
-      ADMIN_PASSWORD: admin
-      ACCEPT_EULA: Y
-      JAVA_OPTS: '-Xmx1g'
-    ports:
-      - 4516:4516
-      
-  tomcat:
-    image: argosnotary/xld-tomcat-target:9.0
-    environment:
-      JAVA_OPTS: '-Xmx500m'
-    ports:
-      - "8082:8080"
-      - "2022:22"
 
   nexus:
     image: sonatype/nexus:2.14.15-01
