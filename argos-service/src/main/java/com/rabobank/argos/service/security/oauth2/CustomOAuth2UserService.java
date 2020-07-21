@@ -58,7 +58,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         if (oAuth2User.getAttributes() == null || oAuth2User.getAttributes().isEmpty()) {
             throw new ArgosError("invalid response from oauth profile service");
         }
-
+        // oAuth2UserRequest.getAccessToken().getTokenValue()
+        //
         String providerName = oAuth2UserRequest.getClientRegistration().getRegistrationId();
 
         Optional<OAuth2Provider> oauth2Provider = Optional.ofNullable(auth2Providers

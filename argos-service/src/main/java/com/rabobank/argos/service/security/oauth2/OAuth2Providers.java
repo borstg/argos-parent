@@ -15,7 +15,8 @@
  */
 package com.rabobank.argos.service.security.oauth2;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -23,18 +24,27 @@ import java.util.Map;
 
 @Component
 @ConfigurationProperties("spring.security.oauth2.client")
-@Data
+@Getter
+@Setter
 public class OAuth2Providers {
     private Map<String, OAuth2Provider> provider;
 
-    @Data
+    @Getter
+    @Setter
     public static class OAuth2Provider {
-        private String authorizationUri;
-        private String tokenUri;
-        private String userInfoUri;
         private String userNameAttribute;
         private String userIdAttribute;
         private String userEmailAttribute;
+        private String iconUrl;
+        private String displayName;
+        private EmailAddressHandler emailAddressHandler;
+    }
+
+    @Getter
+    @Setter
+    public static class EmailAddressHandler {
+        private String className;
+        private String uri;
     }
 
 }
