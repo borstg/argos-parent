@@ -321,3 +321,39 @@ Feature: Personal Account
     When method GET
     Then status 403
     And match response == {"message":"Access denied"}
+
+  Scenario: should refresh token
+    * def extraToken = call read('classpath:feature/account/create-token.feature') {accountId: #(defaultTestData.personalAccounts['default-pa1'].accountId), minutesEarlier: 16}
+    * configure headers = call read('classpath:headers.js') { token: #(extraToken.response.token)}
+    Given path '/api/personalaccount/me'
+    When method GET
+    Then status 401
+    Then match response.message == 'refresh token'
+
+  Scenario: refresh token
+    * def extraToken = call read('classpath:feature/account/create-token.feature') {accountId: #(defaultTestData.personalAccounts['default-pa1'].accountId), minutesEarlier: 16}
+    * configure headers = call read('classpath:headers.js') { token: #(extraToken.response.token)}
+    Given path '/api/personalaccount/me/refresh'
+    When method GET
+    Then status 200
+    * configure headers = call read('classpath:headers.js') { token: #(response.token)}
+    Given path '/api/personalaccount/me'
+    When method GET
+    Then status 200
+    Then match response.name == 'Default User'
+
+  Scenario: token session expired
+    * def extraToken = call read('classpath:feature/account/create-token.feature') {accountId: #(defaultTestData.personalAccounts['default-pa1'].accountId), minutesEarlier: 21}
+    * configure headers = call read('classpath:headers.js') { token: #(extraToken.response.token)}
+    Given path '/api/personalaccount/me'
+    When method GET
+    Then status 401
+    Then match response == ''
+
+  Scenario: token session expired can not refresh token
+    * def extraToken = call read('classpath:feature/account/create-token.feature') {accountId: #(defaultTestData.personalAccounts['default-pa1'].accountId), minutesEarlier: 21}
+    * configure headers = call read('classpath:headers.js') { token: #(extraToken.response.token)}
+    Given path '/api/personalaccount/me/refresh'
+    When method GET
+    Then status 401
+    Then match response == ''

@@ -15,23 +15,21 @@
  */
 package com.rabobank.argos.integrationtest.service;
 
-import com.rabobank.argos.domain.ArgosError;
-import com.rabobank.argos.domain.crypto.KeyIdProvider;
-import com.rabobank.argos.domain.crypto.KeyPair;
-import com.rabobank.argos.domain.crypto.Signature;
 import com.rabobank.argos.domain.account.AuthenticationProvider;
 import com.rabobank.argos.domain.account.PersonalAccount;
-import com.rabobank.argos.domain.layout.LayoutMetaBlock;
-import com.rabobank.argos.domain.link.LinkMetaBlock;
+import com.rabobank.argos.domain.crypto.KeyPair;
+import com.rabobank.argos.domain.crypto.Signature;
 import com.rabobank.argos.domain.crypto.signing.JsonSigningSerializer;
 import com.rabobank.argos.domain.crypto.signing.Signer;
+import com.rabobank.argos.domain.layout.LayoutMetaBlock;
+import com.rabobank.argos.domain.link.LinkMetaBlock;
 import com.rabobank.argos.integrationtest.argos.service.api.handler.IntegrationTestServiceApi;
-import com.rabobank.argos.integrationtest.argos.service.api.model.RestKeyAlgorithm;
 import com.rabobank.argos.integrationtest.argos.service.api.model.RestKeyPair;
 import com.rabobank.argos.integrationtest.argos.service.api.model.RestLayoutMetaBlock;
 import com.rabobank.argos.integrationtest.argos.service.api.model.RestLinkMetaBlock;
 import com.rabobank.argos.integrationtest.argos.service.api.model.RestPersonalAccount;
 import com.rabobank.argos.integrationtest.argos.service.api.model.RestPersonalAccountWithToken;
+import com.rabobank.argos.integrationtest.argos.service.api.model.RestToken;
 import com.rabobank.argos.integrationtest.service.layout.LayoutMetaBlockMapper;
 import com.rabobank.argos.integrationtest.service.link.LinkMetaBlockMapper;
 import com.rabobank.argos.service.domain.account.AccountService;
@@ -41,15 +39,8 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Hex;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8DecryptorProviderBuilder;
-import org.bouncycastle.operator.InputDecryptorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
-import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,24 +50,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
-import javax.crypto.Cipher;
-import javax.crypto.EncryptedPrivateKeyInfo;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.PBEParameterSpec;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
 import java.security.Security;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -94,7 +74,6 @@ public class TestITService implements IntegrationTestServiceApi {
     @Value("${jwt.token.secret}")
     private String secret;
 
-    public static final String PBE_WITH_SHA_1_AND_DE_SEDE = "PBEWithSHA1AndDESede";
     private final RepositoryResetProvider repositoryResetProvider;
 
     private final LayoutMetaBlockMapper layoutMetaBlockMapper;
@@ -149,8 +128,7 @@ public class TestITService implements IntegrationTestServiceApi {
     public ResponseEntity<RestLayoutMetaBlock> signLayout(String password, String keyId, RestLayoutMetaBlock restLayoutMetaBlock) {
         LayoutMetaBlock layoutMetaBlock = layoutMetaBlockMapper.convertFromRestLayoutMetaBlock(restLayoutMetaBlock);
         KeyPair keyPair = getKeyPair(keyId);
-        Signature signature = null;
-		signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(layoutMetaBlock.getLayout()));
+        Signature signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(layoutMetaBlock.getLayout()));
         List<Signature> signatures = new ArrayList<>(layoutMetaBlock.getSignatures());
         signatures.add(signature);
         layoutMetaBlock.setSignatures(signatures);
@@ -162,8 +140,7 @@ public class TestITService implements IntegrationTestServiceApi {
         LinkMetaBlock linkMetaBlock = linkMetaBlockMapper.convertFromRestLinkMetaBlock(restLinkMetaBlock);
 
         KeyPair keyPair = getKeyPair(keyId);
-        Signature signature = null;
-		signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(linkMetaBlock.getLink()));
+        Signature signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(linkMetaBlock.getLink()));
         linkMetaBlock.setSignature(signature);
         
         return ResponseEntity.ok(linkMetaBlockMapper.convertToRestLinkMetaBlock(linkMetaBlock));
@@ -191,7 +168,7 @@ public class TestITService implements IntegrationTestServiceApi {
         personalAccountRepository.save(personalAccount);
 
         RestPersonalAccountWithToken restPersonalAccountWithToken = accountMapper.map(personalAccount);
-        restPersonalAccountWithToken.setToken(createToken(restPersonalAccountWithToken.getId()));
+        restPersonalAccountWithToken.setToken(createToken(restPersonalAccountWithToken.getId(), new Date()));
         return ResponseEntity.ok(restPersonalAccountWithToken);
     }
 
@@ -201,53 +178,24 @@ public class TestITService implements IntegrationTestServiceApi {
         return ResponseEntity.noContent().build();
     }
 
-    public String createToken(String accountId) {
+    @Override
+    public ResponseEntity<RestToken> createToken(String accountId, OffsetDateTime issuedAt) {
+        log.info("issuedAt {}", issuedAt);
+        return ResponseEntity.ok(new RestToken().token(createToken(accountId, Timestamp.valueOf(issuedAt.toLocalDateTime()))));
+    }
+
+    public String createToken(String accountId, Date issuedAt) {
         return Jwts.builder()
                 .setSubject(accountId)
-                .setIssuedAt(new Date())
+                .setId(UUID.randomUUID().toString())
+                .setIssuedAt(issuedAt)
                 .setExpiration(Timestamp.valueOf(LocalDateTime.now().plus(Period.ofDays(1))))
                 .signWith(secretKey)
                 .compact();
     }
-    
+
     private KeyPair getKeyPair(String keyId) {
     	return accountService.findKeyPairByKeyId(keyId).orElseThrow();
-    }
-
-    private byte[] addPassword(byte[] encodedprivkey, String password) {
-        // extract the encoded private key, this is an unencrypted PKCS#8 private key
-
-        try {
-            int count = 20;// hash iteration count
-            SecureRandom random = new SecureRandom();
-            byte[] salt = new byte[8];
-            random.nextBytes(salt);
-
-            // Create PBE parameter set
-            PBEParameterSpec pbeParamSpec = new PBEParameterSpec(salt, count);
-            PBEKeySpec pbeKeySpec = new PBEKeySpec(password.toCharArray());
-            SecretKeyFactory keyFac = SecretKeyFactory.getInstance(PBE_WITH_SHA_1_AND_DE_SEDE);
-            SecretKey pbeKey = keyFac.generateSecret(pbeKeySpec);
-
-            Cipher pbeCipher = Cipher.getInstance(PBE_WITH_SHA_1_AND_DE_SEDE);
-
-            // Initialize PBE Cipher with key and parameters
-            pbeCipher.init(Cipher.ENCRYPT_MODE, pbeKey, pbeParamSpec);
-
-            // Encrypt the encoded Private Key with the PBE key
-            byte[] ciphertext = pbeCipher.doFinal(encodedprivkey);
-
-            // Now construct  PKCS #8 EncryptedPrivateKeyInfo object
-            AlgorithmParameters algparms = AlgorithmParameters.getInstance(PBE_WITH_SHA_1_AND_DE_SEDE);
-            algparms.init(pbeParamSpec);
-            EncryptedPrivateKeyInfo encinfo = new EncryptedPrivateKeyInfo(algparms, ciphertext);
-
-
-            // and here we have it! a DER encoded PKCS#8 encrypted key!
-            return encinfo.getEncoded();
-        } catch (GeneralSecurityException | IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }
