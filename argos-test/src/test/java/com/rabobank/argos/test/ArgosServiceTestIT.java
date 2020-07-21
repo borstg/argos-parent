@@ -110,4 +110,9 @@ class ArgosServiceTestIT {
     Karate searchAccounts() {
         return new Karate().feature("classpath:feature/account/search-account.feature");
     }
+
+    @Karate.Test()
+    Karate oauthProviders() {
+        return new Karate().feature("classpath:feature/oauthprovider/oauthprovider.feature");
+    }
 }

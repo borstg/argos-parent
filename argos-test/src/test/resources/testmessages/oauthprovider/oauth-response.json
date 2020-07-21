@@ -1,0 +1,7 @@
+[
+  {
+    "providerName": "azure",
+    "displayName": "Azure",
+    "iconUrl": "https://localhost:8080/azure.svg"
+  }
+]
