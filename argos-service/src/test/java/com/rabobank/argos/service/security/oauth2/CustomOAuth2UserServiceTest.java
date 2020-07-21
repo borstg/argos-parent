@@ -15,7 +15,6 @@
  */
 package com.rabobank.argos.service.security.oauth2;
 
-import com.rabobank.argos.domain.account.AuthenticationProvider;
 import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.service.domain.account.AccountService;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +47,10 @@ class CustomOAuth2UserServiceTest {
 
     private static final String ACCOUNT_ID = "accountId";
     protected static final String AZURE = "azure";
+    protected static final String USER_PRINCIPAL_NAME = "userPrincipalName";
+    protected static final String DISPLAY_NAME = "displayName";
+    protected static final String PROVIDER_ID = "providerId";
+    protected static final String ID = "id";
     @Mock
     private AccountService accountService;
 
@@ -93,56 +96,64 @@ class CustomOAuth2UserServiceTest {
 
     @Test
     void loadUserNewUserWithEmptyAttributesShouldThrowError() {
-        setupMocksForEmptyAttributes();
-        assertThrows(InternalAuthenticationServiceException.class, () -> {
-            userService.loadUser(oAuth2UserRequest);
-        });
+        assertThrows(InternalAuthenticationServiceException.class, () -> userService.loadUser(oAuth2UserRequest));
 
     }
 
     @Test
     void loadUserNotFoundShouldThrowError() {
         setupMocks();
+        when(oauth2Provider.getUserEmailAttribute()).thenReturn(USER_PRINCIPAL_NAME);
+        when(oauth2Provider.getUserIdAttribute()).thenReturn(ID);
+        when(oauth2Provider.getUserNameAttribute()).thenReturn(DISPLAY_NAME);
         when(accountService.authenticateUser(any())).thenReturn(Optional.empty());
-        InternalAuthenticationServiceException error = assertThrows(InternalAuthenticationServiceException.class, () -> {
-            userService.loadUser(oAuth2UserRequest);
-        });
+        InternalAuthenticationServiceException error = assertThrows(InternalAuthenticationServiceException.class, () -> userService.loadUser(oAuth2UserRequest));
         assertThat(error.getMessage(), is("account not authenticated"));
     }
 
     @Test
     void loadUserNewUser() {
         setupMocks();
+        when(oauth2Provider.getUserEmailAttribute()).thenReturn(USER_PRINCIPAL_NAME);
+        when(oauth2Provider.getUserNameAttribute()).thenReturn(DISPLAY_NAME);
+        when(oauth2Provider.getUserIdAttribute()).thenReturn(ID);
         when(personalAccount.getAccountId()).thenReturn(ACCOUNT_ID);
         when(accountService.authenticateUser(any())).thenReturn(Optional.of(personalAccount));
         ArgosOAuth2User userPrincipal = (ArgosOAuth2User) userService.loadUser(oAuth2UserRequest);
         assertThat(userPrincipal.getAccountId(), is(ACCOUNT_ID));
         verify(accountService).authenticateUser(userArgumentCaptor.capture());
         PersonalAccount createdPersonalAccount = userArgumentCaptor.getValue();
-        assertThat(createdPersonalAccount.getName(), is("displayName"));
-        assertThat(createdPersonalAccount.getEmail(), is("userprincipalname"));
-        assertThat(createdPersonalAccount.getProviderName(), is(AuthenticationProvider.AZURE));
-        assertThat(createdPersonalAccount.getProviderId(), is("providerId"));
+        assertThat(createdPersonalAccount.getName(), is(DISPLAY_NAME));
+        assertThat(createdPersonalAccount.getEmail(), is(USER_PRINCIPAL_NAME));
+        assertThat(createdPersonalAccount.getProviderName(), is(AZURE));
+        assertThat(createdPersonalAccount.getProviderId(), is(PROVIDER_ID));
     }
 
     @Test
     void loadUserNoEmailAddress() {
         setupMocks();
-        when(oAuth2User.getAttributes()).thenReturn(Map.of("displayName", "displayName", "id", "providerId"));
+        when(oauth2Provider.getUserEmailAttribute()).thenReturn(USER_PRINCIPAL_NAME);
+        when(oAuth2User.getAttributes()).thenReturn(Map.of(DISPLAY_NAME, DISPLAY_NAME, ID, PROVIDER_ID));
         InternalAuthenticationServiceException serviceException = assertThrows(InternalAuthenticationServiceException.class, () -> userService.loadUser(oAuth2UserRequest));
         assertThat(serviceException.getCause().getMessage(), is("email address not provided by oauth profile service"));
     }
 
+    @Test
+    void loadUserNoOAuthProvider() {
+        when(oAuth2Providers.getProvider()).thenReturn(Map.of("git", oauth2Provider));
+        when(oAuth2User.getAttributes()).thenReturn(Map.of(USER_PRINCIPAL_NAME, USER_PRINCIPAL_NAME, DISPLAY_NAME, DISPLAY_NAME, ID, PROVIDER_ID));
+        when(oAuth2UserRequest.getClientRegistration()).thenReturn(clientRegistration);
+        when(defaultOAuth2UserService.loadUser(oAuth2UserRequest)).thenReturn(oAuth2User);
+        InternalAuthenticationServiceException serviceException = assertThrows(InternalAuthenticationServiceException.class, () -> userService.loadUser(oAuth2UserRequest));
+        assertThat(serviceException.getCause().getMessage(), is("no provider is configured for: azure"));
+    }
+
     private void setupMocks() {
         when(oAuth2Providers.getProvider()).thenReturn(Map.of(AZURE, oauth2Provider));
-        when(oAuth2User.getAttributes()).thenReturn(Map.of("userPrincipalName", "userPrincipalName", "displayName", "displayName", "id", "providerId"));
+        when(oAuth2User.getAttributes()).thenReturn(Map.of(USER_PRINCIPAL_NAME, USER_PRINCIPAL_NAME, DISPLAY_NAME, DISPLAY_NAME, ID, PROVIDER_ID));
         when(defaultOAuth2UserService.loadUser(oAuth2UserRequest)).thenReturn(oAuth2User);
         when(oAuth2UserRequest.getClientRegistration()).thenReturn(clientRegistration);
     }
 
-    private void setupMocksForEmptyAttributes() {
-        when(oAuth2User.getAttributes()).thenReturn(null);
-        when(defaultOAuth2UserService.loadUser(oAuth2UserRequest)).thenReturn(oAuth2User);
-        when(oAuth2UserRequest.getClientRegistration()).thenReturn(clientRegistration);
-    }
+
 }
