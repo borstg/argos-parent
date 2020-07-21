@@ -72,7 +72,6 @@ public class TestITService implements IntegrationTestServiceApi {
     @Value("${jwt.token.secret}")
     private String secret;
 
-    public static final String PBE_WITH_SHA_1_AND_DE_SEDE = "PBEWithSHA1AndDESede";
     private final RepositoryResetProvider repositoryResetProvider;
 
     private final LayoutMetaBlockMapper layoutMetaBlockMapper;
@@ -117,6 +116,7 @@ public class TestITService implements IntegrationTestServiceApi {
 				| PemGenerationException e) {
 			log.error(e.getMessage());
 		}
+        assert keyPair != null;
         return ResponseEntity.ok(new RestKeyPair()
         		.keyId(keyPair.getKeyId())
         		.publicKey(keyPair.getPublicKey())
@@ -127,7 +127,7 @@ public class TestITService implements IntegrationTestServiceApi {
     public ResponseEntity<RestLayoutMetaBlock> signLayout(String password, String keyId, RestLayoutMetaBlock restLayoutMetaBlock) {
         LayoutMetaBlock layoutMetaBlock = layoutMetaBlockMapper.convertFromRestLayoutMetaBlock(restLayoutMetaBlock);
         KeyPair keyPair = getKeyPair(keyId);
-        Signature signature = null;
+        Signature signature;
 		signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(layoutMetaBlock.getLayout()));
         List<Signature> signatures = new ArrayList<>(layoutMetaBlock.getSignatures());
         signatures.add(signature);
@@ -140,7 +140,7 @@ public class TestITService implements IntegrationTestServiceApi {
         LinkMetaBlock linkMetaBlock = linkMetaBlockMapper.convertFromRestLinkMetaBlock(restLinkMetaBlock);
 
         KeyPair keyPair = getKeyPair(keyId);
-        Signature signature = null;
+        Signature signature;
 		signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(linkMetaBlock.getLink()));
         linkMetaBlock.setSignature(signature);
         
