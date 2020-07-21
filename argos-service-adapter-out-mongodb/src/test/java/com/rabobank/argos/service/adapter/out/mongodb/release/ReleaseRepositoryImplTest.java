@@ -151,5 +151,9 @@ class ReleaseRepositoryImplTest {
         assertThat(releaseRepository.findReleaseByReleasedArtifactsAndPath(releasedArtifacts, PATH).isEmpty(), is(true));
     }
 
-
+    @Test
+    void artifactsAreReleasedShouldReturnTrue() {
+        when(mongoTemplate.exists(any(Query.class), any(String.class))).thenReturn(true);
+        assertThat(releaseRepository.artifactsAreReleased(Set.of("hash1"), PATH), is(true));
+    }
 }

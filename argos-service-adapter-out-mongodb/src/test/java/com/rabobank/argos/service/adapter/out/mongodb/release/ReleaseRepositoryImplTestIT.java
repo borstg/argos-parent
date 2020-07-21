@@ -136,6 +136,15 @@ class ReleaseRepositoryImplTestIT {
         assertThat(emptyDossier.isPresent(), is(false));
     }
 
+    @Test
+    void artifactsAreReleased() {
+        storeReleaseDossier();
+        boolean artifactsAreReleased = releaseRepository
+                .artifactsAreReleased(RELEASE_ARTIFACTS.get(0), "path.to");
+        assertThat(artifactsAreReleased, is(true));
+    }
+
+
     @AfterEach
     void removeData() {
         gridFsTemplate.delete(new Query());

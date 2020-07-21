@@ -28,4 +28,6 @@ public interface ReleaseRepository {
     Optional<ReleaseDossierMetaData> findReleaseByReleasedArtifactsAndPath(List<Set<String>> releasedArtifacts, String path);
 
     Optional<String> getRawReleaseFileById(String id);
+
+    boolean artifactsAreReleased(Set<String> releasedArtifacts, String path);
 }

@@ -21,6 +21,7 @@ import com.rabobank.argos.service.adapter.in.rest.api.model.RestArtifact;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestVerificationResult;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestVerifyCommand;
 import com.rabobank.argos.service.domain.layout.LayoutMetaBlockRepository;
+import com.rabobank.argos.service.domain.release.ReleaseRepository;
 import com.rabobank.argos.service.domain.verification.VerificationProvider;
 import com.rabobank.argos.service.domain.verification.VerificationRunResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Collections.singletonList;
@@ -49,7 +51,7 @@ class VerificationRestServiceTest {
     private VerificationProvider verificationProvider;
 
     @Mock
-    private LayoutMetaBlockRepository repository;
+    private LayoutMetaBlockRepository layoutMetaBlockRepository;
 
     @Mock
     private ArtifactMapper artifactMapper;
@@ -59,6 +61,9 @@ class VerificationRestServiceTest {
 
     @Mock
     private RestVerifyCommand restVerifyCommand;
+
+    @Mock
+    private ReleaseRepository releaseRepository;
 
     @Mock
     private Artifact artifact;
@@ -76,7 +81,8 @@ class VerificationRestServiceTest {
     void setup() {
         verificationRestService = new VerificationRestService(
                 verificationProvider,
-                repository,
+                layoutMetaBlockRepository,
+                releaseRepository,
                 artifactMapper,
                 verificationResultMapper);
 
@@ -87,7 +93,7 @@ class VerificationRestServiceTest {
         VerificationRunResult runResult = VerificationRunResult.okay();
         RestVerificationResult restVerificationResult = new RestVerificationResult();
         restVerificationResult.setRunIsValid(true);
-        when(repository.findBySupplyChainId(eq("supplyChainId")))
+        when(layoutMetaBlockRepository.findBySupplyChainId(eq("supplyChainId")))
                 .thenReturn(Optional.of(layoutMetaBlockMetaBlock));
         when(restVerifyCommand.getExpectedProducts()).thenReturn(singletonList(restArtifact));
         when(artifactMapper.mapToArtifacts(any())).thenReturn(singletonList(artifact));
@@ -100,9 +106,18 @@ class VerificationRestServiceTest {
 
     @Test
     void performVerificationWithNoLayoutShouldReturnError() {
-        when(repository.findBySupplyChainId(eq("supplyChainId")))
+        when(layoutMetaBlockRepository.findBySupplyChainId(eq("supplyChainId")))
                 .thenReturn(Optional.empty());
         ResponseStatusException error = assertThrows(ResponseStatusException.class, () -> verificationRestService.performVerification("supplyChainId", restVerifyCommand));
         assertThat(error.getStatus().value(), is(400));
+    }
+
+
+    @Test
+    void getVerification() {
+        when(releaseRepository.artifactsAreReleased(any(), any())).thenReturn(true);
+        ResponseEntity<RestVerificationResult> result = verificationRestService.getVerification(List.of("hash"), "path");
+        assertThat(result.getStatusCode(), is(HttpStatus.OK));
+        assertThat(result.getBody().getRunIsValid(), is(true));
     }
 }
