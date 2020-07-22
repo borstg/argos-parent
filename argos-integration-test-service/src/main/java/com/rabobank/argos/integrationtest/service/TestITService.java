@@ -15,6 +15,13 @@
  */
 package com.rabobank.argos.integrationtest.service;
 
+import com.rabobank.argos.domain.account.PersonalAccount;
+import com.rabobank.argos.domain.crypto.KeyPair;
+import com.rabobank.argos.domain.crypto.Signature;
+import com.rabobank.argos.domain.crypto.signing.JsonSigningSerializer;
+import com.rabobank.argos.domain.crypto.signing.Signer;
+import com.rabobank.argos.domain.layout.LayoutMetaBlock;
+import com.rabobank.argos.domain.link.LinkMetaBlock;
 import com.rabobank.argos.domain.account.AuthenticationProvider;
 import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.domain.crypto.KeyPair;
@@ -71,6 +78,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TestITService implements IntegrationTestServiceApi {
 
+    protected static final String AZURE = "azure";
     @Value("${jwt.token.secret}")
     private String secret;
 
@@ -118,6 +126,7 @@ public class TestITService implements IntegrationTestServiceApi {
 				| PemGenerationException e) {
 			log.error(e.getMessage());
 		}
+        assert keyPair != null;
         return ResponseEntity.ok(new RestKeyPair()
         		.keyId(keyPair.getKeyId())
         		.publicKey(keyPair.getPublicKey())
@@ -160,7 +169,7 @@ public class TestITService implements IntegrationTestServiceApi {
         PersonalAccount personalAccount = PersonalAccount.builder()
                 .name(restPersonalAccount.getName())
                 .email(restPersonalAccount.getEmail())
-                .provider(AuthenticationProvider.AZURE)
+                .providerName(AZURE)
                 .providerId(UUID.randomUUID().toString())
                 .roleIds(Collections.emptyList())
                 .build();
