@@ -151,6 +151,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PersonalAccountWithToken"
+  /createToken:
+    get:
+      summary: create token
+      operationId: createToken
+      tags:
+        - IntegrationTestService
+      parameters:
+        - name: accountId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: issuedAt
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: created personal account
+          content:
+            application/json:
+              schema:
+                $ref: "api.yml#/components/schemas/Token"
   /deletePersonalAccount/{accountId}:
     delete:
       summary: delete account

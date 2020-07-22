@@ -25,7 +25,6 @@ Feature: Search Account
     * def supplyChain = call read('classpath:feature/supplychain/create-supplychain.feature') { supplyChainName: 'name', parentLabelId: #(defaultTestData.defaultRootLabel.id)}
 
   Scenario: search account by key id should return a 200
-    * print supplyChain.response.id
     Given path '/api/supplychain/'+supplyChain.response.id+'/account/key'
     And param keyIds = keyId
     When method GET

@@ -36,7 +36,7 @@ public class PersonalAccountAuthenticationProvider implements AuthenticationProv
         PersonalAccountAuthenticationToken personalAccountAuthenticationToken = (PersonalAccountAuthenticationToken) notAuthenticatedPersonalAccount;
         try {
             AccountUserDetailsAdapter userDetails = (AccountUserDetailsAdapter) personalAccountUserDetailsService.loadUserByToken(personalAccountAuthenticationToken);
-            Authentication authenticatedPersonalAccount = new PersonalAccountAuthenticationToken(personalAccountAuthenticationToken.getCredentials(), personalAccountAuthenticationToken.getSessionId(), userDetails, userDetails.getAuthorities());
+            Authentication authenticatedPersonalAccount = new PersonalAccountAuthenticationToken(personalAccountAuthenticationToken.getTokenInfo(), userDetails, userDetails.getAuthorities());
             authenticatedPersonalAccount.setAuthenticated(true);
             logContextHelper.addAccountInfoToLogContext(userDetails);
             log.debug("successfully authenticated personal account {}", userDetails.getUsername());

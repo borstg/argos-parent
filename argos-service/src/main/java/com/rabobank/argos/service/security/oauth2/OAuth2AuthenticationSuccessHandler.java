@@ -15,7 +15,7 @@
  */
 package com.rabobank.argos.service.security.oauth2;
 
-import com.rabobank.argos.service.security.TokenProvider;
+import com.rabobank.argos.service.security.TokenProviderImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -33,7 +33,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final TokenProvider tokenProvider;
+    private final TokenProviderImpl tokenProvider;
 
     @Value("#{T(java.net.URI).create('${auth.frontendRedirectBasePath}')}")
     private URI frontendRedirectBasePath;
@@ -59,7 +59,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         Optional<String> redirectUri = httpCookieOAuth2AuthorizationRequestRepository.getRedirectUri(request);
         URI targetUrl = redirectUri.map(URI::create).orElse(URI.create(getDefaultTargetUrl()));
 
-        String token = tokenProvider.createToken(authentication);
+        String token = tokenProvider.createToken(((ArgosOAuth2User) authentication.getPrincipal()).getAccountId());
 
         return UriComponentsBuilder.fromUri(frontendRedirectBasePath).path(targetUrl.getPath())
                 .query(targetUrl.getQuery())

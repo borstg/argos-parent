@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FROM openjdk:11.0.5-jre-slim-buster
+FROM openjdk:11.0.8-jre-slim-buster
 
 RUN adduser --system --home /home/argos --uid 1000 argos
 

@@ -15,6 +15,7 @@
  */
 package com.rabobank.argos.service.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabobank.argos.service.domain.account.FinishedSessionRepository;
 import com.rabobank.argos.service.security.oauth2.CustomOAuth2UserService;
 import com.rabobank.argos.service.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
@@ -56,7 +57,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CookieHelper cookieHelper;
 
-    private final TokenProvider tokenProvider;
+    private final TokenProviderImpl tokenProvider;
 
     private final PersonalAccountUserDetailsService personalAccountUserDetailsService;
 
@@ -64,8 +65,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final FinishedSessionRepository finishedSessionRepository;
 
+    private final ObjectMapper mapper;
+
     private TokenAuthenticationFilter tokenAuthenticationFilter() {
-        return new TokenAuthenticationFilter(tokenProvider, finishedSessionRepository);
+        return new TokenAuthenticationFilter(tokenProvider, finishedSessionRepository, mapper);
     }
 
     private KeyIdBasicAuthenticationFilter keyIdBasicAuthenticationFilter() {

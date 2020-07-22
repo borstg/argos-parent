@@ -15,20 +15,9 @@
  */
 package com.rabobank.argos.service.domain.security;
 
-import com.rabobank.argos.domain.account.Account;
-import com.rabobank.argos.domain.permission.Permission;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-public interface AccountSecurityContext {
-    Optional<Account> getAuthenticatedAccount();
-
-    Optional<TokenInfo> getTokenInfo();
-
-    Set<Permission> getGlobalPermission();
-
-    Set<Permission> allLocalPermissions(List<String> labelIds);
+public interface TokenProvider {
+    Optional<String> refreshToken(TokenInfo tokenInfo);
 }
-

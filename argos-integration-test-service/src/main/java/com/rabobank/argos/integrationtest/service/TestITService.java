@@ -28,6 +28,7 @@ import com.rabobank.argos.integrationtest.argos.service.api.model.RestLayoutMeta
 import com.rabobank.argos.integrationtest.argos.service.api.model.RestLinkMetaBlock;
 import com.rabobank.argos.integrationtest.argos.service.api.model.RestPersonalAccount;
 import com.rabobank.argos.integrationtest.argos.service.api.model.RestPersonalAccountWithToken;
+import com.rabobank.argos.integrationtest.argos.service.api.model.RestToken;
 import com.rabobank.argos.integrationtest.service.layout.LayoutMetaBlockMapper;
 import com.rabobank.argos.integrationtest.service.link.LinkMetaBlockMapper;
 import com.rabobank.argos.service.domain.account.AccountService;
@@ -54,6 +55,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -127,8 +129,7 @@ public class TestITService implements IntegrationTestServiceApi {
     public ResponseEntity<RestLayoutMetaBlock> signLayout(String password, String keyId, RestLayoutMetaBlock restLayoutMetaBlock) {
         LayoutMetaBlock layoutMetaBlock = layoutMetaBlockMapper.convertFromRestLayoutMetaBlock(restLayoutMetaBlock);
         KeyPair keyPair = getKeyPair(keyId);
-        Signature signature;
-		signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(layoutMetaBlock.getLayout()));
+        Signature signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(layoutMetaBlock.getLayout()));
         List<Signature> signatures = new ArrayList<>(layoutMetaBlock.getSignatures());
         signatures.add(signature);
         layoutMetaBlock.setSignatures(signatures);
@@ -140,8 +141,7 @@ public class TestITService implements IntegrationTestServiceApi {
         LinkMetaBlock linkMetaBlock = linkMetaBlockMapper.convertFromRestLinkMetaBlock(restLinkMetaBlock);
 
         KeyPair keyPair = getKeyPair(keyId);
-        Signature signature;
-		signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(linkMetaBlock.getLink()));
+        Signature signature = Signer.sign(keyPair, password.toCharArray(), new JsonSigningSerializer().serialize(linkMetaBlock.getLink()));
         linkMetaBlock.setSignature(signature);
         
         return ResponseEntity.ok(linkMetaBlockMapper.convertToRestLinkMetaBlock(linkMetaBlock));
@@ -169,7 +169,7 @@ public class TestITService implements IntegrationTestServiceApi {
         personalAccountRepository.save(personalAccount);
 
         RestPersonalAccountWithToken restPersonalAccountWithToken = accountMapper.map(personalAccount);
-        restPersonalAccountWithToken.setToken(createToken(restPersonalAccountWithToken.getId()));
+        restPersonalAccountWithToken.setToken(createToken(restPersonalAccountWithToken.getId(), new Date()));
         return ResponseEntity.ok(restPersonalAccountWithToken);
     }
 
@@ -179,15 +179,22 @@ public class TestITService implements IntegrationTestServiceApi {
         return ResponseEntity.noContent().build();
     }
 
-    public String createToken(String accountId) {
+    @Override
+    public ResponseEntity<RestToken> createToken(String accountId, OffsetDateTime issuedAt) {
+        log.info("issuedAt {}", issuedAt);
+        return ResponseEntity.ok(new RestToken().token(createToken(accountId, Timestamp.valueOf(issuedAt.toLocalDateTime()))));
+    }
+
+    public String createToken(String accountId, Date issuedAt) {
         return Jwts.builder()
                 .setSubject(accountId)
-                .setIssuedAt(new Date())
+                .setId(UUID.randomUUID().toString())
+                .setIssuedAt(issuedAt)
                 .setExpiration(Timestamp.valueOf(LocalDateTime.now().plus(Period.ofDays(1))))
                 .signWith(secretKey)
                 .compact();
     }
-    
+
     private KeyPair getKeyPair(String keyId) {
     	return accountService.findKeyPairByKeyId(keyId).orElseThrow();
     }

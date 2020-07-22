@@ -30,20 +30,20 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 public class AccountUserDetailsAdapter extends org.springframework.security.core.userdetails.User {
     private final Account account;
-    private final String sessionId;
+    private final TokenInfo tokenInfo;
     private Set<Permission> globalPermissions = Collections.emptySet();
 
-    public AccountUserDetailsAdapter(PersonalAccount account, String sessionId, Set<Permission> globalPermissions) {
+    public AccountUserDetailsAdapter(PersonalAccount account, TokenInfo tokenInfo, Set<Permission> globalPermissions) {
         super(account.getName(), "", List.of(new SimpleGrantedAuthority("ROLE_USER")));
         this.account = account;
         this.globalPermissions = globalPermissions;
-        this.sessionId = sessionId;
+        this.tokenInfo = tokenInfo;
     }
 
     public AccountUserDetailsAdapter(ServiceAccount serviceAccount) {
         super(serviceAccount.getName(), "", List.of(new SimpleGrantedAuthority("ROLE_NONPERSONAL")));
         this.account = serviceAccount;
-        this.sessionId = null;
+        this.tokenInfo = null;
     }
 
     public String getId() {
@@ -58,7 +58,7 @@ public class AccountUserDetailsAdapter extends org.springframework.security.core
         return globalPermissions;
     }
 
-    public String getSessionId() {
-        return sessionId;
+    public TokenInfo getTokenInfo() {
+        return tokenInfo;
     }
 }
