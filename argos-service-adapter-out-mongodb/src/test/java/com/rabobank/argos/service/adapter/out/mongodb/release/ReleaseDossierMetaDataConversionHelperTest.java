@@ -19,7 +19,6 @@ import org.bson.Document;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -32,7 +31,7 @@ class ReleaseDossierMetaDataConversionHelperTest {
 
     @Test
     void convertToDocumentList() {
-        List<Document> documents = ReleaseDossierMetaDataConversionHelper.convertToDocumentList(List.of(Set.of("string", "string2")));
+        List<Document> documents = ReleaseDossierMetaDataConversionHelper.convertToDocumentList(List.of(List.of("string", "string2")));
         assertThat(documents, hasSize(1));
         Document document = documents.iterator().next();
         assertThat(document.containsKey(HASH), is(true));

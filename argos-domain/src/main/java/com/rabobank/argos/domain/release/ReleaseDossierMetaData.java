@@ -19,9 +19,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static java.lang.String.join;
 import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
@@ -31,11 +32,12 @@ import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
 @Setter
 public class ReleaseDossierMetaData {
     private String documentId;
-    private Date releaseDate;
+    private OffsetDateTime releaseDate;
     private String supplyChainPath;
-    private List<Set<String>> releaseArtifacts;
+    private List<List<String>> releaseArtifacts;
 
     public static String createHashFromArtifactList(List<String> artifactList) {
+        Collections.sort(new ArrayList<>(artifactList));
         return sha256Hex(join("", artifactList));
     }
 }

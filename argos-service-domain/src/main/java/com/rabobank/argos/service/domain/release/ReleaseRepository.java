@@ -20,14 +20,13 @@ import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public interface ReleaseRepository {
     ReleaseDossierMetaData storeRelease(ReleaseDossierMetaData releaseDossierMetaData, ReleaseDossier releaseDossier);
 
-    Optional<ReleaseDossierMetaData> findReleaseByReleasedArtifactsAndPath(List<Set<String>> releasedArtifacts, String path);
+    Optional<ReleaseDossierMetaData> findReleaseByReleasedArtifactsAndPath(List<List<String>> releasedArtifacts, String path);
 
     Optional<String> getRawReleaseFileById(String id);
 
-    boolean artifactsAreReleased(Set<String> releasedArtifacts, String path);
+    boolean artifactsAreReleased(List<String> releasedArtifacts, String path);
 }

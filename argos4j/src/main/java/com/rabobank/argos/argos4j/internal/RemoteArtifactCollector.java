@@ -15,8 +15,12 @@
  */
 package com.rabobank.argos.argos4j.internal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabobank.argos.argos4j.Argos4jError;
 import com.rabobank.argos.argos4j.RemoteCollector;
+import com.rabobank.argos.argos4j.RemoteCollectorCollector;
 import com.rabobank.argos.argos4j.RemoteFileCollector;
 import com.rabobank.argos.argos4j.RemoteZipFileCollector;
 import com.rabobank.argos.domain.crypto.HashUtil;
@@ -48,6 +52,10 @@ public class RemoteArtifactCollector implements ArtifactCollector {
     }
 
     public RemoteArtifactCollector(RemoteZipFileCollector remoteCollector) {
+        this.remoteCollector = remoteCollector;
+    }
+    
+    public RemoteArtifactCollector(RemoteCollectorCollector remoteCollector) {
         this.remoteCollector = remoteCollector;
     }
 
@@ -85,6 +93,9 @@ public class RemoteArtifactCollector implements ArtifactCollector {
                     .orElseGet(() -> remoteCollector.getUrl().getPath().substring(remoteCollector.getUrl().getPath().lastIndexOf('/') + 1));
             String hash = HashUtil.createHash(response.body().asInputStream(), fileName, remoteCollector.isNormalizeLineEndings());
             return Collections.singletonList(Artifact.builder().hash(hash).uri(fileName).build());
+        } else if (remoteCollector.getClass() == RemoteCollectorCollector.class) {
+            ObjectMapper objectMapper = new ObjectMapper();            
+            return objectMapper.readValue(response.body().asInputStream(), new TypeReference<List<Artifact>>(){});
         } else {
             throw new Argos4jError("not implemented");
         }
@@ -92,7 +103,16 @@ public class RemoteArtifactCollector implements ArtifactCollector {
 
     private RequestTemplate createRequest() {
         RequestTemplate requestTemplate = new RequestTemplate();
-        requestTemplate.method(Request.HttpMethod.GET);
+        if (remoteCollector.getClass() == RemoteCollectorCollector.class) {
+            requestTemplate.method(Request.HttpMethod.POST);
+            try {
+                requestTemplate.body(new ObjectMapper().writeValueAsString((((RemoteCollectorCollector) remoteCollector).getConfigMap())));
+            } catch (JsonProcessingException e) {
+                throw new Argos4jError(e.getMessage());
+            }
+        } else {
+            requestTemplate.method(Request.HttpMethod.GET);
+        }
         requestTemplate.target(remoteCollector.getUrl().toString());
         addAuthorization(requestTemplate);
         return requestTemplate;

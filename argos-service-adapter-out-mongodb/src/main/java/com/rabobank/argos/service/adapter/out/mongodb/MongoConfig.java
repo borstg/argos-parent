@@ -17,6 +17,9 @@ package com.rabobank.argos.service.adapter.out.mongodb;
 
 import com.github.cloudyrock.mongock.SpringBootMongock;
 import com.github.cloudyrock.mongock.SpringBootMongockBuilder;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -24,19 +27,25 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.MongoTransactionManager;
+import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 @Configuration
-public class MongoConfig {
+public class MongoConfig extends AbstractMongoClientConfiguration {
+    
     @Bean
+    @Override
     public MongoCustomConversions customConversions() {
         List<Converter<?, ?>> converterList = new ArrayList<>();
+        converterList.add(new DateToOffsetTimeConverter());
+        converterList.add(new OffsetTimeToDateConverter());
         return new MongoCustomConversions(converterList);
     }
 
@@ -52,12 +61,27 @@ public class MongoConfig {
     }
 
     @Bean
-    public GridFsTemplate gridFsTemplate(MongoDbFactory dbFactory, MappingMongoConverter mappingMongoConverter) {
-        return new GridFsTemplate(dbFactory, mappingMongoConverter);
+    public GridFsTemplate gridFsTemplate() throws Exception {
+        return new GridFsTemplate(mongoDbFactory(), mappingMongoConverter());
     }
 
     @Bean
     public MongoTransactionManager transactionManager(MongoDbFactory dbFactory) {
         return new MongoTransactionManager(dbFactory);
+    }
+
+    @Override
+    public MongoClient mongoClient() {
+        return MongoClients.create(mongoURI);
+    }
+
+    @Override
+    protected String getDatabaseName() {
+        return "test";
+    }
+    
+    @Override
+    public Collection<String> getMappingBasePackages() {
+        return Arrays.asList("com.rabobank.argos.service.domain");
     }
 }

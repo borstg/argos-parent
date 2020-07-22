@@ -39,7 +39,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.HashSet;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.rabobank.argos.service.adapter.in.rest.supplychain.SupplyChainLabelIdExtractor.SUPPLY_CHAIN_LABEL_ID_EXTRACTOR;
@@ -62,7 +63,7 @@ public class VerificationRestService implements VerificationApi {
 
     @Override
     public ResponseEntity<RestVerificationResult> getVerification(@NotNull @Valid List<String> artifactHashes, @Valid String path) {
-        boolean isvalid = releaseRepository.artifactsAreReleased(new HashSet<>(artifactHashes), path);
+        boolean isvalid = releaseRepository.artifactsAreReleased(new ArrayList<>(artifactHashes), path);
         return ResponseEntity.ok(new RestVerificationResult().runIsValid(isvalid));
     }
 

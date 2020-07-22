@@ -17,10 +17,7 @@ package com.rabobank.argos.service.adapter.out.mongodb.release;
 
 import org.bson.Document;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.rabobank.argos.domain.release.ReleaseDossierMetaData.createHashFromArtifactList;
@@ -29,12 +26,10 @@ public class ReleaseDossierMetaDataConversionHelper {
     private ReleaseDossierMetaDataConversionHelper() {
     }
 
-    public static List<Document> convertToDocumentList(List<Set<String>> releaseArtifacts) {
-        return releaseArtifacts.stream().map(artifactSet -> {
-            List<String> artifactList = new ArrayList<>(artifactSet);
-            Collections.sort(artifactList);
+    public static List<Document> convertToDocumentList(List<List<String>> releaseArtifacts) {
+        return releaseArtifacts.stream().map(artifacts -> {
             Document document = new Document();
-            document.put(createHashFromArtifactList(artifactList), artifactList);
+            document.put(createHashFromArtifactList(artifacts), artifacts);
             return document;
         }).collect(Collectors.toList());
 

@@ -15,6 +15,8 @@
  */
 package com.rabobank.argos.argos4j;
 
+import com.rabobank.argos.domain.release.ReleaseResult;
+
 public interface ReleaseBuilder {
 
     ReleaseBuilder addFileCollector(FileCollector collector);

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Date;
 
@@ -49,11 +50,11 @@ class ReleaseResultMapperTest {
                 .releaseIsValid(true)
                 .releaseDossierMetaData(ReleaseDossierMetaData
                         .builder()
-                        .releaseDate(Date.from(Instant.parse(RELEASE_DATE_TIME)))
+                        .releaseDate(OffsetDateTime.parse(RELEASE_DATE_TIME))
                         .documentId(DOCUMENT_ID)
                         .releaseArtifacts(Collections
                                 .singletonList(Collections
-                                        .singleton(HASH)))
+                                        .singletonList(HASH)))
                         .supplyChainPath(PATH)
                         .build())
                 .build();

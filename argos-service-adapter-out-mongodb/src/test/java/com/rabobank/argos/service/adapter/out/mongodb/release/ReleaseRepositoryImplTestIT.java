@@ -20,15 +20,16 @@ import com.mongodb.client.MongoClients;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
 import com.rabobank.argos.domain.release.ReleaseDossier;
 import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
-import de.flapdoodle.embed.mongo.Command;
+import com.rabobank.argos.service.adapter.out.mongodb.DateToOffsetTimeConverter;
+import com.rabobank.argos.service.adapter.out.mongodb.OffsetTimeToDateConverter;
+import com.rabobank.argos.service.domain.release.ReleaseRepository;
+
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.IMongodConfig;
 import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
 import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.mongo.distribution.Version;
-import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.runtime.Network;
 import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.AfterAll;
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDbFactory;
@@ -49,41 +51,40 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-import static de.flapdoodle.embed.process.config.io.ProcessOutput.getDefaultInstanceSilent;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ReleaseRepositoryImplTestIT {
-    protected static final List<Set<String>> RELEASE_ARTIFACTS = List.of(Set.of("hash1-1", "hash1-2"), Set.of("hash2-1", "hash2-2"));
+    protected static final List<List<String>> RELEASE_ARTIFACTS = List.of(List.of("hash1-1", "hash1-2"), List.of("hash2-1", "hash2-2"));
     private MongodExecutable mongodExecutable;
-    private ReleaseRepositoryImpl releaseRepository;
+    
+    @Autowired
+    private ReleaseRepository releaseRepository;
+    
+    @Autowired
     private GridFsTemplate gridFsTemplate;
 
-    @BeforeAll
-    void setup() throws IOException {
-        String ip = "localhost";
-        int port = Network.getFreeServerPort();
-        IMongodConfig mongodConfig = new MongodConfigBuilder().version(Version.Main.PRODUCTION)
+    @BeforeAll 
+    void setup() throws IOException { 
+        String ip = "localhost"; 
+        int port = Network.getFreeServerPort(); 
+        IMongodConfig mongodConfig = new MongodConfigBuilder()
+                .version(Version.Main.PRODUCTION)
                 .net(new Net(ip, port, Network.localhostIsIPv6()))
                 .build();
-        IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder().defaults(Command.MongoD).processOutput(getDefaultInstanceSilent()).build();
-        MongodStarter starter = MongodStarter.getInstance(runtimeConfig);
-        mongodExecutable = starter.prepare(mongodConfig);
-        mongodExecutable.start();
-        String connectionString = "mongodb://localhost:" + port;
+        MongodStarter starter = MongodStarter.getDefaultInstance(); 
+        mongodExecutable = starter.prepare(mongodConfig); 
+        mongodExecutable.start(); 
+        String connectionString = "mongodb://localhost:" + port; 
         MongoTemplate mongoTemplate = new MongoTemplate(MongoClients.create(connectionString), "test");
         MongoDbFactory factory = new SimpleMongoClientDbFactory(MongoClients.create(connectionString), "test");
-        gridFsTemplate = new GridFsTemplate(factory, getDefaultMongoConverter(factory));
+        gridFsTemplate = new GridFsTemplate(factory, getDefaultMongoConverter(factory)); 
         ObjectMapper mapper = new ObjectMapper();
-        releaseRepository = new ReleaseRepositoryImpl(gridFsTemplate, mongoTemplate, mapper);
-    }
+        releaseRepository = new ReleaseRepositoryImpl(gridFsTemplate, mongoTemplate, mapper); }
 
     @AfterAll
     void clean() {
@@ -92,7 +93,7 @@ class ReleaseRepositoryImplTestIT {
 
     private static MongoConverter getDefaultMongoConverter(MongoDbFactory factory) {
         DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
-        MongoCustomConversions conversions = new MongoCustomConversions(Collections.emptyList());
+        MongoCustomConversions conversions = new MongoCustomConversions(List.of(new DateToOffsetTimeConverter(), new OffsetTimeToDateConverter()));
         MongoMappingContext mappingContext = new MongoMappingContext();
         mappingContext.setSimpleTypeHolder(conversions.getSimpleTypeHolder());
         mappingContext.afterPropertiesSet();
@@ -131,7 +132,7 @@ class ReleaseRepositoryImplTestIT {
         assertThat(dossierMetaData.isPresent(), is(true));
 
         Optional<ReleaseDossierMetaData> emptyDossier = releaseRepository
-                .findReleaseByReleasedArtifactsAndPath(List.of(Set.of("hash1-incorrect", "hash1-2"), Set.of("hash2-1", "hash2-2")), null);
+                .findReleaseByReleasedArtifactsAndPath(List.of(List.of("hash1-incorrect", "hash1-2"), List.of("hash2-1", "hash2-2")), null);
 
         assertThat(emptyDossier.isPresent(), is(false));
     }

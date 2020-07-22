@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -33,6 +34,8 @@ public class VerifyBuilderImpl implements VerifyBuilder {
     private final Argos4jSettings settings;
 
     private final ArtifactListBuilder artifactListBuilder;
+    
+    private final String path;
 
     @Override
     public VerifyBuilder addFileCollector(FileCollector collector) {
@@ -41,10 +44,11 @@ public class VerifyBuilderImpl implements VerifyBuilder {
     }
 
     @Override
-    public VerificationResult verify(char[] keyPassphrase) {
+    public VerificationResult verify() {
         List<Artifact> artifacts = artifactListBuilder.collect();
+
         log.info("verify artifacts {}", artifacts);
-        return new ArgosServiceClient(settings, keyPassphrase).verify(artifacts);
+        return new ArgosServiceClient(settings).verify(artifacts.stream().map(Artifact::getHash).collect(Collectors.toList()), path);
     }
 
 }

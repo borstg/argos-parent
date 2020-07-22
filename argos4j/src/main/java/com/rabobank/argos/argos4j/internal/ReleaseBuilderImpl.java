@@ -19,8 +19,9 @@ import com.rabobank.argos.argos4j.Argos4jSettings;
 import com.rabobank.argos.argos4j.ArtifactListBuilder;
 import com.rabobank.argos.argos4j.FileCollector;
 import com.rabobank.argos.argos4j.ReleaseBuilder;
-import com.rabobank.argos.argos4j.ReleaseResult;
 import com.rabobank.argos.domain.link.Artifact;
+import com.rabobank.argos.domain.release.ReleaseResult;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
