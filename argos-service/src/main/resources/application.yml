@@ -36,7 +36,14 @@ spring:
             authorizationUri: http://localhost:8087/oauth2/v2.0/authorize
             tokenUri: http://localhost:8087/oauth2/v2.0/token
             userInfoUri: http://localhost:8087/v1.0/me
-            user-name-attribute: displayName
+            userNameAttribute: displayName
+            userIdAttribute: id
+            userEmailAttribute: userPrincipalName
+            iconUrl: https://localhost:8080/azure.svg
+            displayName: Azure
+            emailAddressHandler:
+              className: com.rabobank.argos.service.security.oauth2.EmailAddressHandler
+              uri: http://localhost:8087/v1.0/me
 
   application:
     name: argos-service

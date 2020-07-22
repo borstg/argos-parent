@@ -38,7 +38,7 @@ public class PersonalAccount extends Account {
             String email,
             KeyPair activeKeyPair,
             List<KeyPair> inactiveKeyPairs,
-            AuthenticationProvider provider,
+            String providerName,
             String providerId,
             List<String> roleIds,
             List<LocalPermissions> localPermissions
@@ -49,11 +49,12 @@ public class PersonalAccount extends Account {
                 activeKeyPair,
                 inactiveKeyPairs == null ? emptyList() : inactiveKeyPairs,
                 localPermissions == null ? emptyList() : localPermissions);
-        this.provider = provider;
+        this.providerName = providerName;
         this.providerId = providerId;
         this.roleIds = roleIds == null ? emptyList() : roleIds;
     }
-    private AuthenticationProvider provider;
+
+    private String providerName;
     private String providerId;
     private List<String> roleIds;
 

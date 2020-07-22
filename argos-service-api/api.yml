@@ -26,6 +26,23 @@ security:
   - bearerAuth: []
 
 paths:
+  /oauthprovider:
+    get:
+      summary: get a list of configured oauth providers
+      operationId: getOAuthProviders
+      tags:
+        - oauthProvider
+      responses:
+        '200':
+          description: array of OAuthProviders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OAuthProvider"
+        '500':
+          $ref:  '#/components/responses/Error'
   /supplychain:
     post:
       summary: create a supplychain
@@ -1927,5 +1944,15 @@ components:
             minItems: 1
             items:
               type: string
+    OAuthProvider:
+      type: object
+      properties:
+        providerName:
+          type: string
+        displayName:
+          type: string
+        iconUrl:
+          type: string
+
 
 
