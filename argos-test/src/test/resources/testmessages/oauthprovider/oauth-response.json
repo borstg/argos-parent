@@ -3,5 +3,15 @@
     "providerName": "azure",
     "displayName": "Azure",
     "iconUrl": "https://localhost:8080/azure.svg"
+  },
+  {
+    "providerName": "github",
+    "displayName": "Github",
+    "iconUrl": "https://localhost:8080/github.svg"
+  },
+  {
+    "providerName": "google",
+    "displayName": "Google",
+    "iconUrl": "https://localhost:8080/google.svg"
   }
 ]
