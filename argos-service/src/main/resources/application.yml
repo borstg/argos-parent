@@ -31,6 +31,20 @@ spring:
             authorization-grant-type: authorization_code
             scope:
               - https://graph.microsoft.com/User.Read
+          github:
+            clientId: <replace>
+            clientSecret: <replace>
+            redirectUri: "{baseUrl}/api/oauth2/callback/{registrationId}"
+            scope:
+              - user:email
+              - read:user
+          google:
+            clientId: <replace>
+            clientSecret: <replace>
+            redirectUri: "{baseUrl}/api/oauth2/callback/{registrationId}"
+            scope:
+              - email
+              - profile
         provider:
           azure:
             authorizationUri: http://localhost:8087/oauth2/v2.0/authorize
@@ -41,10 +55,27 @@ spring:
             userEmailAttribute: userPrincipalName
             iconUrl: https://localhost:8080/azure.svg
             displayName: Azure
+          github:
+            authorizationUri: https://github.com/login/oauth/authorize
+            tokenUri: https://github.com/login/oauth/access_token
+            userInfoUri: https://api.github.com/user
+            userNameAttribute: name
+            userIdAttribute: id
+            userEmailAttribute: email
+            iconUrl: https://localhost:8080/github.svg
+            displayName: Github
             emailAddressHandler:
-              className: com.rabobank.argos.service.security.oauth2.EmailAddressHandler
-              uri: http://localhost:8087/v1.0/me
-
+              className: com.rabobank.argos.service.security.oauth2.GithubEmailProvider
+              uri: https://api.github.com/user/emails
+          google:
+            authorizationUri: https://accounts.google.com/o/oauth2/v2/auth
+            tokenUri: https://oauth2.googleapis.com/token
+            userInfoUri: https://www.googleapis.com/oauth2/v3/userinfo
+            userNameAttribute: name
+            userIdAttribute: sub
+            userEmailAttribute: email
+            iconUrl: https://localhost:8080/google.svg
+            displayName: Google
   application:
     name: argos-service
 management:
@@ -73,7 +104,7 @@ jwt:
   # redirectUri mentioned by the client in the /oauth2/authorize request.
   # We're not using cookies because they won't work well in mobile clients.
 auth:
-  frontendRedirectBasePath: http://localhost:8087
+  frontendRedirectBasePath: http://localhost:3000
 
 logging:
   pattern:

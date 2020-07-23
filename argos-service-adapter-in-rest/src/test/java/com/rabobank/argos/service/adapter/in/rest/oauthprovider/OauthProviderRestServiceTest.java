@@ -16,8 +16,8 @@
 package com.rabobank.argos.service.adapter.in.rest.oauthprovider;
 
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestOAuthProvider;
-import com.rabobank.argos.service.security.oauth2.OAuth2Providers;
-import com.rabobank.argos.service.security.oauth2.OAuth2Providers.OAuth2Provider;
+import com.rabobank.argos.service.domain.security.oauth.OAuth2Providers;
+import com.rabobank.argos.service.domain.security.oauth.OAuth2Providers.OAuth2Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
