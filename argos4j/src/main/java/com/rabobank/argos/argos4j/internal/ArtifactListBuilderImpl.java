@@ -15,28 +15,31 @@
  */
 package com.rabobank.argos.argos4j.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.rabobank.argos.argos4j.ArtifactListBuilder;
 import com.rabobank.argos.argos4j.FileCollector;
 import com.rabobank.argos.domain.link.Artifact;
 
-public class ArtifactListBuilderImpl implements ArtifactListBuilder {
-	
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-    private List<FileCollector> fileCollectors = new ArrayList<>();
+public class ArtifactListBuilderImpl implements ArtifactListBuilder {
+
+	private final List<FileCollector> fileCollectors = new ArrayList<>();
 
 	@Override
 	public void addFileCollector(FileCollector collector) {
-        fileCollectors.add(collector);
-
+		fileCollectors.add(collector);
 	}
 
 	@Override
 	public List<Artifact> collect() {
 		return fileCollectors.stream().map(ArtifactCollectorFactory::build).map(ArtifactCollector::collect).flatMap(List::stream).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<List<Artifact>> collectAsArtifactLists() {
+		return fileCollectors.stream().map(ArtifactCollectorFactory::build).map(ArtifactCollector::collect).collect(Collectors.toList());
 	}
 
 }

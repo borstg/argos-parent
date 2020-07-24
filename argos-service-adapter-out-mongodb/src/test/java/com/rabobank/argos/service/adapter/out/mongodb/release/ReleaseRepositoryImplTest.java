@@ -35,11 +35,11 @@ import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 import java.io.InputStream;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseDossierMetaDataConversionHelper.convertToDocumentList;
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.ID_FIELD;
@@ -105,7 +105,7 @@ class ReleaseRepositoryImplTest {
 
     @Test
     void findReleaseByReleasedArtifactsAndPath() {
-        List<Set<String>> releasedArtifacts = List.of(Set.of("hash1"), Set.of("hash2"));
+        List<List<String>> releasedArtifacts = List.of(List.of("hash1"), List.of("hash2"));
         List<Document> storedReleasedArtifacts = convertToDocumentList(releasedArtifacts);
         when(objectId.toHexString()).thenReturn(ID);
         when(document.get(METADATA_FIELD)).thenReturn(metaData);
@@ -121,7 +121,7 @@ class ReleaseRepositoryImplTest {
         assertThat(retrievedReleaseDossierMetaData.get().getDocumentId(), is(ID));
         assertThat(retrievedReleaseDossierMetaData.get().getSupplyChainPath(), is(PATH));
         assertThat(retrievedReleaseDossierMetaData.get().getReleaseArtifacts(), is(releasedArtifacts));
-        assertThat(retrievedReleaseDossierMetaData.get().getReleaseDate(), is(Date.from(Instant.parse(RELEASE_DATE_TIME))));
+        assertThat(retrievedReleaseDossierMetaData.get().getReleaseDate(), is(OffsetDateTime.parse(RELEASE_DATE_TIME)));
         verify(mongoTemplate).find(queryArgumentCaptor.capture(), any(), any());
         assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"$and\" : [{ \"metadata.releaseArtifacts\" : { \"$elemMatch\" : { \"e7bf382f6e5915b3f88619b866223ebf1d51c4c5321cccde2e9ff700a3259086\" : [\"hash2\"]}}}, { \"metadata.releaseArtifacts\" : { \"$elemMatch\" : { \"af316ecb91a8ee7ae99210702b2d4758f30cdde3bf61e3d8e787d74681f90a6e\" : [\"hash1\"]}}}], \"metadata.supplyChainPath\" : { \"$regex\" : \"^path\", \"$options\" : \"\"}}, Fields: {}, Sort: {}"));
     }
@@ -129,7 +129,7 @@ class ReleaseRepositoryImplTest {
 
     @Test
     void findReleaseByReleasedArtifactsAndPathWithMultipleResultsShouldThrowException() {
-        List<Set<String>> releasedArtifacts = List.of(Set.of("hash1"), Set.of("hash2"));
+        List<List<String>> releasedArtifacts = List.of(List.of("hash1"), List.of("hash2"));
         List<Document> storedReleasedArtifacts = convertToDocumentList(releasedArtifacts);
         when(objectId.toHexString()).thenReturn(ID);
         when(document.get(METADATA_FIELD)).thenReturn(metaData);
@@ -146,7 +146,7 @@ class ReleaseRepositoryImplTest {
 
     @Test
     void findReleaseByReleasedArtifactsAndPathWithNoResultShouldReturnEmpty() {
-        List<Set<String>> releasedArtifacts = List.of(Set.of("hash1"), Set.of("hash2"));
+        List<List<String>> releasedArtifacts = List.of(List.of("hash1"), List.of("hash2"));
         when(mongoTemplate.find(any(), any(), any())).thenReturn(Collections.emptyList());
         assertThat(releaseRepository.findReleaseByReleasedArtifactsAndPath(releasedArtifacts, PATH).isEmpty(), is(true));
     }
@@ -154,6 +154,6 @@ class ReleaseRepositoryImplTest {
     @Test
     void artifactsAreReleasedShouldReturnTrue() {
         when(mongoTemplate.exists(any(Query.class), any(String.class))).thenReturn(true);
-        assertThat(releaseRepository.artifactsAreReleased(Set.of("hash1"), PATH), is(true));
+        assertThat(releaseRepository.artifactsAreReleased(List.of("hash1"), PATH), is(true));
     }
 }

@@ -21,6 +21,7 @@ import com.rabobank.argos.argos4j.FileCollector;
 import com.rabobank.argos.argos4j.LinkBuilder;
 import com.rabobank.argos.argos4j.LinkBuilderSettings;
 import com.rabobank.argos.argos4j.LocalFileCollector;
+import com.rabobank.argos.argos4j.ReleaseBuilder;
 import com.rabobank.argos.argos4j.VerifyBuilder;
 import com.rabobank.argos.argos4j.rest.api.model.RestLabel;
 import com.rabobank.argos.argos4j.rest.api.model.RestLayout;
@@ -64,7 +65,7 @@ class Argos4jIT {
     }
 
     @Test
-    void postLinkMetaBlockWithSignatureValidationAndVerify() {
+    void postLinkMetaBlockWithSignatureReleaseAndVerify() {
 
         DefaultTestData defaultTestData = createDefaultTestData();
         String adminAccountToken = defaultTestData.getAdminToken();
@@ -93,15 +94,21 @@ class Argos4jIT {
         linkBuilder.collectMaterials(fileCollector);
         linkBuilder.store(serviceAccount.getPassphrase().toCharArray());
 
+        File fileToVerify = new File("src/test/resources/karate-config.js");
+        
+        FileCollector collector = LocalFileCollector.builder()
+                .path(fileToVerify.toPath())
+                .basePath(fileToVerify.toPath().getParent()).build();
+        
+        ReleaseBuilder releaseBuilder = argos4j.getReleaseBuilder();
+        
+        releaseBuilder.addFileCollector(collector).release(serviceAccount.getPassphrase().toCharArray());
+
 
         VerifyBuilder verifyBuilder = argos4j.getVerifyBuilder();
 
-        File fileToVerify = new File("src/test/resources/karate-config.js");
-
-        boolean runIsValid = verifyBuilder.addFileCollector(LocalFileCollector.builder()
-                .path(fileToVerify.toPath())
-                .basePath(fileToVerify.toPath().getParent()).build())
-                .verify("test".toCharArray()).isRunIsValid();
+        boolean runIsValid = verifyBuilder.addFileCollector(collector)
+                .verify().isRunIsValid();
 
         assertThat(runIsValid, Matchers.is(true));
     }

@@ -15,14 +15,15 @@
  */
 package com.rabobank.argos.argos4j;
 
-import java.util.List;
-
 import com.rabobank.argos.domain.link.Artifact;
 
-public interface ArtifactListBuilder {
-	
-	public void addFileCollector(FileCollector collector);
-	
-	public List<Artifact> collect();
+import java.util.List;
 
+public interface ArtifactListBuilder {
+
+	void addFileCollector(FileCollector collector);
+
+	List<Artifact> collect();
+
+	List<List<Artifact>> collectAsArtifactLists();
 }

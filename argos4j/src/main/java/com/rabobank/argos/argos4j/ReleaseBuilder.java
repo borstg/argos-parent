@@ -13,20 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.service.adapter.in.rest.release;
+package com.rabobank.argos.argos4j;
 
 import com.rabobank.argos.domain.release.ReleaseResult;
-import com.rabobank.argos.service.adapter.in.rest.api.model.RestReleaseResult;
-import org.mapstruct.Mapper;
 
-import java.util.List;
-import java.util.Set;
+public interface ReleaseBuilder {
 
-@Mapper(componentModel = "spring")
-public abstract class ReleaseResultMapper {
+    ReleaseBuilder addFileCollector(FileCollector collector);
 
-    abstract RestReleaseResult maptoRestReleaseResult(ReleaseResult releaseResult);
-
-    abstract List<String> mapToListString(Set<String> artifactHashes);
-
+    ReleaseResult release(char[] keyPassphrase);
 }

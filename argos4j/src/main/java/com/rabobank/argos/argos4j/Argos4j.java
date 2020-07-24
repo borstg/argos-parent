@@ -17,6 +17,7 @@ package com.rabobank.argos.argos4j;
 
 import com.rabobank.argos.argos4j.internal.ArtifactListBuilderImpl;
 import com.rabobank.argos.argos4j.internal.LinkBuilderImpl;
+import com.rabobank.argos.argos4j.internal.ReleaseBuilderImpl;
 import com.rabobank.argos.argos4j.internal.VerifyBuilderImpl;
 
 import lombok.EqualsAndHashCode;
@@ -36,8 +37,16 @@ public class Argos4j implements Serializable {
         return new LinkBuilderImpl(settings, linkBuilderSettings);
     }
 
+    public VerifyBuilder getVerifyBuilder(String path) {
+        return new VerifyBuilderImpl(settings, getArtifactListBuilder(), path);
+    }
+    
     public VerifyBuilder getVerifyBuilder() {
-        return new VerifyBuilderImpl(settings, getArtifactListBuilder());
+        return this.getVerifyBuilder(null);
+    }
+
+    public ReleaseBuilder getReleaseBuilder() {
+        return new ReleaseBuilderImpl(settings, getArtifactListBuilder());
     }
     
     public static ArtifactListBuilder getArtifactListBuilder() {

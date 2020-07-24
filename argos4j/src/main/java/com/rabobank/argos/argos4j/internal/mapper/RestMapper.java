@@ -18,10 +18,13 @@ package com.rabobank.argos.argos4j.internal.mapper;
 
 import com.rabobank.argos.argos4j.rest.api.model.RestArtifact;
 import com.rabobank.argos.argos4j.rest.api.model.RestLinkMetaBlock;
+import com.rabobank.argos.argos4j.rest.api.model.RestReleaseResult;
 import com.rabobank.argos.argos4j.rest.api.model.RestServiceAccountKeyPair;
 import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.domain.link.Artifact;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
+import com.rabobank.argos.domain.release.ReleaseResult;
+
 import org.mapstruct.Mapper;
 
 import java.util.List;
@@ -36,4 +39,8 @@ public interface RestMapper {
     RestLinkMetaBlock convertToRestLinkMetaBlock(LinkMetaBlock metaBlock);
 
     List<RestArtifact> convertToRestArtifacts(List<Artifact> artifacts);
+
+    List<List<RestArtifact>> convertToRestArtifactsList(List<List<Artifact>> artifactsList);
+
+    ReleaseResult convertToReleaseResult(RestReleaseResult releaseResult);
 }

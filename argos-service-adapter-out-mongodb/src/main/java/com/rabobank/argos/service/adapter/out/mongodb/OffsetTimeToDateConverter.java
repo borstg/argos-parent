@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.service.adapter.in.rest.release;
+package com.rabobank.argos.service.adapter.out.mongodb;
 
-import com.rabobank.argos.domain.release.ReleaseResult;
-import com.rabobank.argos.service.adapter.in.rest.api.model.RestReleaseResult;
-import org.mapstruct.Mapper;
 
-import java.util.List;
-import java.util.Set;
+import org.springframework.core.convert.converter.Converter;
 
-@Mapper(componentModel = "spring")
-public abstract class ReleaseResultMapper {
+import java.time.OffsetDateTime;
+import java.util.Date;
 
-    abstract RestReleaseResult maptoRestReleaseResult(ReleaseResult releaseResult);
+public class OffsetTimeToDateConverter implements Converter<OffsetDateTime, Date>{
 
-    abstract List<String> mapToListString(Set<String> artifactHashes);
+    @Override
+    public Date convert(OffsetDateTime offsetDateTime) {
+        return Date.from(offsetDateTime.toInstant());
+    }
 
 }

@@ -19,6 +19,7 @@ import com.rabobank.argos.argos4j.Argos4jError;
 import com.rabobank.argos.argos4j.FileCollector;
 import com.rabobank.argos.argos4j.LocalFileCollector;
 import com.rabobank.argos.argos4j.LocalZipFileCollector;
+import com.rabobank.argos.argos4j.RemoteCollectorCollector;
 import com.rabobank.argos.argos4j.RemoteFileCollector;
 import com.rabobank.argos.argos4j.RemoteZipFileCollector;
 
@@ -38,6 +39,7 @@ public class ArtifactCollectorFactory {
         MAPPING.put(LocalZipFileCollector.class, ZipArtifactCollector.class);
         MAPPING.put(RemoteFileCollector.class, RemoteArtifactCollector.class);
         MAPPING.put(RemoteZipFileCollector.class, RemoteArtifactCollector.class);
+        MAPPING.put(RemoteCollectorCollector.class, RemoteArtifactCollector.class);
     }
 
     public static ArtifactCollector build(FileCollector fileCollector) {

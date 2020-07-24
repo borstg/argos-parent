@@ -21,6 +21,10 @@ import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.rabobank.argos.argos4j.internal.ArtifactListBuilderImpl;
 import com.rabobank.argos.argos4j.rest.api.model.RestKeyPair;
+import com.rabobank.argos.argos4j.rest.api.model.RestReleaseDossierMetaData;
+import com.rabobank.argos.argos4j.rest.api.model.RestReleaseResult;
+import com.rabobank.argos.domain.release.ReleaseResult;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -65,6 +69,8 @@ class Argos4jTest {
     private String restKeyPairRest;
     private LinkBuilder linkBuilder;
     private VerifyBuilder verifyBuilder;
+    private ReleaseBuilder releaseBuilder;
+    private String releaseResult;
     private Argos4jSettings settings;
 
     @BeforeAll
@@ -97,7 +103,12 @@ class Argos4jTest {
 
         argos4j = new Argos4j(settings);
         linkBuilder = argos4j.getLinkBuilder(LinkBuilderSettings.builder().stepName("build").runId("runId").layoutSegmentName("layoutSegmentName").build());
-        verifyBuilder = argos4j.getVerifyBuilder();
+        verifyBuilder = argos4j.getVerifyBuilder(null);
+        releaseBuilder = argos4j.getReleaseBuilder();
+        RestReleaseDossierMetaData restReleaseDossierMetaData = new RestReleaseDossierMetaData().addReleaseArtifactsItem(Arrays.asList("cb6bdad36690e8024e7df13e6796ae6603f2cb9cf9f989c9ff939b2ecebdcb91"));
+        releaseResult = new ObjectMapper().writeValueAsString(new RestReleaseResult().releaseIsValid(true).releaseDossierMetaData(restReleaseDossierMetaData));
+        
+        
     }
 
     private static Integer findRandomPort() throws IOException {
@@ -149,30 +160,55 @@ class Argos4jTest {
 
     @Test
     void verify() {
-        wireMockServer.stubFor(get(urlEqualTo("/api/supplychain?name=supplyChainName&path=rootLabel&path=subLabel"))
-                .willReturn(ok().withBody("{\"name\":\"supplyChainName\",\"id\":\"supplyChainId\",\"parentLabelId\":\"parentLabelId\"}")));
-        wireMockServer.stubFor(post(urlEqualTo("/api/supplychain/supplyChainId/verification"))
+        wireMockServer.stubFor(get(urlEqualTo("/api/supplychain/verification?artifactHashes=cb6bdad36690e8024e7df13e6796ae6603f2cb9cf9f989c9ff939b2ecebdcb91"))
                 .willReturn(ok().withBody("{\"runIsValid\":true}")));
 
         assertThat(verifyBuilder.addFileCollector(LocalFileCollector.builder().path(sharedTempDir.toPath()).basePath(sharedTempDir.toPath()).build())
-                .verify("test".toCharArray()).isRunIsValid(), is(true));
+                .verify().isRunIsValid(), is(true));
 
         List<LoggedRequest> requests = wireMockServer.findRequestsMatching(RequestPattern.everything()).getRequests();
-        assertThat(requests, hasSize(2));
-        assertThat(requests.get(1).getBodyAsString(), is("{\"expectedProducts\":[{\"uri\":\"text.txt\",\"hash\":\"cb6bdad36690e8024e7df13e6796ae6603f2cb9cf9f989c9ff939b2ecebdcb91\"}]}"));
+        assertThat(requests, hasSize(1));
     }
 
     @Test
-    void verifyNotUnauthorized() {
-        wireMockServer.stubFor(get(urlEqualTo("/api/supplychain?name=supplyChainName&path=rootLabel&path=subLabel"))
-                .willReturn(ok().withBody("{\"name\":\"supplyChainName\",\"id\":\"supplyChainId\",\"parentLabelId\":\"parentLabelId\"}")));
-        wireMockServer.stubFor(post(urlEqualTo("/api/supplychain/supplyChainId/verification"))
-                .willReturn(status(401)));
+    void verifyBadRequest() {
+        wireMockServer.stubFor(get(urlEqualTo("/api/supplychain/verification?artifactHashes=cb6bdad36690e8024e7df13e6796ae6603f2cb9cf9f989c9ff939b2ecebdcb91"))
+                .willReturn(status(400)));
 
         Argos4jError error = assertThrows(Argos4jError.class, () -> verifyBuilder.addFileCollector(LocalFileCollector.builder()
                 .path(sharedTempDir.toPath()).basePath(sharedTempDir.toPath()).build())
-                .verify("test".toCharArray()));
-        assertThat(error.getMessage(), startsWith("[401 Unauthorized] during [POST] to "));
+                .verify());
+        assertThat(error.getMessage(), startsWith("[400 Bad Request] during [GET] to [http://localhost:"));
+    }
+    
+    @Test
+    void verifyNotValid() {
+        wireMockServer.stubFor(get(urlEqualTo("/api/supplychain/verification?artifactHashes=cb6bdad36690e8024e7df13e6796ae6603f2cb9cf9f989c9ff939b2ecebdcb91"))
+                .willReturn(ok().withBody("{\"runIsValid\":false}")));
+
+        assertThat(verifyBuilder.addFileCollector(LocalFileCollector.builder().path(sharedTempDir.toPath()).basePath(sharedTempDir.toPath()).build())
+                .verify().isRunIsValid(), is(false));
+
+        List<LoggedRequest> requests = wireMockServer.findRequestsMatching(RequestPattern.everything()).getRequests();
+        assertThat(requests, hasSize(1));
+    }
+    
+    @Test
+    void release() {
+        wireMockServer.stubFor(get(urlEqualTo("/api/supplychain?name=supplyChainName&path=rootLabel&path=subLabel"))
+                .willReturn(ok().withBody("{\"name\":\"supplyChainName\",\"id\":\"supplyChainId\",\"parentLabelId\":\"parentLabelId\"}")));
+        wireMockServer.stubFor(post(urlEqualTo("/api/supplychain/supplyChainId/release")).willReturn(ok().withBody(releaseResult)));
+        
+        ReleaseResult result = releaseBuilder
+                .addFileCollector(LocalFileCollector
+                        .builder().path(sharedTempDir.toPath()).basePath(sharedTempDir.toPath()).build())
+                .release("test".toCharArray());
+
+        assertThat(result.isReleaseIsValid(), is(true));
+
+        List<LoggedRequest> requests = wireMockServer.findRequestsMatching(RequestPattern.everything()).getRequests();
+        assertThat(requests, hasSize(2));
+        assertThat(requests.get(1).getBodyAsString(), is("{\"releaseArtifacts\":[[{\"uri\":\"text.txt\",\"hash\":\"cb6bdad36690e8024e7df13e6796ae6603f2cb9cf9f989c9ff939b2ecebdcb91\"}]]}"));
     }
     
     @Test

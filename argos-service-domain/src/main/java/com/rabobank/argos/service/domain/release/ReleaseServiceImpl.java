@@ -56,7 +56,7 @@ public class ReleaseServiceImpl implements ReleaseService {
     public ReleaseResult createRelease(String supplyChainId, List<Set<Artifact>> releaseArtifacts) {
 
         String supplyChainPath = getSupplyChainPath(supplyChainId);
-        List<Set<String>> releaseArtifactHashes = convertToReleaseArtifactHashes(releaseArtifacts);
+        List<List<String>> releaseArtifactHashes = convertToReleaseArtifactHashes(releaseArtifacts);
         return releaseRepository
                 .findReleaseByReleasedArtifactsAndPath(releaseArtifactHashes, supplyChainPath)
                 .map(releaseDossierMetaData -> ReleaseResult
@@ -68,7 +68,7 @@ public class ReleaseServiceImpl implements ReleaseService {
                 .orElseGet(() -> verifyAndStoreRelease(supplyChainId, releaseArtifacts, supplyChainPath, releaseArtifactHashes));
     }
 
-    private ReleaseResult verifyAndStoreRelease(String supplyChainId, List<Set<Artifact>> releaseArtifacts, String supplyChainPath, List<Set<String>> releaseArtifactHashes) {
+    private ReleaseResult verifyAndStoreRelease(String supplyChainId, List<Set<Artifact>> releaseArtifacts, String supplyChainPath, List<List<String>> releaseArtifactHashes) {
         ReleaseResult.ReleaseResultBuilder releaseBuilder = ReleaseResult.builder();
         LayoutMetaBlock layoutMetaBlock = layoutMetaBlockRepository.findBySupplyChainId(supplyChainId)
                 .orElseThrow(() -> new NotFoundException("Layout not found"));
@@ -96,7 +96,7 @@ public class ReleaseServiceImpl implements ReleaseService {
 
     private ReleaseDossierMetaData createAndStoreRelease(String supplyChainPath, LayoutMetaBlock layoutMetaBlock,
                                                          VerificationRunResult verificationRunResult,
-                                                         List<Set<String>> releaseArtifacts) {
+                                                         List<List<String>> releaseArtifacts) {
 
         List<ReleaseDossier.Account> accounts = getAccounts(layoutMetaBlock);
 
@@ -114,12 +114,12 @@ public class ReleaseServiceImpl implements ReleaseService {
         return releaseDossierMetaData;
     }
 
-    private List<Set<String>> convertToReleaseArtifactHashes(List<Set<Artifact>> releaseArtifacts) {
+    private List<List<String>> convertToReleaseArtifactHashes(List<Set<Artifact>> releaseArtifacts) {
         return releaseArtifacts
                 .stream()
                 .map(s -> s.stream()
                         .map(Artifact::getHash)
-                        .collect(Collectors.toSet()))
+                        .collect(Collectors.toList()))
                 .collect(Collectors.toList());
     }
 

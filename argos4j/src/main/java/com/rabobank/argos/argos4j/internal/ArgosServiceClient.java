@@ -23,26 +23,37 @@ import com.rabobank.argos.argos4j.VerificationResult;
 import com.rabobank.argos.argos4j.internal.mapper.RestMapper;
 import com.rabobank.argos.argos4j.rest.api.ApiClient;
 import com.rabobank.argos.argos4j.rest.api.client.LinkApi;
+import com.rabobank.argos.argos4j.rest.api.client.ReleaseApi;
 import com.rabobank.argos.argos4j.rest.api.client.ServiceAccountApi;
 import com.rabobank.argos.argos4j.rest.api.client.SupplychainApi;
 import com.rabobank.argos.argos4j.rest.api.client.VerificationApi;
 import com.rabobank.argos.argos4j.rest.api.model.RestArtifact;
 import com.rabobank.argos.argos4j.rest.api.model.RestLinkMetaBlock;
+import com.rabobank.argos.argos4j.rest.api.model.RestReleaseArtifacts;
+import com.rabobank.argos.argos4j.rest.api.model.RestReleaseResult;
 import com.rabobank.argos.argos4j.rest.api.model.RestServiceAccountKeyPair;
-import com.rabobank.argos.argos4j.rest.api.model.RestVerifyCommand;
 import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.domain.link.Artifact;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
+import com.rabobank.argos.domain.release.ReleaseResult;
+
 import feign.FeignException;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public class ArgosServiceClient {
 
     private final Argos4jSettings settings;
     private final ApiClient apiClient;
+    
+    public ArgosServiceClient(Argos4jSettings settings) {
+        this.settings = settings;
+        apiClient = new ApiClient().setBasePath(settings.getArgosServerBaseUrl());
+        apiClient.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    }
 
     public ArgosServiceClient(Argos4jSettings settings, char[] signingKeyPassphrase) {
         this.settings = settings;
@@ -62,11 +73,23 @@ public class ArgosServiceClient {
         }
     }
 
-    public VerificationResult verify(List<Artifact> artifacts) {
+    public VerificationResult verify(List<String> hashes, String path) {
         try {
             VerificationApi verificationApi = apiClient.buildClient(VerificationApi.class);
-            List<RestArtifact> restArtifacts = Mappers.getMapper(RestMapper.class).convertToRestArtifacts(artifacts);
-            return VerificationResult.builder().runIsValid(verificationApi.performVerification(getSupplyChainId(), new RestVerifyCommand().expectedProducts(restArtifacts)).getRunIsValid()).build();
+            return VerificationResult.builder()
+                    .runIsValid(verificationApi.getVerification(hashes, path).getRunIsValid())
+                    .build();
+        } catch (FeignException e) {
+            throw convertToArgos4jError(e);
+        }
+    }
+
+    public ReleaseResult release(List<List<Artifact>> artifactsList) {
+        try {
+            ReleaseApi releaseApi = apiClient.buildClient(ReleaseApi.class);
+            List<List<RestArtifact>> restArtifactsList = Mappers.getMapper(RestMapper.class).convertToRestArtifactsList(artifactsList);
+            RestReleaseResult releaseResult = releaseApi.createRelease(getSupplyChainId(), new RestReleaseArtifacts().releaseArtifacts(restArtifactsList));
+            return Mappers.getMapper(RestMapper.class).convertToReleaseResult(releaseResult);
         } catch (FeignException e) {
             throw convertToArgos4jError(e);
         }

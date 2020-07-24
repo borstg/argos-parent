@@ -19,6 +19,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.rabobank.argos.argos4j.Argos4jError;
+import com.rabobank.argos.argos4j.RemoteCollectorCollector;
 import com.rabobank.argos.argos4j.RemoteFileCollector;
 import com.rabobank.argos.argos4j.RemoteZipFileCollector;
 import com.rabobank.argos.domain.link.Artifact;
@@ -31,13 +32,18 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.status;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
@@ -84,6 +90,18 @@ class RemoteArtifactCollectorTest {
         Argos4jError error = assertThrows(Argos4jError.class, () -> collector.collect());
         assertThat(error.getMessage(), is("encrypted ZIP entry not supported"));
     }
+    
+    @Test
+    void collectCollector() throws IOException {
+        createCollectorCollector();
+        wireMockServer.stubFor(post(urlPathEqualTo("/collect"))
+                .withRequestBody(equalToJson("{\"key1\": \"value1\",\"key2\": \"value2\"}"))
+                .willReturn(ok().withBody("[{\"uri\":\"path1\",\"hash\": \"hash1\"},{\"uri\":\"path2\",\"hash\": \"hash2\"}]")));
+        List<Artifact> collect = collector.collect();
+        assertThat(collect, contains(
+                Artifact.builder().uri("path1").hash("hash1").build(),
+                Artifact.builder().uri("path2").hash("hash2").build()));
+    }
 
     @Test
     void collectNotFound() throws MalformedURLException {
@@ -119,6 +137,14 @@ class RemoteArtifactCollectorTest {
     private void createFileCollector(String artifactUri) throws MalformedURLException {
         collector = ArtifactCollectorFactory.build(RemoteFileCollector.builder()
                 .artifactUri(artifactUri).url(new URL("http://localhost:" + randomPort + "/argos-test-app-1.0-SNAPSHOT.dar")).build());
+    }
+    
+    private void createCollectorCollector() throws MalformedURLException {
+        Map<String, String> configMap = new HashMap<>();
+        configMap.put("key1", "value1");
+        configMap.put("key2", "value2");
+        collector = ArtifactCollectorFactory.build(RemoteCollectorCollector.builder()
+                .configMap(configMap).url(new URL("http://localhost:" + randomPort + "/collect")).build());
     }
 
     @Test

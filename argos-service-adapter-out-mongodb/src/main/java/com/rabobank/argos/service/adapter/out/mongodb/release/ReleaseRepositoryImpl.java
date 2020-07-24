@@ -22,6 +22,7 @@ import com.mongodb.client.gridfs.model.GridFSFile;
 import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.release.ReleaseDossier;
 import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
+import com.rabobank.argos.service.adapter.out.mongodb.DateToOffsetTimeConverter;
 import com.rabobank.argos.service.domain.NotFoundException;
 import com.rabobank.argos.service.domain.release.ReleaseRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,16 +40,15 @@ import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -78,7 +78,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
     @Override
     public ReleaseDossierMetaData storeRelease(ReleaseDossierMetaData releaseDossierMetaData, ReleaseDossier releaseDossier) {
         DBObject metaData = new BasicDBObject();
-        Date releaseDate = new Date();
+        OffsetDateTime releaseDate = OffsetDateTime.now(ZoneOffset.UTC);
         releaseDossierMetaData.setReleaseDate(releaseDate);
         metaData.put(RELEASE_ARTIFACTS_FIELD, convertToDocumentList(releaseDossierMetaData.getReleaseArtifacts()));
         metaData.put(SUPPLY_CHAIN_PATH_FIELD, releaseDossierMetaData.getSupplyChainPath());
@@ -95,7 +95,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
     }
 
     @Override
-    public Optional<ReleaseDossierMetaData> findReleaseByReleasedArtifactsAndPath(List<Set<String>> releasedArtifacts, String path) {
+    public Optional<ReleaseDossierMetaData> findReleaseByReleasedArtifactsAndPath(List<List<String>> releasedArtifacts, String path) {
         checkForEmptyArtifacts(releasedArtifacts);
 
         Criteria criteria = createArtifactCriteria(releasedArtifacts);
@@ -117,7 +117,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     }
 
-    private void checkForEmptyArtifacts(List<Set<String>> releasedArtifacts) {
+    private void checkForEmptyArtifacts(List<List<String>> releasedArtifacts) {
         if (releasedArtifacts.isEmpty()) {
             throw new ArgosError("releasedArtifacts cannot be empty", ArgosError.Level.WARNING);
         }
@@ -131,7 +131,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
         }
     }
 
-    private Criteria createArtifactCriteria(List<Set<String>> releasedArtifacts) {
+    private Criteria createArtifactCriteria(List<List<String>> releasedArtifacts) {
 
         Map<String, List<String>> artifactHashes = createArtifactsHashes(releasedArtifacts);
         Criteria criteria = new Criteria();
@@ -144,7 +144,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     }
 
-    private Map<String, List<String>> createArtifactsHashes(List<Set<String>> releasedArtifacts) {
+    private Map<String, List<String>> createArtifactsHashes(List<List<String>> releasedArtifacts) {
         Map<String, List<String>> map = new HashMap<>();
         releasedArtifacts.forEach(artifactSet -> {
             List<String> artifactList = new ArrayList<>(artifactSet);
@@ -154,7 +154,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
         return map;
     }
 
-    private static Function<Document, ReleaseDossierMetaData> toMetaDataDossier() {
+    private Function<Document, ReleaseDossierMetaData> toMetaDataDossier() {
         return document -> {
             Document metaData = (Document) document.get(METADATA_FIELD);
             List<Document> releaseArtifacts = metaData
@@ -165,18 +165,18 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
                     .documentId(document.getObjectId(ID_FIELD)
                             .toHexString())
                     .releaseArtifacts(convertToReleaseArtifacts(releaseArtifacts))
-                    .releaseDate(metaData.getDate(RELEASE_DATE_FIELD))
+                    .releaseDate(new DateToOffsetTimeConverter().convert(metaData.getDate(RELEASE_DATE_FIELD)))
                     .supplyChainPath(metaData.getString(SUPPLY_CHAIN_PATH_FIELD))
                     .build();
         };
     }
 
-    private static List<Set<String>> convertToReleaseArtifacts(List<Document> releaseArtifacts) {
+    private static List<List<String>> convertToReleaseArtifacts(List<Document> releaseArtifacts) {
         return releaseArtifacts.stream()
                 .flatMap(d -> d.values()
                         .stream()
                         .map(o -> (List<String>) o)
-                        .map(HashSet::new)
+                        .map(ArrayList::new)
                 ).collect(Collectors.toList());
 
 
@@ -192,8 +192,8 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
     }
 
     @Override
-    public boolean artifactsAreReleased(Set<String> releasedArtifacts, String path) {
-        List<Set<String>> releasedArtifactsList = new ArrayList();
+    public boolean artifactsAreReleased(List<String> releasedArtifacts, String path) {
+        List<List<String>> releasedArtifactsList = new ArrayList<>();
         releasedArtifactsList.add(releasedArtifacts);
         checkForEmptyArtifacts(releasedArtifactsList);
         Criteria criteria = createArtifactCriteria(releasedArtifactsList);

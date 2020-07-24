@@ -18,37 +18,34 @@ package com.rabobank.argos.argos4j.internal;
 import com.rabobank.argos.argos4j.Argos4jSettings;
 import com.rabobank.argos.argos4j.ArtifactListBuilder;
 import com.rabobank.argos.argos4j.FileCollector;
-import com.rabobank.argos.argos4j.VerificationResult;
-import com.rabobank.argos.argos4j.VerifyBuilder;
+import com.rabobank.argos.argos4j.ReleaseBuilder;
 import com.rabobank.argos.domain.link.Artifact;
+import com.rabobank.argos.domain.release.ReleaseResult;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
-public class VerifyBuilderImpl implements VerifyBuilder {
+public class ReleaseBuilderImpl implements ReleaseBuilder {
 
     private final Argos4jSettings settings;
 
     private final ArtifactListBuilder artifactListBuilder;
-    
-    private final String path;
 
     @Override
-    public VerifyBuilder addFileCollector(FileCollector collector) {
-    	artifactListBuilder.addFileCollector(collector);
+    public ReleaseBuilder addFileCollector(FileCollector collector) {
+        artifactListBuilder.addFileCollector(collector);
         return this;
     }
 
     @Override
-    public VerificationResult verify() {
-        List<Artifact> artifacts = artifactListBuilder.collect();
-
-        log.info("verify artifacts {}", artifacts);
-        return new ArgosServiceClient(settings).verify(artifacts.stream().map(Artifact::getHash).collect(Collectors.toList()), path);
+    public ReleaseResult release(char[] keyPassphrase) {
+        List<List<Artifact>> artifactsList = artifactListBuilder.collectAsArtifactLists();
+        log.info("release artifacts {}", artifactsList);
+        return new ArgosServiceClient(settings, keyPassphrase).release(artifactsList);
     }
 
 }
