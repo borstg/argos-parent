@@ -17,7 +17,7 @@ package com.rabobank.argos.service.adapter.in.rest.oauthprovider;
 
 import com.rabobank.argos.service.adapter.in.rest.api.handler.OauthProviderApi;
 import com.rabobank.argos.service.adapter.in.rest.api.model.RestOAuthProvider;
-import com.rabobank.argos.service.security.oauth2.OAuth2Providers;
+import com.rabobank.argos.service.domain.security.oauth.OAuth2Providers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;

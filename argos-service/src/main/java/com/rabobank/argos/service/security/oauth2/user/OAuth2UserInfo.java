@@ -15,9 +15,14 @@
  */
 package com.rabobank.argos.service.security.oauth2.user;
 
-import com.rabobank.argos.service.security.oauth2.OAuth2Providers;
+import com.rabobank.argos.service.domain.security.oauth.OAuth2Providers;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Map;
+import java.util.Optional;
+
 
 public class OAuth2UserInfo {
 
@@ -35,13 +40,16 @@ public class OAuth2UserInfo {
         return providerName;
     }
 
+    @NotNull
+    @Size(min = 1)
     public String getId() {
-
-        return (String) attributes
+        return Optional.ofNullable(attributes
                 .getOrDefault(oauth2Provider
-                        .getUserIdAttribute(), null);
+                        .getUserIdAttribute(), null)).map(Object::toString).orElse(null);
     }
 
+    @NotNull
+    @Size(min = 1)
     public String getName() {
         return (String) attributes
                 .getOrDefault(oauth2Provider
@@ -49,6 +57,8 @@ public class OAuth2UserInfo {
 
     }
 
+    @Email
+    @NotNull
     public String getEmail() {
         return (String) attributes
                 .getOrDefault(oauth2Provider

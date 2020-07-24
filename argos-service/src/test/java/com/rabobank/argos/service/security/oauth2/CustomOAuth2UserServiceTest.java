@@ -17,6 +17,8 @@ package com.rabobank.argos.service.security.oauth2;
 
 import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.service.domain.account.AccountService;
+import com.rabobank.argos.service.domain.security.oauth.EmailAddressHandler;
+import com.rabobank.argos.service.domain.security.oauth.OAuth2Providers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,14 +26,17 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import javax.validation.Validation;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,11 +51,12 @@ import static org.mockito.Mockito.when;
 class CustomOAuth2UserServiceTest {
 
     private static final String ACCOUNT_ID = "accountId";
-    protected static final String AZURE = "azure";
-    protected static final String USER_PRINCIPAL_NAME = "userPrincipalName";
-    protected static final String DISPLAY_NAME = "displayName";
-    protected static final String PROVIDER_ID = "providerId";
-    protected static final String ID = "id";
+    private static final String AZURE = "azure";
+    private static final String USER_PRINCIPAL_NAME = "userPrincipalName";
+    private static final String EMAIL = "email@email.com";
+    private static final String DISPLAY_NAME = "displayName";
+    private static final String PROVIDER_ID = "providerId";
+    private static final String ID = "id";
     @Mock
     private AccountService accountService;
 
@@ -80,6 +86,18 @@ class CustomOAuth2UserServiceTest {
     @Mock
     private PersonalAccount personalAccount;
 
+    @Mock
+    private ApplicationContext applicationContext;
+
+    @Mock
+    private OAuth2Providers.EmailAddressHandler emailAddressHandler;
+
+    @Mock
+    private EmailAddressHandler emailHandler;
+
+    @Mock
+    private OAuth2AccessToken accessToken;
+
     @BeforeEach
     void setUp() {
         clientRegistration = ClientRegistration.withRegistrationId(AZURE)
@@ -89,7 +107,7 @@ class CustomOAuth2UserServiceTest {
                 .authorizationUri("/")
                 .tokenUri("/")
                 .build();
-        userService = new CustomOAuth2UserService(accountService, oAuth2Providers);
+        userService = new CustomOAuth2UserService(accountService, oAuth2Providers, applicationContext, Validation.buildDefaultValidatorFactory().getValidator());
         ReflectionTestUtils.setField(userService, "defaultOAuth2UserService", defaultOAuth2UserService);
     }
 
@@ -124,7 +142,32 @@ class CustomOAuth2UserServiceTest {
         verify(accountService).authenticateUser(userArgumentCaptor.capture());
         PersonalAccount createdPersonalAccount = userArgumentCaptor.getValue();
         assertThat(createdPersonalAccount.getName(), is(DISPLAY_NAME));
-        assertThat(createdPersonalAccount.getEmail(), is(USER_PRINCIPAL_NAME));
+        assertThat(createdPersonalAccount.getEmail(), is(EMAIL));
+        assertThat(createdPersonalAccount.getProviderName(), is(AZURE));
+        assertThat(createdPersonalAccount.getProviderId(), is(PROVIDER_ID));
+    }
+
+    @Test
+    void loadUserNewUserWithCustomEmail() {
+        setupMocks();
+        when(oauth2Provider.getEmailAddressHandler()).thenReturn(emailAddressHandler);
+        when(emailAddressHandler.getClassName()).thenReturn("className");
+        when(emailAddressHandler.getUri()).thenReturn("email uri");
+        when(applicationContext.getBean("className", EmailAddressHandler.class)).thenReturn(emailHandler);
+        when(oAuth2UserRequest.getAccessToken()).thenReturn(accessToken);
+        when(accessToken.getTokenValue()).thenReturn("token");
+        when(emailHandler.getEmailAddress("token", "email uri")).thenReturn("other@email.com");
+        when(oauth2Provider.getUserEmailAttribute()).thenReturn(USER_PRINCIPAL_NAME);
+        when(oauth2Provider.getUserNameAttribute()).thenReturn(DISPLAY_NAME);
+        when(oauth2Provider.getUserIdAttribute()).thenReturn(ID);
+        when(personalAccount.getAccountId()).thenReturn(ACCOUNT_ID);
+        when(accountService.authenticateUser(any())).thenReturn(Optional.of(personalAccount));
+        ArgosOAuth2User userPrincipal = (ArgosOAuth2User) userService.loadUser(oAuth2UserRequest);
+        assertThat(userPrincipal.getAccountId(), is(ACCOUNT_ID));
+        verify(accountService).authenticateUser(userArgumentCaptor.capture());
+        PersonalAccount createdPersonalAccount = userArgumentCaptor.getValue();
+        assertThat(createdPersonalAccount.getName(), is(DISPLAY_NAME));
+        assertThat(createdPersonalAccount.getEmail(), is("other@email.com"));
         assertThat(createdPersonalAccount.getProviderName(), is(AZURE));
         assertThat(createdPersonalAccount.getProviderId(), is(PROVIDER_ID));
     }
@@ -133,9 +176,11 @@ class CustomOAuth2UserServiceTest {
     void loadUserNoEmailAddress() {
         setupMocks();
         when(oauth2Provider.getUserEmailAttribute()).thenReturn(USER_PRINCIPAL_NAME);
+        when(oauth2Provider.getUserNameAttribute()).thenReturn(DISPLAY_NAME);
+        when(oauth2Provider.getUserIdAttribute()).thenReturn(ID);
         when(oAuth2User.getAttributes()).thenReturn(Map.of(DISPLAY_NAME, DISPLAY_NAME, ID, PROVIDER_ID));
         InternalAuthenticationServiceException serviceException = assertThrows(InternalAuthenticationServiceException.class, () -> userService.loadUser(oAuth2UserRequest));
-        assertThat(serviceException.getCause().getMessage(), is("email address not provided by oauth profile service"));
+        assertThat(serviceException.getCause().getMessage(), is("email : must not be null"));
     }
 
     @Test
@@ -150,10 +195,9 @@ class CustomOAuth2UserServiceTest {
 
     private void setupMocks() {
         when(oAuth2Providers.getProvider()).thenReturn(Map.of(AZURE, oauth2Provider));
-        when(oAuth2User.getAttributes()).thenReturn(Map.of(USER_PRINCIPAL_NAME, USER_PRINCIPAL_NAME, DISPLAY_NAME, DISPLAY_NAME, ID, PROVIDER_ID));
+        when(oAuth2User.getAttributes()).thenReturn(Map.of(USER_PRINCIPAL_NAME, EMAIL, DISPLAY_NAME, DISPLAY_NAME, ID, PROVIDER_ID));
         when(defaultOAuth2UserService.loadUser(oAuth2UserRequest)).thenReturn(oAuth2User);
         when(oAuth2UserRequest.getClientRegistration()).thenReturn(clientRegistration);
     }
-
 
 }

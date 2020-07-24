@@ -18,9 +18,12 @@ package com.rabobank.argos.service.security.oauth2;
 import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.account.PersonalAccount;
 import com.rabobank.argos.service.domain.account.AccountService;
-import com.rabobank.argos.service.security.oauth2.OAuth2Providers.OAuth2Provider;
+import com.rabobank.argos.service.domain.security.oauth.EmailAddressHandler;
+import com.rabobank.argos.service.domain.security.oauth.OAuth2Providers;
+import com.rabobank.argos.service.domain.security.oauth.OAuth2Providers.OAuth2Provider;
 import com.rabobank.argos.service.security.oauth2.user.OAuth2UserInfo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -28,9 +31,14 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -39,7 +47,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     private final AccountService accountService;
     private final OAuth2Providers auth2Providers;
-    private DefaultOAuth2UserService defaultOAuth2UserService = new DefaultOAuth2UserService();
+    private final ApplicationContext applicationContext;
+    private final DefaultOAuth2UserService defaultOAuth2UserService = new DefaultOAuth2UserService();
+    private final Validator validator;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) {
@@ -58,34 +68,48 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         if (oAuth2User.getAttributes() == null || oAuth2User.getAttributes().isEmpty()) {
             throw new ArgosError("invalid response from oauth profile service");
         }
-        // oAuth2UserRequest.getAccessToken().getTokenValue()
-        //
+
         String providerName = oAuth2UserRequest.getClientRegistration().getRegistrationId();
 
-        Optional<OAuth2Provider> oauth2Provider = Optional.ofNullable(auth2Providers
+        OAuth2Provider oauth2Provider = getoAuth2Provider(oAuth2UserRequest, providerName);
+
+        Map<String, Object> attributes = handleEmailProperty(oAuth2UserRequest, oAuth2User, oauth2Provider);
+
+        return accountService.authenticateUser(convertToPersonalAccount(new OAuth2UserInfo(providerName, attributes, oauth2Provider)))
+                .map(account -> new ArgosOAuth2User(oAuth2User, account.getAccountId()))
+                .orElseThrow(() -> new ArgosError("account not authenticated"));
+
+    }
+
+    private OAuth2Provider getoAuth2Provider(OAuth2UserRequest oAuth2UserRequest, String providerName) {
+        return Optional.ofNullable(auth2Providers
                 .getProvider()
-                .getOrDefault(oAuth2UserRequest.getClientRegistration().getRegistrationId(), null));
-
-        OAuth2UserInfo oAuth2UserInfo = oauth2Provider
-                .map(p -> new OAuth2UserInfo(providerName, oAuth2User.getAttributes(), p))
+                .getOrDefault(oAuth2UserRequest.getClientRegistration().getRegistrationId(), null))
                 .orElseThrow(() -> new ArgosError("no provider is configured for: " + providerName));
+    }
 
-        if (!StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {
-            return accountService.authenticateUser(convertToPersonalAccount(oAuth2UserInfo))
-                    .map(account -> new ArgosOAuth2User(oAuth2User, account.getAccountId()))
-                    .orElseThrow(() -> new ArgosError("account not authenticated"));
-        } else {
-            throw new ArgosError("email address not provided by oauth profile service");
-        }
+    private Map<String, Object> handleEmailProperty(OAuth2UserRequest oAuth2UserRequest, OAuth2User oAuth2User, OAuth2Provider oauth2Provider) {
+        return Optional.ofNullable(oauth2Provider.getEmailAddressHandler())
+                .map(handler -> applicationContext.getBean(handler.getClassName(), EmailAddressHandler.class)
+                        .getEmailAddress(oAuth2UserRequest.getAccessToken().getTokenValue(), handler.getUri())).map(email -> {
+                    Map<String, Object> stringObjectMap = new HashMap<>(oAuth2User.getAttributes());
+                    stringObjectMap.put(oauth2Provider.getUserEmailAttribute(), email);
+                    return stringObjectMap;
+                }).orElse(oAuth2User.getAttributes());
     }
 
     private PersonalAccount convertToPersonalAccount(OAuth2UserInfo oAuth2UserInfo) {
-        return PersonalAccount.builder()
-                .name(oAuth2UserInfo.getName())
-                .email(oAuth2UserInfo.getEmail())
-                .providerId(oAuth2UserInfo.getId())
-                .providerName(oAuth2UserInfo.getProviderName())
-                .build();
+        Set<ConstraintViolation<OAuth2UserInfo>> violations = validator.validate(oAuth2UserInfo);
+        if (violations.isEmpty()) {
+            return PersonalAccount.builder()
+                    .name(oAuth2UserInfo.getName())
+                    .email(oAuth2UserInfo.getEmail())
+                    .providerId(oAuth2UserInfo.getId())
+                    .providerName(oAuth2UserInfo.getProviderName())
+                    .build();
+        } else {
+            throw new ArgosError(violations.stream().map(violation -> violation.getPropertyPath().toString() + " : " + violation.getMessage()).collect(Collectors.joining(", ")));
+        }
     }
 
 
