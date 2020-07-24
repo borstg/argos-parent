@@ -59,7 +59,7 @@ public class ArgosJenkinsHelper {
         if (Float.parseFloat(version) < 1.8F) {
             throw new Argos4jError("bouncycastle-api plugin " + version + " installed, minimal version 1.8 required");
         }
-
+        
         checkProperty(privateKeyCredentialId, "privateKeyCredentialId");
         checkProperty(layoutSegmentName, "layoutSegmentName");
         checkProperty(stepName, "stepName");
@@ -97,6 +97,7 @@ public class ArgosJenkinsHelper {
     }
 
     private static StandardUsernamePasswordCredentials getCredentials(String privateKeyCredentialId) {
+        log.info("credential id = {}", privateKeyCredentialId);
         StandardUsernamePasswordCredentials fileCredential = CredentialsMatchers.firstOrNull(
                 CredentialsProvider.lookupCredentials(
                         StandardUsernamePasswordCredentials.class,
