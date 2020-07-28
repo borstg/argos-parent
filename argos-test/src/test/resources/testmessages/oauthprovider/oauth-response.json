@@ -2,7 +2,7 @@
   {
     "providerName": "azure",
     "displayName": "Azure",
-    "iconUrl": "/images/auth_icons/azure.svg"
+    "iconUrl": "/images/auth_icons/microsoft.svg"
   },
   {
     "providerName": "github",

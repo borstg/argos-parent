@@ -53,7 +53,7 @@ spring:
             userNameAttribute: displayName
             userIdAttribute: id
             userEmailAttribute: userPrincipalName
-            iconUrl: /images/auth_icons/google.svg
+            iconUrl: /images/auth_icons/microsoft.svg
             displayName: Azure
           github:
             authorizationUri: https://github.com/login/oauth/authorize
