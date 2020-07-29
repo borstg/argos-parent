@@ -45,11 +45,11 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -82,7 +82,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
         DBObject metaData = new BasicDBObject();
         OffsetDateTime releaseDate = OffsetDateTime.now(ZoneOffset.UTC);
         releaseDossierMetaData.setReleaseDate(releaseDate);
-        metaData.put(RELEASE_ARTIFACTS_FIELD, convertToDocumentList(releaseDossierMetaData.getReleaseArtifacts()));
+        metaData.put(RELEASE_ARTIFACTS_FIELD, convertToDocumentList(createArtifactsHashes(releaseDossierMetaData.getReleaseArtifacts())));
         metaData.put(SUPPLY_CHAIN_PATH_FIELD, releaseDossierMetaData.getSupplyChainPath());
         metaData.put(RELEASE_DATE_FIELD, releaseDate);
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
@@ -149,13 +149,12 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
     }
 
     private Map<String, List<String>> createArtifactsHashes(List<List<String>> releasedArtifacts) {
-        Map<String, List<String>> map = new HashMap<>();
+        Map<String, List<String>> map = new TreeMap<>();
         releasedArtifacts.forEach(artifactSet -> {
             List<String> artifactList = new ArrayList<>(artifactSet);
             Collections.sort(artifactList);
             map.put(createHashFromArtifactList(artifactList), artifactList);
         });
-        releasedArtifacts.forEach(artifactSet -> map.put(createHashFromArtifactList(artifactSet), artifactSet));
         return map;
     }
 

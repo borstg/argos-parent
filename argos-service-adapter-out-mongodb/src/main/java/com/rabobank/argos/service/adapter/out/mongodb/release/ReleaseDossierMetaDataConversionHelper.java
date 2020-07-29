@@ -15,28 +15,23 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.release;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.bson.Document;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.rabobank.argos.domain.release.ReleaseDossierMetaData.createHashFromArtifactList;
-
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReleaseDossierMetaDataConversionHelper {
-    private ReleaseDossierMetaDataConversionHelper() {
-    }
 
-    public static List<Document> convertToDocumentList(List<List<String>> releaseArtifacts) {
-        return releaseArtifacts.stream().map(artifacts -> {
+    public static List<Document> convertToDocumentList(Map<String, List<String>> releaseArtifacts) {
+        return releaseArtifacts.entrySet().stream().map(entry -> {
             Document document = new Document();
-            ArrayList<String> list = new ArrayList<>(artifacts);
-            Collections.sort(list);
-            document.put(createHashFromArtifactList(artifacts), list);
+            document.put(entry.getKey(), entry.getValue());
             return document;
         }).collect(Collectors.toList());
-
     }
 
 }
