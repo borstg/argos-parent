@@ -53,7 +53,7 @@ spring:
             userNameAttribute: displayName
             userIdAttribute: id
             userEmailAttribute: userPrincipalName
-            iconUrl: https://localhost:8080/azure.svg
+            iconUrl: /images/auth_icons/microsoft.svg
             displayName: Azure
           github:
             authorizationUri: https://github.com/login/oauth/authorize
@@ -62,7 +62,7 @@ spring:
             userNameAttribute: name
             userIdAttribute: id
             userEmailAttribute: email
-            iconUrl: https://localhost:8080/github.svg
+            iconUrl: /images/auth_icons/github.svg
             displayName: Github
             emailAddressHandler:
               className: com.rabobank.argos.service.security.oauth2.GithubEmailProvider
@@ -74,7 +74,7 @@ spring:
             userNameAttribute: name
             userIdAttribute: sub
             userEmailAttribute: email
-            iconUrl: https://localhost:8080/google.svg
+            iconUrl: /images/auth_icons/google.svg
             displayName: Google
   application:
     name: argos-service

@@ -2,16 +2,16 @@
   {
     "providerName": "azure",
     "displayName": "Azure",
-    "iconUrl": "https://localhost:8080/azure.svg"
+    "iconUrl": "/images/auth_icons/microsoft.svg"
   },
   {
     "providerName": "github",
     "displayName": "Github",
-    "iconUrl": "https://localhost:8080/github.svg"
+    "iconUrl": "/images/auth_icons/github.svg"
   },
   {
     "providerName": "google",
     "displayName": "Google",
-    "iconUrl": "https://localhost:8080/google.svg"
+    "iconUrl": "/images/auth_icons/google.svg"
   }
 ]
