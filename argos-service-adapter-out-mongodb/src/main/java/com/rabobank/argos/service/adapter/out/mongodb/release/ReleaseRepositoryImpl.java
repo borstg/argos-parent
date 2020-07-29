@@ -146,11 +146,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     private Map<String, List<String>> createArtifactsHashes(List<List<String>> releasedArtifacts) {
         Map<String, List<String>> map = new HashMap<>();
-        releasedArtifacts.forEach(artifactSet -> {
-            List<String> artifactList = new ArrayList<>(artifactSet);
-            Collections.sort(artifactList);
-            map.put(createHashFromArtifactList(artifactList), artifactList);
-        });
+        releasedArtifacts.forEach(artifactSet -> map.put(createHashFromArtifactList(artifactSet), artifactSet));
         return map;
     }
 

@@ -37,7 +37,8 @@ public class ReleaseDossierMetaData {
     private List<List<String>> releaseArtifacts;
 
     public static String createHashFromArtifactList(List<String> artifactList) {
-        Collections.sort(new ArrayList<>(artifactList));
-        return sha256Hex(join("", artifactList));
+        ArrayList<String> list = new ArrayList<>(artifactList);
+        Collections.sort(list);
+        return sha256Hex(join("", list));
     }
 }
