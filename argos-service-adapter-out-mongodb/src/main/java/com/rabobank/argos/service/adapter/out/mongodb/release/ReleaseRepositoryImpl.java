@@ -27,6 +27,7 @@ import com.rabobank.argos.service.domain.NotFoundException;
 import com.rabobank.argos.service.domain.release.ReleaseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.bson.Document;
@@ -58,6 +59,7 @@ import static org.springframework.data.mongodb.core.query.MongoRegexCreator.Matc
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     protected static final String ID_FIELD = "_id";
@@ -102,7 +104,9 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
         addOptionalPathCriteria(path, criteria);
 
-        List<Document> documents = mongoTemplate.find(new Query(criteria), Document.class, COLLECTION_NAME);
+        Query query = new Query(criteria);
+        log.info("findReleaseByReleasedArtifactsAndPath: {}", query);
+        List<Document> documents = mongoTemplate.find(query, Document.class, COLLECTION_NAME);
 
         List<ReleaseDossierMetaData> releaseDossierMetaData = documents
                 .stream().map(toMetaDataDossier()).collect(Collectors.toList());
@@ -136,9 +140,9 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
         Map<String, List<String>> artifactHashes = createArtifactsHashes(releasedArtifacts);
         Criteria criteria = new Criteria();
         List<Criteria> andOperations = new ArrayList<>();
-        artifactHashes.forEach((key, value) -> andOperations
+        artifactHashes.forEach((totalHash, hashesList) -> andOperations
                 .add(Criteria.where(METADATA_RELEASE_ARTIFACTS_FIELD)
-                        .elemMatch(Criteria.where(key).is(value))));
+                        .elemMatch(Criteria.where(totalHash).is(hashesList))));
         criteria.andOperator(andOperations.toArray(new Criteria[0]));
         return criteria;
 
@@ -146,6 +150,11 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     private Map<String, List<String>> createArtifactsHashes(List<List<String>> releasedArtifacts) {
         Map<String, List<String>> map = new HashMap<>();
+        releasedArtifacts.forEach(artifactSet -> {
+            List<String> artifactList = new ArrayList<>(artifactSet);
+            Collections.sort(artifactList);
+            map.put(createHashFromArtifactList(artifactList), artifactList);
+        });
         releasedArtifacts.forEach(artifactSet -> map.put(createHashFromArtifactList(artifactSet), artifactSet));
         return map;
     }
@@ -194,7 +203,9 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
         checkForEmptyArtifacts(releasedArtifactsList);
         Criteria criteria = createArtifactCriteria(releasedArtifactsList);
         addOptionalPathCriteria(path, criteria);
-        return mongoTemplate.exists(new Query(criteria), COLLECTION_NAME);
+        Query query = new Query(criteria);
+        log.info("artifactsAreReleased: {}", query);
+        return mongoTemplate.exists(query, COLLECTION_NAME);
     }
 
 }
