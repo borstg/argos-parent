@@ -19,6 +19,7 @@ import org.bson.Document;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -26,16 +27,15 @@ import static org.hamcrest.Matchers.is;
 
 class ReleaseDossierMetaDataConversionHelperTest {
 
-    protected static final String HASH = "71ed24f24e838b18a4bc53aac2638155692b43289ca9778c37139859fc6e619d";
     protected static final List<String> ARTIFACT_LIST = List.of("string", "string2");
 
     @Test
     void convertToDocumentList() {
-        List<Document> documents = ReleaseDossierMetaDataConversionHelper.convertToDocumentList(List.of(List.of("string", "string2")));
+        List<Document> documents = ReleaseDossierMetaDataConversionHelper.convertToDocumentList(Map.of("totalHash", List.of("string", "string2")));
         assertThat(documents, hasSize(1));
         Document document = documents.iterator().next();
-        assertThat(document.containsKey(HASH), is(true));
-        assertThat(document.get(HASH), is(ARTIFACT_LIST));
+        assertThat(document.containsKey("totalHash"), is(true));
+        assertThat(document.get("totalHash"), is(ARTIFACT_LIST));
     }
 
 }

@@ -148,7 +148,7 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
 
     }
 
-    private Map<String, List<String>> createArtifactsHashes(List<List<String>> releasedArtifacts) {
+    static Map<String, List<String>> createArtifactsHashes(List<List<String>> releasedArtifacts) {
         Map<String, List<String>> map = new TreeMap<>();
         releasedArtifacts.forEach(artifactSet -> {
             List<String> artifactList = new ArrayList<>(artifactSet);

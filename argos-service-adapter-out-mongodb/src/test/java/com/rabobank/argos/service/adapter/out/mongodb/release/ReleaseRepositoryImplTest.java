@@ -47,6 +47,7 @@ import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepo
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.RELEASE_ARTIFACTS_FIELD;
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.RELEASE_DATE_FIELD;
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.SUPPLY_CHAIN_PATH_FIELD;
+import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.createArtifactsHashes;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -106,7 +107,7 @@ class ReleaseRepositoryImplTest {
     @Test
     void findReleaseByReleasedArtifactsAndPath() {
         List<List<String>> releasedArtifacts = List.of(List.of("hash1"), List.of("hash2"));
-        List<Document> storedReleasedArtifacts = convertToDocumentList(releasedArtifacts);
+        List<Document> storedReleasedArtifacts = convertToDocumentList(createArtifactsHashes(releasedArtifacts));
         when(objectId.toHexString()).thenReturn(ID);
         when(document.get(METADATA_FIELD)).thenReturn(metaData);
         when(metaData.getList(RELEASE_ARTIFACTS_FIELD, Document.class,
@@ -123,14 +124,14 @@ class ReleaseRepositoryImplTest {
         assertThat(retrievedReleaseDossierMetaData.get().getReleaseArtifacts(), is(releasedArtifacts));
         assertThat(retrievedReleaseDossierMetaData.get().getReleaseDate(), is(OffsetDateTime.parse(RELEASE_DATE_TIME)));
         verify(mongoTemplate).find(queryArgumentCaptor.capture(), any(), any());
-        assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"$and\" : [{ \"metadata.releaseArtifacts\" : { \"$elemMatch\" : { \"e7bf382f6e5915b3f88619b866223ebf1d51c4c5321cccde2e9ff700a3259086\" : [\"hash2\"]}}}, { \"metadata.releaseArtifacts\" : { \"$elemMatch\" : { \"af316ecb91a8ee7ae99210702b2d4758f30cdde3bf61e3d8e787d74681f90a6e\" : [\"hash1\"]}}}], \"metadata.supplyChainPath\" : { \"$regex\" : \"^path\", \"$options\" : \"\"}}, Fields: {}, Sort: {}"));
+        assertThat(queryArgumentCaptor.getValue().toString(), is("Query: { \"$and\" : [{ \"metadata.releaseArtifacts\" : { \"$elemMatch\" : { \"af316ecb91a8ee7ae99210702b2d4758f30cdde3bf61e3d8e787d74681f90a6e\" : [\"hash1\"]}}}, { \"metadata.releaseArtifacts\" : { \"$elemMatch\" : { \"e7bf382f6e5915b3f88619b866223ebf1d51c4c5321cccde2e9ff700a3259086\" : [\"hash2\"]}}}], \"metadata.supplyChainPath\" : { \"$regex\" : \"^path\", \"$options\" : \"\"}}, Fields: {}, Sort: {}"));
     }
 
 
     @Test
     void findReleaseByReleasedArtifactsAndPathWithMultipleResultsShouldThrowException() {
         List<List<String>> releasedArtifacts = List.of(List.of("hash1"), List.of("hash2"));
-        List<Document> storedReleasedArtifacts = convertToDocumentList(releasedArtifacts);
+        List<Document> storedReleasedArtifacts = convertToDocumentList(createArtifactsHashes(releasedArtifacts));
         when(objectId.toHexString()).thenReturn(ID);
         when(document.get(METADATA_FIELD)).thenReturn(metaData);
         when(metaData.getList(RELEASE_ARTIFACTS_FIELD, Document.class,
