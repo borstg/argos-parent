@@ -121,8 +121,20 @@ class ReleaseServiceImplTest {
     }
 
     @Test
-    void createReleaseForNonExistingValidReleaseShouldReturnAndStoreNewDossier() {
+    void createReleaseForNonExistingLayoutShouldReturnFalse() {
+        Artifact releaseArtifact = Artifact.builder().hash("hash").uri("/target/").build();
+        List<Set<Artifact>> releaseArtifacts = Collections.singletonList(Set.of(releaseArtifact));
+        when(treeNode.getName()).thenReturn("name");
+        when(treeNode.getPathToRoot()).thenReturn(Collections.singletonList("path"));
+        when(hierarchyRepository.getSubTree(SUPPLY_CHAIN_ID, HierarchyMode.NONE, 0)).thenReturn(Optional.of(treeNode));
+        when(releaseRepository.findReleaseByReleasedArtifactsAndPath(any(), any())).thenReturn(Optional.empty());
+        when(layoutMetaBlockRepository.findBySupplyChainId(SUPPLY_CHAIN_ID)).thenReturn(Optional.empty());
+        ReleaseResult releaseResult = releaseService.createRelease(SUPPLY_CHAIN_ID, releaseArtifacts);
+        assertThat(releaseResult.isReleaseIsValid(), is(false));
+    }
 
+    @Test
+    void createReleaseForNonExistingValidReleaseShouldReturnAndStoreNewDossier() {
         Artifact releaseArtifact = Artifact.builder().hash("hash").uri("/target/").build();
         List<Set<Artifact>> releaseArtifacts = Collections.singletonList(Set.of(releaseArtifact));
         when(treeNode.getName()).thenReturn("name");

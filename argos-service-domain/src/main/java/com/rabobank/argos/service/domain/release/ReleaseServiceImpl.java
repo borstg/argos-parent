@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -70,28 +71,29 @@ public class ReleaseServiceImpl implements ReleaseService {
 
     private ReleaseResult verifyAndStoreRelease(String supplyChainId, List<Set<Artifact>> releaseArtifacts, String supplyChainPath, List<List<String>> releaseArtifactHashes) {
         ReleaseResult.ReleaseResultBuilder releaseBuilder = ReleaseResult.builder();
-        LayoutMetaBlock layoutMetaBlock = layoutMetaBlockRepository.findBySupplyChainId(supplyChainId)
-                .orElseThrow(() -> new NotFoundException("Layout not found"));
+        Optional<LayoutMetaBlock> optionalLayoutMetaBlock = layoutMetaBlockRepository.findBySupplyChainId(supplyChainId);
+        if (optionalLayoutMetaBlock.isPresent()) {
 
-        List<Artifact> allArtifacts = releaseArtifacts
-                .stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+            List<Artifact> allArtifacts = releaseArtifacts
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
 
-        VerificationRunResult verificationRunResult = verificationProvider.verifyRun(layoutMetaBlock, allArtifacts);
-        releaseBuilder.releaseIsValid(verificationRunResult.isRunIsValid());
+            VerificationRunResult verificationRunResult = verificationProvider.verifyRun(optionalLayoutMetaBlock.get(), allArtifacts);
+            releaseBuilder.releaseIsValid(verificationRunResult.isRunIsValid());
 
-        if (verificationRunResult.isRunIsValid()) {
-            ReleaseDossierMetaData releaseDossierMetaData = createAndStoreRelease(
-                    supplyChainPath,
-                    layoutMetaBlock,
-                    verificationRunResult,
-                    releaseArtifactHashes);
-            releaseBuilder.releaseDossierMetaData(releaseDossierMetaData);
-            linkMetaBlockRepository.deleteBySupplyChainId(supplyChainId);
+            if (verificationRunResult.isRunIsValid()) {
+                ReleaseDossierMetaData releaseDossierMetaData = createAndStoreRelease(
+                        supplyChainPath,
+                        optionalLayoutMetaBlock.get(),
+                        verificationRunResult,
+                        releaseArtifactHashes);
+                releaseBuilder.releaseDossierMetaData(releaseDossierMetaData);
+                linkMetaBlockRepository.deleteBySupplyChainId(supplyChainId);
+            }
+            return releaseBuilder.build();
         }
-
-        return releaseBuilder.build();
+        return ReleaseResult.builder().releaseIsValid(false).build();
     }
 
     private ReleaseDossierMetaData createAndStoreRelease(String supplyChainPath, LayoutMetaBlock layoutMetaBlock,
