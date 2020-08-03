@@ -184,13 +184,11 @@ steps:
 - name: release argos service image
   image: plugins/docker
   settings:
-    tags:
-    - ${DRONE_TAG}
-    - latest
     build_args:
     - VERSION=${DRONE_TAG}
     context: argos-docker
     dockerfile: argos-docker/ServiceDockerfile
+    auto_tag: true
     password:
       from_secret: docker_login_token
     repo: argosnotary/argos-service
