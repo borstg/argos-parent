@@ -17,7 +17,8 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://localhost/test
+      uri: mongodb://localhost/argos
+      database: argos
   jackson:
     serialization:
       write-dates-as-timestamps: false
