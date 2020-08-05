@@ -31,7 +31,7 @@ services:
       args:
         - VERSION=compose
     environment:
-      spring.data.mongodb.uri: mongodb://mongodb/test
+      spring.data.mongodb.uri: mongodb://mongodb/argos
       spring.security.oauth2.client.registration.azure.clientId: client-id
       spring.security.oauth2.client.registration.azure.clientSecret: client-secret
       spring.security.oauth2.client.provider.azure.authorizationUri: http://localhost:8087/oauth2/v2.0/authorize
@@ -59,7 +59,7 @@ services:
       context: .
       dockerfile: IntegrationTestServiceDockerfile
     environment:
-      spring.data.mongodb.uri: mongodb://mongodb/test
+      spring.data.mongodb.uri: mongodb://mongodb/argos
       jwt.token.secret: Z2LcVpgCuGtpb5rBDNIIWGe8RXqYGWDpWFjWhYQUS2Z8rjE2/GTJlu0s6BRYG0Mn0kV8StC9cFE83Jkl68RCkw==
       JAVA_OPTS: '-Xmx500m'
     ports:
@@ -68,8 +68,7 @@ services:
       - mongodb
 
   mongodb:
-    build:
-      context: mongo
+    image: argosnotary/mongo:4.2.8
     ports:
       - 27017:27017
 

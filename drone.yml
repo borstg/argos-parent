@@ -8,14 +8,23 @@ platform:
   arch: amd64
 
 steps:
-- name: build
+- name: set version
   image: argosnotary/argos-build:3.6.3
   commands:
   - mvn versions:set -DnewVersion=${DRONE_TAG:-${DRONE_BRANCH//\//_}} -DgenerateBackupPoms=false -DprocessAllModules
+  volumes:
+  - name: mvn_cache
+    path: /root/.m2/repository
+
+- name: build
+  image: argosnotary/argos-build:3.6.3
+  commands:
   - mvn -q install
   volumes:
   - name: mvn_cache
     path: /root/.m2/repository
+  depends_on:
+  - set version
 
 - name: sonar
   image: argosnotary/argos-build:3.6.3
@@ -99,24 +108,6 @@ steps:
   depends_on:
   - pitest
   - sonar
-
-- name: build mongo
-  image: plugins/docker
-  settings:
-    context: argos-docker/mongo
-    dockerfile: argos-docker/mongo/Dockerfile
-    password:
-      from_secret: docker_login_token
-    repo: argosnotary/argos-mongo-test
-    tags: ${DRONE_TAG:-${DRONE_BRANCH//\//_}}
-    username:
-      from_secret: docker_login_user
-  
-- name: mongodb
-  image: argosnotary/argos-mongo-test:${DRONE_TAG:-${DRONE_BRANCH//\//_}}
-  detach: true
-  depends_on:
-  - build mongo
   
 - name: argos-service
   image: argosnotary/argos-service-snapshot:${DRONE_TAG:-${DRONE_BRANCH//\//_}}
@@ -184,13 +175,11 @@ steps:
 - name: release argos service image
   image: plugins/docker
   settings:
-    tags:
-    - ${DRONE_TAG}
-    - latest
     build_args:
     - VERSION=${DRONE_TAG}
     context: argos-docker
     dockerfile: argos-docker/ServiceDockerfile
+    auto_tag: true
     password:
       from_secret: docker_login_token
     repo: argosnotary/argos-service
@@ -254,6 +243,9 @@ steps:
 services:
 - name: nexus
   image: sonatype/nexus:2.14.15-01
+  
+- name: mongodb
+  image: argosnotary/mongo:4.2.8
   
 volumes:
 - name: mvn_cache
