@@ -20,7 +20,6 @@ import com.mongodb.client.MongoClients;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
 import com.rabobank.argos.domain.release.ReleaseDossier;
 import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
-import com.rabobank.argos.service.adapter.out.mongodb.DateToOffsetTimeConverter;
 import com.rabobank.argos.service.adapter.out.mongodb.OffsetTimeToDateConverter;
 import com.rabobank.argos.service.domain.release.ReleaseRepository;
 
