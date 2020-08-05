@@ -51,6 +51,9 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
 
     @Value("${spring.data.mongodb.uri}")
     private String mongoURI;
+    
+    @Value("${spring.data.mongodb.database}")
+    private String mongoDatabaseName;
 
 
     @Bean
@@ -77,7 +80,7 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
 
     @Override
     protected String getDatabaseName() {
-        return "test";
+        return mongoDatabaseName;
     }
     
     @Override
