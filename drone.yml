@@ -99,10 +99,6 @@ steps:
   depends_on:
   - pitest
   - sonar
-
-- name: mongodb
-  image: argosnotary/mongo:4.2.8
-  detach: true
   
 - name: argos-service
   image: argosnotary/argos-service-snapshot:${DRONE_TAG:-${DRONE_BRANCH//\//_}}
@@ -238,6 +234,9 @@ steps:
 services:
 - name: nexus
   image: sonatype/nexus:2.14.15-01
+  
+- name: mongodb
+  image: argosnotary/mongo:4.2.8
   
 volumes:
 - name: mvn_cache
