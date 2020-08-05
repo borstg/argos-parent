@@ -8,14 +8,23 @@ platform:
   arch: amd64
 
 steps:
-- name: build
+- name: set version
   image: argosnotary/argos-build:3.6.3
   commands:
   - mvn versions:set -DnewVersion=${DRONE_TAG:-${DRONE_BRANCH//\//_}} -DgenerateBackupPoms=false -DprocessAllModules
+  volumes:
+  - name: mvn_cache
+    path: /root/.m2/repository
+
+- name: build
+  image: argosnotary/argos-build:3.6.3
+  commands:
   - mvn -q install
   volumes:
   - name: mvn_cache
     path: /root/.m2/repository
+  depends_on:
+  - set version
 
 - name: sonar
   image: argosnotary/argos-build:3.6.3
