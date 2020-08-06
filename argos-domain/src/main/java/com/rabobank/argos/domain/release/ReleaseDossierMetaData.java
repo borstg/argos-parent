@@ -16,6 +16,7 @@
 package com.rabobank.argos.domain.release;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,6 +31,7 @@ import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
 @Builder
 @Getter
 @Setter
+@EqualsAndHashCode
 public class ReleaseDossierMetaData {
     private String documentId;
     private OffsetDateTime releaseDate;

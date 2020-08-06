@@ -15,23 +15,17 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.release;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import org.bson.Document;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import org.springframework.core.convert.converter.Converter;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ReleaseDossierMetaDataConversionHelper {
+import java.time.OffsetDateTime;
+import java.util.Date;
 
-    public static List<Document> convertToDocumentList(Map<String, List<String>> releaseArtifacts) {
-        return releaseArtifacts.entrySet().stream().map(entry -> {
-            Document document = new Document();
-            document.put(entry.getKey(), entry.getValue());
-            return document;
-        }).collect(Collectors.toList());
+public class OffsetTimeToDateConverter implements Converter<OffsetDateTime, Date>{
+
+    @Override
+    public Date convert(OffsetDateTime offsetDateTime) {
+        return offsetDateTime == null ? null : Date.from(offsetDateTime.toInstant());
     }
 
 }

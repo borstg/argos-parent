@@ -19,6 +19,10 @@ import com.github.cloudyrock.mongock.SpringBootMongock;
 import com.github.cloudyrock.mongock.SpringBootMongockBuilder;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.rabobank.argos.service.adapter.out.mongodb.release.DateToOffsetTimeConverter;
+import com.rabobank.argos.service.adapter.out.mongodb.release.DocumentToReleaseDossierMetaDataConverter;
+import com.rabobank.argos.service.adapter.out.mongodb.release.OffsetTimeToDateConverter;
+import com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseDossierMetaDataToDocumentConverter;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -46,6 +50,8 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
         List<Converter<?, ?>> converterList = new ArrayList<>();
         converterList.add(new DateToOffsetTimeConverter());
         converterList.add(new OffsetTimeToDateConverter());
+        converterList.add(new ReleaseDossierMetaDataToDocumentConverter());
+        converterList.add(new DocumentToReleaseDossierMetaDataConverter());
         return new MongoCustomConversions(converterList);
     }
 

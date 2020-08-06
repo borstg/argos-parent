@@ -20,8 +20,6 @@ import com.mongodb.client.MongoClients;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
 import com.rabobank.argos.domain.release.ReleaseDossier;
 import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
-import com.rabobank.argos.service.adapter.out.mongodb.DateToOffsetTimeConverter;
-import com.rabobank.argos.service.adapter.out.mongodb.OffsetTimeToDateConverter;
 import com.rabobank.argos.service.domain.release.ReleaseRepository;
 
 import de.flapdoodle.embed.mongo.MongodExecutable;
@@ -93,7 +91,12 @@ class ReleaseRepositoryImplTestIT {
 
     private static MongoConverter getDefaultMongoConverter(MongoDbFactory factory) {
         DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
-        MongoCustomConversions conversions = new MongoCustomConversions(List.of(new DateToOffsetTimeConverter(), new OffsetTimeToDateConverter()));
+        MongoCustomConversions conversions = new MongoCustomConversions(
+                List.of(
+                        new DateToOffsetTimeConverter(), 
+                        new OffsetTimeToDateConverter(),
+                        new ReleaseDossierMetaDataToDocumentConverter(),
+                        new DocumentToReleaseDossierMetaDataConverter()));
         MongoMappingContext mappingContext = new MongoMappingContext();
         mappingContext.setSimpleTypeHolder(conversions.getSimpleTypeHolder());
         mappingContext.afterPropertiesSet();
@@ -105,7 +108,7 @@ class ReleaseRepositoryImplTestIT {
     }
 
     @Test
-    void storeReleaseAndRetreival() {
+    void storeReleaseAndRetrieval() {
         ReleaseDossierMetaData stored = storeReleaseDossier();
         assertThat(stored.getDocumentId(), is(IsNull.notNullValue()));
         assertThat(stored.getReleaseDate(), is(IsNull.notNullValue()));
@@ -128,7 +131,7 @@ class ReleaseRepositoryImplTestIT {
     void findReleaseByReleasedArtifactsAndPath() {
         storeReleaseDossier();
         Optional<ReleaseDossierMetaData> dossierMetaData = releaseRepository
-                .findReleaseByReleasedArtifactsAndPath(RELEASE_ARTIFACTS, "path.to");
+                .findReleaseByReleasedArtifactsAndPath(RELEASE_ARTIFACTS, null);
         assertThat(dossierMetaData.isPresent(), is(true));
 
         Optional<ReleaseDossierMetaData> emptyDossier = releaseRepository
@@ -144,7 +147,6 @@ class ReleaseRepositoryImplTestIT {
                 .artifactsAreReleased(RELEASE_ARTIFACTS.get(0), "path.to");
         assertThat(artifactsAreReleased, is(true));
     }
-
 
     @AfterEach
     void removeData() {
