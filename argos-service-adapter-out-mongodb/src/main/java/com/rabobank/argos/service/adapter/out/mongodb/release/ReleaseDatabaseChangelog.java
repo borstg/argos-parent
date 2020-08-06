@@ -20,23 +20,17 @@ import com.github.cloudyrock.mongock.ChangeSet;
 import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.CompoundIndexDefinition;
-import org.springframework.data.mongodb.core.index.Index;
 
 import java.util.Map;
 
-import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.METADATA_RELEASE_ARTIFACTS_FIELD;
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.SUPPLY_CHAIN_PATH_FIELD;
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.METADATA_RELEASE_ARTIFACTS_ARTIFACTS_HASH_FIELD;
-import static org.springframework.data.domain.Sort.Direction.ASC;
-
 
 @ChangeLog
 public class ReleaseDatabaseChangelog {
 
     @ChangeSet(order = "001", id = "ReleaseDatabaseChangelog-1", author = "michel")
     public void addIndex(MongoTemplate template) {
-        template.indexOps(ReleaseRepositoryImpl.COLLECTION_NAME)
-                .ensureIndex(new Index(METADATA_RELEASE_ARTIFACTS_FIELD, ASC));
         template.indexOps(ReleaseRepositoryImpl.COLLECTION_NAME)
                 .ensureIndex(new CompoundIndexDefinition(new Document(Map.of(METADATA_RELEASE_ARTIFACTS_ARTIFACTS_HASH_FIELD, 1, SUPPLY_CHAIN_PATH_FIELD, 1)))
                         .named(METADATA_RELEASE_ARTIFACTS_ARTIFACTS_HASH_FIELD + "_" + SUPPLY_CHAIN_PATH_FIELD));
