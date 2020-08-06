@@ -24,7 +24,7 @@ import org.bson.types.ObjectId;
 import org.springframework.core.convert.converter.Converter;
 
 import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
-
+import com.rabobank.argos.domain.release.ReleaseDossierMetaData.ReleaseDossierMetaDataBuilder;
 
 import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.*;
 
@@ -32,18 +32,19 @@ public class DocumentToReleaseDossierMetaDataConverter implements Converter<Docu
 
     @Override
     public ReleaseDossierMetaData convert(Document source) {
-        Document metaData = (Document) source.get(METADATA_FIELD);
-        List<Document> releaseArtifactsList = metaData
+        List<Document> releaseArtifactsList = source
                 .getList(RELEASE_ARTIFACTS_FIELD, Document.class,
                         Collections.emptyList());
-        return ReleaseDossierMetaData
-                .builder()
-                .documentId(((ObjectId)source.get(ID_FIELD))
-                        .toHexString())
+        ReleaseDossierMetaDataBuilder builder =  ReleaseDossierMetaData.builder()
+                
                 .releaseArtifacts(convertToReleaseArtifacts(releaseArtifactsList))
-                .releaseDate(new DateToOffsetTimeConverter().convert(metaData.getDate(RELEASE_DATE_FIELD)))
-                .supplyChainPath(metaData.getString(SUPPLY_CHAIN_PATH_FIELD))
-                .build();
+                .releaseDate(new DateToOffsetTimeConverter().convert(source.getDate(RELEASE_DATE_FIELD)))
+                .supplyChainPath(source.getString(SUPPLY_CHAIN_PATH_FIELD));
+        if (source.containsKey(ID_FIELD)) {
+            builder.documentId(((ObjectId)source.get(ID_FIELD))
+                    .toHexString());
+        }
+        return builder.build();
     }
 
     private static List<List<String>> convertToReleaseArtifacts(List<Document> releaseArtifacts) {

@@ -16,7 +16,6 @@
 package com.rabobank.argos.service.adapter.out.mongodb.release;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.DBObject;
 import com.rabobank.argos.domain.release.ReleaseDossier;
 import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
 import com.rabobank.argos.service.domain.NotFoundException;
@@ -34,18 +33,11 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 import java.io.InputStream;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.ID_FIELD;
-import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.METADATA_FIELD;
-import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.RELEASE_ARTIFACTS_FIELD;
-import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.RELEASE_DATE_FIELD;
-import static com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseRepositoryImpl.SUPPLY_CHAIN_PATH_FIELD;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;

@@ -19,14 +19,14 @@ package com.rabobank.argos.service.adapter.out.mongodb.release;
 import org.springframework.core.convert.converter.Converter;
 
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 public class DateToOffsetTimeConverter implements Converter<Date, OffsetDateTime>{
 
     @Override
     public OffsetDateTime convert(Date date) {
-        return date == null ? null : OffsetDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        return date == null ? null : date.toInstant().atOffset(ZoneOffset.UTC);
     }
 
 }

@@ -15,33 +15,47 @@
  */
 package com.rabobank.argos.service.adapter.out.mongodb.release;
 
-import org.bson.Document;
 import org.junit.jupiter.api.Test;
 
 import com.rabobank.argos.domain.release.ReleaseDossierMetaData;
 
+import java.util.Date;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 class ReleaseDossierMetaDataConversionTest {
 
     protected static final List<String> ARTIFACT_LIST = List.of("string", "string2");
+    protected static final Date DATE = new Date(1596716015548L);
 
     @Test
-    void convertToDocumentList() {
-        ReleaseDossierMetaData metadata = ReleaseDossierMetaData.builder()
-                .releaseArtifacts(List.of(List.of("string", "string2")))
-                .documentId("documentId")
+    void convertToWithDocumentId() {
+        DateToOffsetTimeConverter converter = new DateToOffsetTimeConverter();
+        ReleaseDossierMetaData expected = ReleaseDossierMetaData.builder()
+                .releaseArtifacts(List.of(ARTIFACT_LIST))
+                .documentId("54651022bffebc03098b4567")
                 .supplyChainPath("foo.bar")
+                .releaseDate(converter.convert(DATE))
                 .build();
-        ReleaseDossierMetaDataToDocumentConverter converter = new ReleaseDossierMetaDataToDocumentConverter();
-        Document document = converter.convert(metadata);
-        assertThat(document.get("supplyChainPath"), is("foo.bar"));
-        Document releaseArtifacts1 = ((List<Document>)document.get("releaseArtifacts")).iterator().next();
-        assertThat(releaseArtifacts1.containsKey("artifactsHash"), is(true));
-        assertThat(releaseArtifacts1.get("artifactsHash"), is("71ed24f24e838b18a4bc53aac2638155692b43289ca9778c37139859fc6e619d"));
+        ReleaseDossierMetaDataToDocumentConverter dossierConverter = new ReleaseDossierMetaDataToDocumentConverter();
+        DocumentToReleaseDossierMetaDataConverter backConverter = new DocumentToReleaseDossierMetaDataConverter();
+        ReleaseDossierMetaData actual = backConverter.convert(dossierConverter.convert(expected));
+        assertEquals(expected, actual);
+    }
+    
+    @Test
+    void convertToWithoutDocumentId() {
+        DateToOffsetTimeConverter converter = new DateToOffsetTimeConverter();
+        ReleaseDossierMetaData expected = ReleaseDossierMetaData.builder()
+                .releaseArtifacts(List.of(ARTIFACT_LIST))
+                .supplyChainPath("foo.bar")
+                .releaseDate(converter.convert(DATE))
+                .build();
+        ReleaseDossierMetaDataToDocumentConverter dossierConverter = new ReleaseDossierMetaDataToDocumentConverter();
+        DocumentToReleaseDossierMetaDataConverter backConverter = new DocumentToReleaseDossierMetaDataConverter();
+        ReleaseDossierMetaData actual = backConverter.convert(dossierConverter.convert(expected));
+        assertEquals(expected, actual);
     }
 
 }
