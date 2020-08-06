@@ -49,6 +49,6 @@ class ReleaseDatabaseChangelogTest {
     void addIndex() {
         when(mongoTemplate.indexOps(COLLECTION_NAME)).thenReturn(indexOperations);
         releaseDatabaseChangelog.addIndex(mongoTemplate);
-        verify(indexOperations, times(2)).ensureIndex(any());
+        verify(indexOperations, times(1)).ensureIndex(any());
     }
 }
