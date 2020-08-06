@@ -44,14 +44,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SignatureValidatorTest {
 
-    private SignatureValidator validator;
     private Link link;
     //private KeyPair pair;
     private KeyPair ecPair;
 
     @BeforeEach
     void setUp() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
-        validator = new SignatureValidator();
         link = Link.builder()
                 .products(singletonList(Artifact.builder().hash("hash2").uri("/path/tofile2").build()))
                 .materials(singletonList(Artifact.builder().hash("hash").uri("/path/tofile").build())).build();
@@ -81,7 +79,7 @@ class SignatureValidatorTest {
                     .hashAlgorithm(HashAlgorithm.SHA384)
                     .build())
                 .link(link).build();
-        assertThat(validator.isValid(linkMetaBlock.getLink(), linkMetaBlock.getSignature(), ecPair.getPublic()), is(true));
+        assertThat(SignatureValidator.isValid(linkMetaBlock.getLink(), linkMetaBlock.getSignature(), ecPair.getPublic()), is(true));
     }
     
     @Test
@@ -101,7 +99,7 @@ class SignatureValidatorTest {
                     .hashAlgorithm(HashAlgorithm.SHA384)
                     .build())
                 .link(link).build();
-        assertThat(validator.isValid(linkMetaBlock.getLink(), linkMetaBlock.getSignature(), ecPair.getPublic()), is(true));
+        assertThat(SignatureValidator.isValid(linkMetaBlock.getLink(), linkMetaBlock.getSignature(), ecPair.getPublic()), is(true));
     }
 
     @Test
@@ -122,7 +120,7 @@ class SignatureValidatorTest {
                     .hashAlgorithm(HashAlgorithm.SHA384)
                     .build())
                 .link(link).build();
-        assertThat(validator.isValid(linkMetaBlock.getLink(), linkMetaBlock.getSignature(), ecPair.getPublic()), is(false));
+        assertThat(SignatureValidator.isValid(linkMetaBlock.getLink(), linkMetaBlock.getSignature(), ecPair.getPublic()), is(false));
     }
 
     @Test
@@ -139,7 +137,7 @@ class SignatureValidatorTest {
         com.rabobank.argos.domain.crypto.Signature sig = linkMetaBlock.getSignature();
         PublicKey pub = ecPair.getPublic();
 
-        ArgosError argosError = assertThrows(ArgosError.class, () -> validator.isValid(link, sig, pub));
+        ArgosError argosError = assertThrows(ArgosError.class, () -> SignatureValidator.isValid(link, sig, pub));
         assertThat(argosError.getMessage(), is("Odd number of characters."));
 
     }

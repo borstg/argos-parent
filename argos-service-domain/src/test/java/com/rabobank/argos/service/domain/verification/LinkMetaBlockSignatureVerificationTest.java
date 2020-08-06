@@ -15,24 +15,31 @@
  */
 package com.rabobank.argos.service.domain.verification;
 
+import com.rabobank.argos.domain.crypto.KeyIdProvider;
+import com.rabobank.argos.domain.crypto.KeyPair;
+import com.rabobank.argos.domain.crypto.PublicKey;
 import com.rabobank.argos.domain.crypto.Signature;
-import com.rabobank.argos.domain.crypto.signing.SignatureValidator;
+import com.rabobank.argos.domain.crypto.signing.JsonSigningSerializer;
+import com.rabobank.argos.domain.crypto.signing.Signer;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
+import com.rabobank.argos.domain.link.Artifact;
 import com.rabobank.argos.domain.link.Link;
 import com.rabobank.argos.domain.link.LinkMetaBlock;
+
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.PublicKey;
 import java.util.Collections;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
@@ -40,40 +47,59 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LinkMetaBlockSignatureVerificationTest {
+    private char[] PASSPHRASE = "test".toCharArray();
 
-    private static final String KEY_ID = "keyId";
-    private static final String SIG = "sigNa";
-    @Mock
-    private SignatureValidator signatureValidator;
+    private String keyId;
+    private String keyId2;
 
     @Mock
     private VerificationContext context;
 
-    @Mock
     private LinkMetaBlock linkMetaBlock;
+    private LinkMetaBlock linkMetaBlock2;
 
     private LinkMetaBlockSignatureVerification verification;
 
-    @Mock
     private Link link;
 
-    @Mock
     private Signature signature;
-
-    @Mock
-    private PublicKey publicKey;
+    private Signature signature2;
 
     @Mock
     private LayoutMetaBlock layoutMetaBlock;
 
     private Layout layout;
 
-    @Mock
     private com.rabobank.argos.domain.crypto.PublicKey domainPublicKey;
+    private com.rabobank.argos.domain.crypto.PublicKey domainPublicKey2;
 
     @BeforeEach
-    void setUp() {
-        verification = new LinkMetaBlockSignatureVerification(signatureValidator);
+    void setUp() throws OperatorCreationException, PemGenerationException, GeneralSecurityException {
+        verification = new LinkMetaBlockSignatureVerification();
+
+        link = Link.builder()
+                .products(singletonList(Artifact.builder().hash("hash2").uri("/path/tofile2").build()))
+                .materials(singletonList(Artifact.builder().hash("hash").uri("/path/tofile").build())).build();
+
+        KeyPair pair = KeyPair.createKeyPair(PASSPHRASE);
+        keyId = KeyIdProvider.computeKeyId(pair.getPublicKey());
+        domainPublicKey = new PublicKey(keyId, pair.getPublicKey());
+        signature = Signer.sign(pair, PASSPHRASE, new JsonSigningSerializer().serialize(link));
+        
+        pair = KeyPair.createKeyPair(PASSPHRASE);
+        keyId2 = KeyIdProvider.computeKeyId(pair.getPublicKey());
+        domainPublicKey2 = new PublicKey(keyId2, pair.getPublicKey());
+        signature2 = Signer.sign(pair, PASSPHRASE, new JsonSigningSerializer().serialize(link));
+        
+        // make invalid
+        signature2.setKeyId(keyId);
+
+        linkMetaBlock = LinkMetaBlock.builder()
+                .signature(signature)
+                .link(link).build();
+        linkMetaBlock2 = LinkMetaBlock.builder()
+                .signature(signature2)
+                .link(link).build();
     }
 
     @Test
@@ -82,41 +108,32 @@ class LinkMetaBlockSignatureVerificationTest {
     }
 
     @Test
-    void verifyOkay() throws GeneralSecurityException, IOException {
-        mockSetup(true);
+    void verifyOkay() throws GeneralSecurityException {
+        when(context.getLinkMetaBlocks()).thenReturn(List.of(linkMetaBlock));
+        layout = Layout.builder().keys(List.of(domainPublicKey)).build();
+        when(context.getLayoutMetaBlock()).thenReturn(layoutMetaBlock);
+        when(layoutMetaBlock.getLayout()).thenReturn(layout);
         assertThat(verification.verify(context).isRunIsValid(), is(true));
         verify(context).removeLinkMetaBlocks(Collections.emptyList());
     }
 
     @Test
-    void verifyNotValid() throws GeneralSecurityException, IOException {
-        mockSetup(false);
+    void verifyNotValid() throws GeneralSecurityException {
+        when(context.getLinkMetaBlocks()).thenReturn(List.of(linkMetaBlock2));
+        layout = Layout.builder().keys(List.of(domainPublicKey, domainPublicKey2)).build();
+        when(context.getLayoutMetaBlock()).thenReturn(layoutMetaBlock);
+        when(layoutMetaBlock.getLayout()).thenReturn(layout);
         assertThat(verification.verify(context).isRunIsValid(), is(true));
-        verify(context).removeLinkMetaBlocks(List.of(linkMetaBlock));
+        verify(context).removeLinkMetaBlocks(List.of(linkMetaBlock2));
     }
 
     @Test
-    void verifyKeyNotFound() {
-        when(context.getLayoutMetaBlock()).thenReturn(layoutMetaBlock);
+    void verifyKeyNotFound() throws GeneralSecurityException {
         when(context.getLinkMetaBlocks()).thenReturn(List.of(linkMetaBlock));
-        when(linkMetaBlock.getSignature()).thenReturn(signature);
-        when(signature.getKeyId()).thenReturn(KEY_ID);
         layout = Layout.builder().keys(Collections.emptyList()).build();
+        when(context.getLayoutMetaBlock()).thenReturn(layoutMetaBlock);
         when(layoutMetaBlock.getLayout()).thenReturn(layout);
         assertThat(verification.verify(context).isRunIsValid(), is(true));
         verify(context).removeLinkMetaBlocks(List.of(linkMetaBlock));
-    }
-
-    private void mockSetup(boolean valid) throws GeneralSecurityException, IOException {
-        when(context.getLinkMetaBlocks()).thenReturn(List.of(linkMetaBlock));
-        when(linkMetaBlock.getLink()).thenReturn(link);
-        when(linkMetaBlock.getSignature()).thenReturn(signature);
-        when(signature.getKeyId()).thenReturn(KEY_ID);
-        when(domainPublicKey.getKeyId()).thenReturn(KEY_ID);
-        when(domainPublicKey.getJavaPublicKey()).thenReturn(publicKey);
-        layout = Layout.builder().keys(List.of(domainPublicKey)).build();
-        when(context.getLayoutMetaBlock()).thenReturn(layoutMetaBlock);
-        when(layoutMetaBlock.getLayout()).thenReturn(layout);
-        when(signatureValidator.isValid(link, signature, publicKey)).thenReturn(valid);
     }
 }

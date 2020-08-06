@@ -16,13 +16,23 @@
 package com.rabobank.argos.argos4j;
 
 import java.io.Serializable;
+import java.util.List;
+
+import com.rabobank.argos.domain.link.Artifact;
+import com.rabobank.argos.domain.link.LinkMetaBlock;
 
 public interface LinkBuilder extends Serializable {
     Argos4jSettings getSettings();
+    
+    void addMaterials(List<Artifact> artifacts);
+    
+    void addProducts(List<Artifact> artifacts);
 
     void collectMaterials(FileCollector collector);
 
     void collectProducts(FileCollector collector);
+
+    LinkMetaBlock create(char[] signingKeyPassphrase);
 
     void store(char[] signingKeyPassphrase);
 }

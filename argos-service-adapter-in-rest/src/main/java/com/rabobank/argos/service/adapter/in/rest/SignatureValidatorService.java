@@ -36,13 +36,11 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class SignatureValidatorService {
 
-    private final SignatureValidator signatureValidator;
-
     private final AccountService accountService;
 
     public void validateSignature(Layout layout, Signature signature) {
     	try {
-			if (!signatureValidator.isValid(layout, signature, getPublicKey(signature))) {
+			if (!SignatureValidator.isValid(layout, signature, getPublicKey(signature))) {
 			    throwInValidSignatureException();
 			}
 		} catch (GeneralSecurityException | IOException e) {
@@ -52,7 +50,7 @@ public class SignatureValidatorService {
 
     public void validateSignature(Link link, Signature signature) {
         try {
-			if (!signatureValidator.isValid(link, signature, getPublicKey(signature))) {
+			if (!SignatureValidator.isValid(link, signature, getPublicKey(signature))) {
 			    throwInValidSignatureException();
 			}
 		} catch (GeneralSecurityException | IOException e) {
@@ -65,7 +63,8 @@ public class SignatureValidatorService {
     }
 
     private PublicKey getPublicKey(Signature signature) throws GeneralSecurityException, IOException {
-    	KeyPair keyPair = accountService.findKeyPairByKeyId(signature.getKeyId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "signature with keyId " + signature.getKeyId() + " not found"));
+    	KeyPair keyPair = accountService.findKeyPairByKeyId(signature.getKeyId())
+    	        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "signature with keyId [" + signature.getKeyId() + "] not found"));
     	return PublicKeyFactory.instance(keyPair.getPublicKey());
     }
 

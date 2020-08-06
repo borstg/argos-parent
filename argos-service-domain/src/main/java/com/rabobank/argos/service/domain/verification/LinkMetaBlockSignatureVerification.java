@@ -37,8 +37,6 @@ import java.io.IOException;
 @Slf4j
 public class LinkMetaBlockSignatureVerification implements Verification {
 
-    private final SignatureValidator signatureValidator;
-
     @Override
     public Priority getPriority() {
         return LINK_METABLOCK_SIGNATURE;
@@ -53,7 +51,7 @@ public class LinkMetaBlockSignatureVerification implements Verification {
 
     private boolean okay(LayoutMetaBlock layoutMetaBlock, LinkMetaBlock linkMetaBlock) {
         return getPublicKey(layoutMetaBlock, linkMetaBlock.getSignature().getKeyId())
-                .map(keyPair -> signatureValidator.isValid(linkMetaBlock.getLink(),
+                .map(keyPair -> SignatureValidator.isValid(linkMetaBlock.getLink(),
                         linkMetaBlock.getSignature(), keyPair))
                 .orElse(false);
     }

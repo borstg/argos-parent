@@ -15,20 +15,26 @@
  */
 package com.rabobank.argos.service.domain.verification;
 
+import com.rabobank.argos.domain.crypto.KeyIdProvider;
+import com.rabobank.argos.domain.crypto.KeyPair;
+import com.rabobank.argos.domain.crypto.PublicKey;
 import com.rabobank.argos.domain.crypto.Signature;
-import com.rabobank.argos.domain.crypto.signing.SignatureValidator;
+import com.rabobank.argos.domain.crypto.signing.JsonSigningSerializer;
+import com.rabobank.argos.domain.crypto.signing.Signer;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.layout.LayoutMetaBlock;
+import com.rabobank.argos.domain.layout.LayoutSegment;
+import com.rabobank.argos.domain.layout.Step;
+
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.PublicKey;
-import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -37,36 +43,66 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LayoutMetaBlockSignatureVerificationTest {
+    private char[] PASSPHRASE = "test".toCharArray();
 
-    private static final String KEY_ID = "keyId";
-    private static final String SIG = "sig";
-    
-    @Mock
-    private SignatureValidator signatureValidator;
+	private String keyId;
+    private String keyId2;
 
     @Mock
     private VerificationContext context;
 
+    private LayoutMetaBlock layoutMetaBlock;
+    private LayoutMetaBlock layoutMetaBlock2;
+    private LayoutMetaBlock layoutMetaBlock3;
+
     private LayoutMetaBlockSignatureVerification verification;
 
-    @Mock
-    private LayoutMetaBlock layoutMetaBlock;
-
-    @Mock
     private Signature signature;
+    private Signature signature2;
 
-    @Mock
-    private PublicKey publicKey;
-
-    @Mock
-    private Layout layout;
-
-    @Mock
     private com.rabobank.argos.domain.crypto.PublicKey domainPublicKey;
+    private com.rabobank.argos.domain.crypto.PublicKey domainPublicKey2;
 
     @BeforeEach
-    void setUp() {
-        verification = new LayoutMetaBlockSignatureVerification(signatureValidator);
+    void setUp() throws GeneralSecurityException, OperatorCreationException, PemGenerationException {
+        verification = new LayoutMetaBlockSignatureVerification();
+        
+        Step step = Step.builder().build();
+        LayoutSegment segment = LayoutSegment.builder().steps(List.of(step)).build();
+
+        // valid
+        KeyPair pair = KeyPair.createKeyPair(PASSPHRASE);
+        keyId = KeyIdProvider.computeKeyId(pair.getPublicKey());
+        domainPublicKey = new PublicKey(keyId, pair.getPublicKey());
+        Layout layout = Layout.builder()
+        		.layoutSegments(List.of(segment))
+        		.keys(List.of(domainPublicKey)).build();
+        
+        signature = Signer.sign(pair, PASSPHRASE, new JsonSigningSerializer().serialize(layout));
+        layoutMetaBlock = LayoutMetaBlock.builder()
+        		.signatures(List.of(signature))
+                .layout(layout).build();
+        
+        // key not found
+        pair = KeyPair.createKeyPair(PASSPHRASE);
+        keyId2 = KeyIdProvider.computeKeyId(pair.getPublicKey());
+        domainPublicKey2 = new PublicKey(keyId2, pair.getPublicKey());
+        layout = Layout.builder()
+        		.layoutSegments(List.of(segment))
+        		.keys(List.of(domainPublicKey)).build();
+        signature2 = Signer.sign(pair, PASSPHRASE, new JsonSigningSerializer().serialize(layout));
+        layoutMetaBlock2 = LayoutMetaBlock.builder()
+        		.signatures(List.of(signature, signature2))
+                .layout(layout).build();
+        
+        // not valid
+        layout = Layout.builder()
+        		.layoutSegments(List.of(segment))
+        		.keys(List.of(domainPublicKey, domainPublicKey2)).build();
+        layoutMetaBlock3 = LayoutMetaBlock.builder()
+        		.signatures(List.of(signature, signature2))
+                .layout(layout).build();
+        
     }
 
     @Test
@@ -75,39 +111,21 @@ class LayoutMetaBlockSignatureVerificationTest {
     }
 
     @Test
-    void verifyOkay() throws GeneralSecurityException, IOException {
-        when(domainPublicKey.getKeyId()).thenReturn(KEY_ID);
-        when(domainPublicKey.getJavaPublicKey()).thenReturn(publicKey);
-        mockSetup(true);
+    void verifyOkay() throws GeneralSecurityException {
+        when(context.getLayoutMetaBlock()).thenReturn(layoutMetaBlock);
+    	
         assertThat(verification.verify(context).isRunIsValid(), is(true));
     }
 
     @Test
-    void verifyNotOkay() throws GeneralSecurityException, IOException {
-        when(domainPublicKey.getKeyId()).thenReturn(KEY_ID);
-        when(domainPublicKey.getJavaPublicKey()).thenReturn(publicKey);
-        mockSetup(false);
+    void verifyNotOkay() throws GeneralSecurityException {
+        when(context.getLayoutMetaBlock()).thenReturn(layoutMetaBlock3);
         assertThat(verification.verify(context).isRunIsValid(), is(false));
-    }
-
-    private void mockSetup(boolean valid) {
-        when(layoutMetaBlock.getLayout()).thenReturn(layout);
-        when(signatureValidator.isValid(layout, signature, publicKey)).thenReturn(valid);
-        when(signature.getKeyId()).thenReturn(KEY_ID);
-        when(layout.getKeys()).thenReturn(List.of(domainPublicKey));
-        when(context.getLayoutMetaBlock()).thenReturn(layoutMetaBlock);
-        when(layoutMetaBlock.getSignatures()).thenReturn(Collections.singletonList(signature));
     }
 
     @Test
     void verifyKeyNotFound() {
-        when(layoutMetaBlock.getLayout()).thenReturn(layout);
-        when(layout.getKeys()).thenReturn(List.of(domainPublicKey));
-        when(domainPublicKey.getKeyId()).thenReturn(KEY_ID);
-        when(signature.getKeyId()).thenReturn(KEY_ID);
-        when(domainPublicKey.getKeyId()).thenReturn("other");
-        when(context.getLayoutMetaBlock()).thenReturn(layoutMetaBlock);
-        when(layoutMetaBlock.getSignatures()).thenReturn(Collections.singletonList(signature));
+        when(context.getLayoutMetaBlock()).thenReturn(layoutMetaBlock2);
         assertThat(verification.verify(context).isRunIsValid(), is(false));
     }
 }

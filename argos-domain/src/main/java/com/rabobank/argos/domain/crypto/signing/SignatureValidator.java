@@ -19,6 +19,7 @@ import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.crypto.Signature;
 import com.rabobank.argos.domain.layout.Layout;
 import com.rabobank.argos.domain.link.Link;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
@@ -28,16 +29,18 @@ import java.security.PublicKey;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class SignatureValidator {
+    
+    private SignatureValidator() {}
 
-    public boolean isValid(Link link, Signature signature, PublicKey publicKey) {
+    public static boolean isValid(Link link, Signature signature, PublicKey publicKey) {
         return isValid(new JsonSigningSerializer().serialize(link), signature, publicKey);
     }
 
-    public boolean isValid(Layout layout, Signature signature, PublicKey publicKey) {
+    public static boolean isValid(Layout layout, Signature signature, PublicKey publicKey) {
         return isValid(new JsonSigningSerializer().serialize(layout), signature, publicKey);
     }
 
-    private boolean isValid(String signableJson, Signature signature, PublicKey publicKey) {
+    private static boolean isValid(String signableJson, Signature signature, PublicKey publicKey) {
         try {
             java.security.Signature publicSignature = java.security.Signature.getInstance(signature.getAlgorithm().getStringValue());
             publicSignature.initVerify(publicKey);

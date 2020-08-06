@@ -15,11 +15,13 @@
  */
 package com.rabobank.argos.argos4j.internal;
 
+import com.rabobank.argos.argos4j.Argos4jError;
 import com.rabobank.argos.argos4j.Argos4jSettings;
 import com.rabobank.argos.argos4j.FileCollector;
 import com.rabobank.argos.argos4j.LinkBuilder;
 import com.rabobank.argos.argos4j.LinkBuilderSettings;
 import com.rabobank.argos.argos4j.internal.mapper.RestMapper;
+import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.domain.crypto.Signature;
 import com.rabobank.argos.domain.crypto.signing.JsonSigningSerializer;
@@ -30,6 +32,7 @@ import com.rabobank.argos.domain.link.LinkMetaBlock;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.mapstruct.factory.Mappers;
 
@@ -47,6 +50,16 @@ public class LinkBuilderImpl implements LinkBuilder {
         return settings;
     }
 
+    @Override
+    public void addMaterials(List<Artifact> artifacts) {
+        materials.addAll(artifacts);
+    }
+
+    @Override
+    public void addProducts(List<Artifact> artifacts) {
+        products.addAll(artifacts);
+    }
+
     public void collectMaterials(FileCollector collector) {
         materials.addAll(ArtifactCollectorFactory.build(collector).collect());
     }
@@ -54,8 +67,9 @@ public class LinkBuilderImpl implements LinkBuilder {
     public void collectProducts(FileCollector collector) {
         products.addAll(ArtifactCollectorFactory.build(collector).collect());
     }
-
-    public void store(char[] signingKeyPassphrase) {
+    
+    @Override
+    public LinkMetaBlock create(char[] signingKeyPassphrase) {
         Link link = Link.builder().runId(linkBuilderSettings.getRunId())
                 .materials(materials)
                 .products(products)
@@ -63,8 +77,18 @@ public class LinkBuilderImpl implements LinkBuilder {
                 .stepName(linkBuilderSettings.getStepName()).build();
         ArgosServiceClient argosServiceClient = new ArgosServiceClient(settings, signingKeyPassphrase);
         ServiceAccountKeyPair keyPair = Mappers.getMapper(RestMapper.class).convertFromRestServiceAccountKeyPair(argosServiceClient.getKeyPair());
-        Signature signature = Signer.sign(keyPair, signingKeyPassphrase, new JsonSigningSerializer().serialize(link));
-
-        argosServiceClient.uploadLinkMetaBlockToService(LinkMetaBlock.builder().link(link).signature(signature).build());
+        Signature signature;
+        try {
+            signature = Signer.sign(keyPair, signingKeyPassphrase, new JsonSigningSerializer().serialize(link));
+        } catch (ArgosError e) {
+            throw new Argos4jError("The Link object couldn't be signed: "+ e.getMessage());
+        }
+        return LinkMetaBlock.builder().link(link).signature(signature).build();
+    }
+    
+    @Override
+    public void store(char[] signingKeyPassphrase) {
+        ArgosServiceClient argosServiceClient = new ArgosServiceClient(settings, signingKeyPassphrase);
+        argosServiceClient.uploadLinkMetaBlockToService(create(signingKeyPassphrase));
     }
 }

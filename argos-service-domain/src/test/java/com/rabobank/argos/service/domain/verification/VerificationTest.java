@@ -51,14 +51,10 @@ import com.rabobank.argos.service.domain.verification.rules.DisallowRuleVerifica
 import com.rabobank.argos.service.domain.verification.rules.MatchRuleVerification;
 import com.rabobank.argos.service.domain.verification.rules.ModifyRuleVerification;
 import com.rabobank.argos.service.domain.verification.rules.RequireRuleVerification;
-import com.rabobank.argos.domain.crypto.KeyAlgorithm;
-import com.rabobank.argos.domain.crypto.KeyIdProvider;
 import com.rabobank.argos.domain.crypto.KeyPair;
 import com.rabobank.argos.domain.crypto.PublicKey;
-import com.rabobank.argos.domain.crypto.ServiceAccountKeyPair;
 import com.rabobank.argos.domain.crypto.Signature;
 import com.rabobank.argos.domain.crypto.signing.JsonSigningSerializer;
-import com.rabobank.argos.domain.crypto.signing.SignatureValidator;
 import com.rabobank.argos.domain.crypto.signing.Signer;
 import com.rabobank.argos.domain.layout.ArtifactType;
 import com.rabobank.argos.domain.layout.Layout;
@@ -133,8 +129,8 @@ class VerificationTest {
         rulesVerification.init();
         verifications = Arrays.asList(
                 new LayoutAuthorizedKeyIdVerification(),
-                new LayoutMetaBlockSignatureVerification(new SignatureValidator()),
-                new LinkMetaBlockSignatureVerification(new SignatureValidator()),
+                new LayoutMetaBlockSignatureVerification(),
+                new LinkMetaBlockSignatureVerification(),
                 new RequiredNumberOfLinksVerification(),
                 rulesVerification,
                 new StepAuthorizedKeyIdVerification()
