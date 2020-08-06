@@ -23,8 +23,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import static java.lang.String.join;
 import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
@@ -42,15 +40,5 @@ public class ReleaseDossierMetaData {
         ArrayList<String> list = new ArrayList<>(artifactList);
         Collections.sort(list);
         return sha256Hex(join("", list));
-    }
-    
-    public static Map<String, List<String>> createArtifactsHashMap(List<List<String>> releaseArtifactLists) {
-        Map<String, List<String>> map = new TreeMap<>();
-        releaseArtifactLists.forEach(artifactSet -> {
-            List<String> artifactList = new ArrayList<>(artifactSet);
-            Collections.sort(artifactList);
-            map.put(ReleaseDossierMetaData.createHashFromArtifactList(artifactList), artifactList);
-        });
-        return map;
     }
 }

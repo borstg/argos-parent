@@ -21,6 +21,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.rabobank.argos.service.adapter.out.mongodb.release.DateToOffsetTimeConverter;
 import com.rabobank.argos.service.adapter.out.mongodb.release.DocumentToReleaseDossierMetaDataConverter;
+import com.rabobank.argos.service.adapter.out.mongodb.release.OffsetTimeToDateConverter;
 import com.rabobank.argos.service.adapter.out.mongodb.release.ReleaseDossierMetaDataToDocumentConverter;
 
 import org.springframework.beans.factory.annotation.Value;

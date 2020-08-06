@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rabobank.argos.service.adapter.out.mongodb;
+package com.rabobank.argos.service.adapter.out.mongodb.release;
 
 
 import org.springframework.core.convert.converter.Converter;
@@ -25,7 +25,7 @@ public class OffsetTimeToDateConverter implements Converter<OffsetDateTime, Date
 
     @Override
     public Date convert(OffsetDateTime offsetDateTime) {
-        return Date.from(offsetDateTime.toInstant());
+        return offsetDateTime == null ? null : Date.from(offsetDateTime.toInstant());
     }
 
 }

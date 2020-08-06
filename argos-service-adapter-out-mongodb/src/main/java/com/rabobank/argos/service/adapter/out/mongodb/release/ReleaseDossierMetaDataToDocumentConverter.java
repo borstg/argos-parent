@@ -31,12 +31,13 @@ public class ReleaseDossierMetaDataToDocumentConverter implements Converter<Rele
     
     @Override
     public Document convert(ReleaseDossierMetaData releaseDossierMetaData) {
+        OffsetTimeToDateConverter converter = new OffsetTimeToDateConverter();
         Document metaData = new Document();
         OffsetDateTime releaseDate = OffsetDateTime.now(ZoneOffset.UTC);
         releaseDossierMetaData.setReleaseDate(releaseDate);
         metaData.put(RELEASE_ARTIFACTS_FIELD, convertReleaseArtifactsToDocumentList(releaseDossierMetaData.getReleaseArtifacts()));
         metaData.put(SUPPLY_CHAIN_PATH_FIELD, releaseDossierMetaData.getSupplyChainPath());
-        metaData.put(RELEASE_DATE_FIELD, releaseDate);
+        metaData.put(RELEASE_DATE_FIELD, converter.convert(releaseDate));
         
         return metaData;
     }

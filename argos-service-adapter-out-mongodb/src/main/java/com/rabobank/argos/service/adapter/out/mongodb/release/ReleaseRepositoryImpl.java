@@ -16,8 +16,6 @@
 package com.rabobank.argos.service.adapter.out.mongodb.release;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import com.rabobank.argos.domain.ArgosError;
 import com.rabobank.argos.domain.release.ReleaseDossier;
@@ -29,7 +27,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -43,13 +40,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.springframework.data.mongodb.core.query.MongoRegexCreator.MatchMode.STARTING_WITH;
 
@@ -129,14 +122,10 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
     }
 
     private Criteria createArtifactCriteria(List<List<String>> releasedArtifacts) {
-
-        Map<String, List<String>> artifactHashes = ReleaseDossierMetaData.createArtifactsHashMap(releasedArtifacts);
         Criteria criteria = new Criteria();
-        List<Criteria> andOperations = new ArrayList<>();
-        artifactHashes.forEach((totalHash, hashesList) -> andOperations
-                .add(Criteria.where(METADATA_RELEASE_ARTIFACTS_FIELD)
-                        .elemMatch(Criteria.where(totalHash).is(hashesList))));
-        criteria.andOperator(andOperations.toArray(new Criteria[0]));
+        List<Criteria> hashCriteria = new ArrayList<>();
+        releasedArtifacts.forEach(l -> hashCriteria.add(createListHashCriteria(l)));
+        criteria.andOperator(hashCriteria.toArray(new Criteria[0]));
         return criteria;
 
     }
@@ -149,12 +138,15 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
         String releaseFileJson = IOUtils.toString(gridFsTemplate.getResource(file).getInputStream(), StandardCharsets.UTF_8.name());
         return Optional.ofNullable(releaseFileJson);
     }
+    
+    private Criteria createListHashCriteria(List<String> releasedArtifacts) {
+        String artifactsHash = ReleaseDossierMetaData.createHashFromArtifactList(releasedArtifacts);
+        return Criteria.where(METADATA_RELEASE_ARTIFACTS_ARTIFACTS_HASH_FIELD).is(artifactsHash);
+    }
 
     @Override
     public boolean artifactsAreReleased(List<String> releasedArtifacts, String path) {
-        String artifactsHash = ReleaseDossierMetaData.createHashFromArtifactList(releasedArtifacts);
-        Criteria criteria = new Criteria();
-        criteria.andOperator(Criteria.where(METADATA_RELEASE_ARTIFACTS_FIELD).is(artifactsHash));
+        Criteria criteria = createListHashCriteria(releasedArtifacts);
         addOptionalPathCriteria(path, criteria);
         Query query = new Query(criteria);
         log.info("artifactsAreReleased: {}", query);
