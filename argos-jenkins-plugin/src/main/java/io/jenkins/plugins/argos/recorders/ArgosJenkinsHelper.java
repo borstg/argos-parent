@@ -78,7 +78,7 @@ public class ArgosJenkinsHelper {
         return new Argos4j(Argos4jSettings.builder()
                 .path(path)
                 .argosServerBaseUrl(argosServiceBaseUrl)
-                .signingKeyId(getCredentials(privateKeyCredentialId).getUsername())
+                .keyId(getCredentials(privateKeyCredentialId).getUsername())
                 .supplyChainName(supplyChainName).build())
                 .getLinkBuilder(LinkBuilderSettings.builder()
                         .layoutSegmentName(layoutSegmentName)

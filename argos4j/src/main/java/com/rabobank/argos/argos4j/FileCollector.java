@@ -15,21 +15,44 @@
  */
 package com.rabobank.argos.argos4j;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.annotation.Nullable;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+import java.util.Map;
 import java.util.Optional;
 
-
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME, 
+        include = JsonTypeInfo.As.PROPERTY, 
+        property = "type")
+      @JsonSubTypes({ 
+        @Type(value = LocalFileCollector.class, name = "LocalFileCollector"), 
+        @Type(value = LocalZipFileCollector.class, name = "LocalZipFileCollector"), 
+        @Type(value = RemoteCollectorCollector.class, name = "RemoteCollectorCollector"), 
+        @Type(value = RemoteFileCollector.class, name = "RemoteFileCollector"), 
+        @Type(value = RemoteZipFileCollector.class, name = "RemoteZipFileCollector")
+      })
 @Getter
+@EqualsAndHashCode
 public abstract class FileCollector {
 
     public static final String DEFAULT_EXCLUDE_PATTERNS = "{**.git/**,**.git\\**}";
 
-    private final String excludePatterns;
+    private String excludePatterns;
 
-    private final boolean normalizeLineEndings;
+    private boolean normalizeLineEndings;
 
+    
     public FileCollector(@Nullable String excludePatterns, @Nullable Boolean normalizeLineEndings) {
         this.excludePatterns = Optional.ofNullable(excludePatterns).orElse(DEFAULT_EXCLUDE_PATTERNS);
         this.normalizeLineEndings = Optional.ofNullable(normalizeLineEndings).orElse(false);

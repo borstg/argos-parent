@@ -15,33 +15,29 @@
  */
 package com.rabobank.argos.argos4j;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NonNull;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-import javax.annotation.Nullable;
-import java.net.URL;
-
+@Builder
 @Getter
-@EqualsAndHashCode(callSuper = true)
-public abstract class RemoteCollector extends FileCollector {
+@Setter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
+@JsonDeserialize(builder = ReleaseCollector.ReleaseCollectorBuilder.class)
+public class ReleaseCollector {
+    @JsonProperty("name")
+    private String name;
+    @JsonProperty("collector")
+    private FileCollector collector;
 
-    /**
-     * optional for basic authentication
-     */
-    private String username;
-
-    private char[] password;
-
-    /**
-     * the url of the remote file
-     */
-    private URL url;
-
-    public RemoteCollector(@Nullable String excludePatterns, @Nullable Boolean normalizeLineEndings, @Nullable String username, char[] password, @NonNull URL url) {
-        super(excludePatterns, normalizeLineEndings);
-        this.username = username;
-        this.password = password;
-        this.url = url;
-    }
 }

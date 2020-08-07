@@ -1,0 +1,32 @@
+{
+    "supplyChainName": "supplyChainName",
+	"argosServerBaseUrl": "argos-service-url",
+	"path": [
+		"root",
+		"label"
+	],
+	"keyId": "keyId",
+	"releaseCollectors": [
+        {
+            "name": "local-collector",
+            "collector": {
+                "type": "LocalFileCollector",
+                "path": "foo"
+            }
+        },
+		{
+			"name": "xld-collector",
+			"collector": {
+				"type": "RemoteCollectorCollector",
+				"url": "http://xld-collector"
+			}
+		},
+		{
+            "name": "git-collector",
+            "collector": {
+                "type": "RemoteCollectorCollector",
+                "url": "http://git-collector"
+            }
+        }
+	]
+}

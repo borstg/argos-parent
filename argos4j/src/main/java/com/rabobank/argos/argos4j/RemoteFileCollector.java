@@ -16,23 +16,37 @@
 package com.rabobank.argos.argos4j;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.ToString;
 
 import javax.annotation.Nullable;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import java.net.URL;
 
 @Getter
+@ToString
+@JsonDeserialize(builder = RemoteFileCollector.RemoteFileCollectorBuilder.class)
+@EqualsAndHashCode(callSuper = true)
 public class RemoteFileCollector extends RemoteCollector {
 
     /**
      * used in the remote file collector to specify the artifact uri when not set the last part of the uri is used
      */
-    private final String artifactUri;
+    private String artifactUri;
 
     @Builder
-    public RemoteFileCollector(@Nullable String excludePatterns, @Nullable Boolean normalizeLineEndings, @Nullable String username, char[] password, @NonNull URL url
-            , @Nullable String artifactUri) {
+    public RemoteFileCollector(
+            @JsonProperty("excludePatterns") @Nullable String excludePatterns, 
+            @JsonProperty("normalizeLineEndings") @Nullable Boolean normalizeLineEndings,
+            @JsonProperty("username") @Nullable String username, 
+            @JsonProperty("password") @Nullable char[] password, 
+            @JsonProperty("url") @NonNull URL url,
+            @JsonProperty("artifactUri") @Nullable String artifactUri) {
         super(excludePatterns, normalizeLineEndings, username, password, url);
         this.artifactUri = artifactUri;
     }

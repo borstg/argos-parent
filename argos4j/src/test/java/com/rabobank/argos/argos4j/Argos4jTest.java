@@ -98,7 +98,7 @@ class Argos4jTest {
                 .argosServerBaseUrl("http://localhost:" + randomPort + "/api")
                 .supplyChainName("supplyChainName")
                 .path(Arrays.asList("rootLabel", "subLabel"))
-                .signingKeyId(keyId)
+                .keyId(keyId)
                 .build();
 
         argos4j = new Argos4j(settings);

@@ -85,7 +85,7 @@ class Argos4jIT {
                 .argosServerBaseUrl(properties.getApiBaseUrl() + "/api")
                 .supplyChainName("test-supply-chain")
                 .path(List.of("root_label", "child_label"))
-                .signingKeyId(serviceAccount.getKeyId())
+                .keyId(serviceAccount.getKeyId())
                 .build();
         Argos4j argos4j = new Argos4j(settings);
         LinkBuilder linkBuilder = argos4j.getLinkBuilder(LinkBuilderSettings.builder().layoutSegmentName("layoutSegmentName").stepName("build").runId("runId").build());
