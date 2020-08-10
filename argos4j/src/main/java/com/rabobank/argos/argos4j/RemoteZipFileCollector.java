@@ -16,18 +16,32 @@
 package com.rabobank.argos.argos4j;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.ToString;
 
 import javax.annotation.Nullable;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import java.net.URL;
 
 @Getter
+@ToString
+@JsonDeserialize(builder = RemoteZipFileCollector.RemoteZipFileCollectorBuilder.class)
+@EqualsAndHashCode(callSuper = true)
 public class RemoteZipFileCollector extends RemoteCollector {
 
     @Builder
-    public RemoteZipFileCollector(@Nullable String excludePatterns, @Nullable Boolean normalizeLineEndings, @Nullable String username, char[] password, @NonNull URL url
-            , @Nullable String artifactUri) {
+    public RemoteZipFileCollector(
+            @JsonProperty("excludePatterns") @Nullable String excludePatterns, 
+            @JsonProperty("normalizeLineEndings") @Nullable Boolean normalizeLineEndings,
+            @JsonProperty("username") @Nullable String username, 
+            @JsonProperty("password") @Nullable char[] password, 
+            @JsonProperty("url") @NonNull URL url,
+            @JsonProperty("artifactUri") @Nullable String artifactUri) {
         super(excludePatterns, normalizeLineEndings, username, password, url);
     }
 }

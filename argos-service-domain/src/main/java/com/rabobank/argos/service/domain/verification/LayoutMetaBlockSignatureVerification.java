@@ -35,8 +35,6 @@ import static com.rabobank.argos.service.domain.verification.Verification.Priori
 @RequiredArgsConstructor
 public class LayoutMetaBlockSignatureVerification implements Verification {
 
-    private final SignatureValidator signatureValidator;
-
     @Override
     public Priority getPriority() {
         return LAYOUT_METABLOCK_SIGNATURE;
@@ -68,7 +66,7 @@ public class LayoutMetaBlockSignatureVerification implements Verification {
             log.info("Public Key with id [{}] is not avaiable in the layout.", signature.getKeyId());
             return false;
         }
-        if (!signatureValidator.isValid(layout, signature, publicKey.get())) {
+        if (!SignatureValidator.isValid(layout, signature, publicKey.get())) {
             log.info("Signature of layout with keyId [{}] is not valid.", signature.getKeyId());
             return false;
         }

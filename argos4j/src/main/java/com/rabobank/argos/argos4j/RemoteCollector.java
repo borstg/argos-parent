@@ -15,6 +15,7 @@
  */
 package com.rabobank.argos.argos4j;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -22,19 +23,20 @@ import javax.annotation.Nullable;
 import java.net.URL;
 
 @Getter
+@EqualsAndHashCode(callSuper = true)
 public abstract class RemoteCollector extends FileCollector {
 
     /**
      * optional for basic authentication
      */
-    private final String username;
+    private String username;
 
-    private final char[] password;
+    private char[] password;
 
     /**
      * the url of the remote file
      */
-    private final URL url;
+    private URL url;
 
     public RemoteCollector(@Nullable String excludePatterns, @Nullable Boolean normalizeLineEndings, @Nullable String username, char[] password, @NonNull URL url) {
         super(excludePatterns, normalizeLineEndings);

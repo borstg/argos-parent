@@ -59,7 +59,7 @@ public class ArgosServiceClient {
         this.settings = settings;
         apiClient = new ApiClient("basicAuth").setBasePath(settings.getArgosServerBaseUrl());
 
-        apiClient.setCredentials(settings.getSigningKeyId(), ServiceAccountKeyPair.calculateHashedPassphrase(settings.getSigningKeyId(), new String(signingKeyPassphrase)));
+        apiClient.setCredentials(settings.getKeyId(), ServiceAccountKeyPair.calculateHashedPassphrase(settings.getKeyId(), new String(signingKeyPassphrase)));
         apiClient.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 

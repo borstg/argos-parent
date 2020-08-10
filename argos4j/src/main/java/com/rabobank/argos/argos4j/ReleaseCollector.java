@@ -15,24 +15,29 @@
  */
 package com.rabobank.argos.argos4j;
 
-import java.io.Serializable;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import com.rabobank.argos.domain.link.Artifact;
-import com.rabobank.argos.domain.link.LinkMetaBlock;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-public interface LinkBuilder extends Serializable {
-    Argos4jSettings getSettings();
-    
-    void addMaterials(List<Artifact> artifacts);
-    
-    void addProducts(List<Artifact> artifacts);
+@Builder
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
+@JsonDeserialize(builder = ReleaseCollector.ReleaseCollectorBuilder.class)
+public class ReleaseCollector {
+    @JsonProperty("name")
+    private String name;
+    @JsonProperty("collector")
+    private FileCollector collector;
 
-    void collectMaterials(FileCollector collector);
-
-    void collectProducts(FileCollector collector);
-
-    LinkMetaBlock create(char[] signingKeyPassphrase);
-
-    void store(char[] signingKeyPassphrase);
 }
