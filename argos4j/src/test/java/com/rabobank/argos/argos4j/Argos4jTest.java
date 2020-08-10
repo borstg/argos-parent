@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import com.rabobank.argos.argos4j.internal.ArtifactCollectorFactory;
 import com.rabobank.argos.argos4j.internal.ArtifactListBuilderImpl;
 import com.rabobank.argos.argos4j.rest.api.model.RestKeyPair;
 import com.rabobank.argos.argos4j.rest.api.model.RestReleaseDossierMetaData;
@@ -126,6 +127,21 @@ class Argos4jTest {
         FileCollector fileCollector = LocalFileCollector.builder().path(sharedTempDir.toPath()).basePath(sharedTempDir.toPath()).build();
         linkBuilder.collectMaterials(fileCollector);
         linkBuilder.collectProducts(fileCollector);
+        linkBuilder.store(KEY_PASSPHRASE);
+        List<LoggedRequest> requests = wireMockServer.findRequestsMatching(RequestPattern.everything()).getRequests();
+        assertThat(requests, hasSize(3));
+        assertThat(requests.get(2).getBodyAsString(), endsWith(",\"link\":{\"runId\":\"runId\",\"stepName\":\"build\",\"layoutSegmentName\":\"layoutSegmentName\",\"materials\":[{\"uri\":\"text.txt\",\"hash\":\"cb6bdad36690e8024e7df13e6796ae6603f2cb9cf9f989c9ff939b2ecebdcb91\"}],\"products\":[{\"uri\":\"text.txt\",\"hash\":\"cb6bdad36690e8024e7df13e6796ae6603f2cb9cf9f989c9ff939b2ecebdcb91\"}]}}"));
+    }
+
+    @Test
+    void addArtifactsAndStoreMetablockLinkForDirectory() {
+        wireMockServer.stubFor(get(urlEqualTo("/api/supplychain?name=supplyChainName&path=rootLabel&path=subLabel"))
+                .willReturn(ok().withBody("{\"name\":\"supplyChainName\",\"id\":\"supplyChainId\",\"parentLabelId\":\"parentLabelId\"}")));
+        wireMockServer.stubFor(post(urlEqualTo("/api/supplychain/supplyChainId/link")).willReturn(noContent()));
+        wireMockServer.stubFor(get(urlEqualTo("/api/serviceaccount/me/activekey")).willReturn(ok().withBody(restKeyPairRest)));
+        FileCollector fileCollector = LocalFileCollector.builder().path(sharedTempDir.toPath()).basePath(sharedTempDir.toPath()).build();
+        linkBuilder.addMaterials(ArtifactCollectorFactory.build(fileCollector).collect());
+        linkBuilder.addProducts(ArtifactCollectorFactory.build(fileCollector).collect());
         linkBuilder.store(KEY_PASSPHRASE);
         List<LoggedRequest> requests = wireMockServer.findRequestsMatching(RequestPattern.everything()).getRequests();
         assertThat(requests, hasSize(3));

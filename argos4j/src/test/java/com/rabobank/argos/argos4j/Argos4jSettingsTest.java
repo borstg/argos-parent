@@ -15,6 +15,9 @@
  */
 package com.rabobank.argos.argos4j;
 
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URL;
@@ -28,6 +31,8 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import com.rabobank.argos.domain.ArgosError;
 
 class Argos4jSettingsTest {
     
@@ -118,6 +123,29 @@ class Argos4jSettingsTest {
                 .build();
         settings.enrichReleaseCollectors(configMaps);
         assertEquals(expectedSettings, settings);
+    }
+    
+    @Test
+    void throwNoCollectorsTest() {
+        Argos4jSettings settings = Argos4jSettings.builder()
+                .argosServerBaseUrl("argos-service-url")
+                .path(Arrays.asList("root", "label"))
+                .keyId("keyId")
+                .supplyChainName("supplyChainName")
+                .build();
+        Argos4jError argosError = assertThrows(Argos4jError.class, () -> {
+            settings.enrichReleaseCollectors(configMaps);
+        });
+        assertThat(argosError.getMessage(), is("No Release Collectors defined"));
+        
+    }
+    
+    @Test
+    void throwErrorReadingFileTest() {
+        Argos4jError argosError = assertThrows(Argos4jError.class, () -> {
+            Argos4jSettings.readSettings(Paths.get("zomaar-wat"));
+        });
+        assertThat(argosError.getMessage(), startsWith("Error on reading config file zomaar-wat: "));
     }
 
 }
