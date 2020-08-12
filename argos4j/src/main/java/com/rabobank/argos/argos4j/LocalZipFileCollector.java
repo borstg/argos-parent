@@ -31,7 +31,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 @Getter
-@ToString
+@ToString(callSuper = true)
 @JsonDeserialize(builder = LocalZipFileCollector.LocalZipFileCollectorBuilder.class)
 @EqualsAndHashCode(callSuper = true)
 public class LocalZipFileCollector extends FileCollector {

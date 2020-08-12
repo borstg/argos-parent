@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Getter
-@ToString
+@ToString(callSuper = true)
 @JsonDeserialize(builder = RemoteCollectorCollector.RemoteCollectorCollectorBuilder.class)
 @EqualsAndHashCode(callSuper = true)
 public class RemoteCollectorCollector extends RemoteCollector {
@@ -47,7 +47,7 @@ public class RemoteCollectorCollector extends RemoteCollector {
             @JsonProperty("username") @Nullable String username, 
             @JsonProperty("password") @Nullable char[] password, 
             @JsonProperty("url") @NonNull URL url, 
-            @JsonProperty("configMap") @Nullable Map<String, String> parameterMap) {
+            @JsonProperty("parameterMap") @Nullable Map<String, String> parameterMap) {
         super(excludePatterns, normalizeLineEndings, username, password, url, parameterMap);
     }
     

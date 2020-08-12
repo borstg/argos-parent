@@ -30,7 +30,7 @@ import java.net.URL;
 import java.util.Map;
 
 @Getter
-@ToString
+@ToString(callSuper = true)
 @JsonDeserialize(builder = RemoteZipFileCollector.RemoteZipFileCollectorBuilder.class)
 @EqualsAndHashCode(callSuper = true)
 public class RemoteZipFileCollector extends RemoteCollector {

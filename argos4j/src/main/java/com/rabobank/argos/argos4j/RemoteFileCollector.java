@@ -30,7 +30,7 @@ import java.net.URL;
 import java.util.Map;
 
 @Getter
-@ToString
+@ToString(callSuper = true)
 @JsonDeserialize(builder = RemoteFileCollector.RemoteFileCollectorBuilder.class)
 @EqualsAndHashCode(callSuper = true)
 public class RemoteFileCollector extends RemoteCollector {

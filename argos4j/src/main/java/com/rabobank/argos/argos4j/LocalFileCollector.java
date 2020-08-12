@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Getter
-@ToString
+@ToString(callSuper = true)
 @JsonDeserialize(builder = LocalFileCollector.LocalFileCollectorBuilder.class)
 @EqualsAndHashCode(callSuper = true)
 public class LocalFileCollector extends FileCollector {

@@ -17,6 +17,7 @@ package com.rabobank.argos.argos4j;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
 import javax.annotation.Nullable;
 
@@ -40,6 +41,7 @@ import java.util.Optional;
       })
 @Getter
 @EqualsAndHashCode
+@ToString
 public abstract class FileCollector {
 
     public static final String DEFAULT_EXCLUDE_PATTERNS = "{**.git/**,**.git\\**}";

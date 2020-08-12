@@ -19,6 +19,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.annotation.Nullable;
 
@@ -30,6 +31,7 @@ import java.util.Map;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public abstract class RemoteCollector extends FileCollector {
     
     private static final String USERNAME_FIELD = "username";
