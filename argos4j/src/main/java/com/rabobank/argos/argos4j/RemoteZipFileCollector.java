@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.net.URL;
+import java.util.Map;
 
 @Getter
 @ToString
@@ -41,7 +42,7 @@ public class RemoteZipFileCollector extends RemoteCollector {
             @JsonProperty("username") @Nullable String username, 
             @JsonProperty("password") @Nullable char[] password, 
             @JsonProperty("url") @NonNull URL url,
-            @JsonProperty("artifactUri") @Nullable String artifactUri) {
-        super(excludePatterns, normalizeLineEndings, username, password, url);
+            @JsonProperty("configMap") @Nullable Map<String, String> parameterMap) {
+        super(excludePatterns, normalizeLineEndings, username, password, url, parameterMap);
     }
 }

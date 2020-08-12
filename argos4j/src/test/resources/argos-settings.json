@@ -8,9 +8,16 @@
 	"keyId": "keyId",
 	"releaseCollectors": [
         {
-            "name": "local-collector",
+            "name": "local-file-collector",
             "collector": {
                 "type": "LocalFileCollector",
+                "path": "foo"
+            }
+        },
+        {
+            "name": "local-zip-file-collector",
+            "collector": {
+                "type": "LocalZipFileCollector",
                 "path": "foo"
             }
         },
@@ -26,6 +33,20 @@
             "collector": {
                 "type": "RemoteCollectorCollector",
                 "url": "http://git-collector"
+            }
+        },
+        {
+            "name": "remote-file-collector",
+            "collector": {
+                "type": "RemoteFileCollector",
+                "url": "http://remote-file-collector"
+            }
+        },
+        {
+            "name": "remote-zip-file-collector",
+            "collector": {
+                "type": "RemoteZipFileCollector",
+                "url": "http://remote-zip-file-collector"
             }
         }
 	]

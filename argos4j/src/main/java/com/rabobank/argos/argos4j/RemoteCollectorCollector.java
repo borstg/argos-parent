@@ -26,7 +26,9 @@ import javax.annotation.Nullable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 @Getter
@@ -34,11 +36,9 @@ import java.util.Map;
 @JsonDeserialize(builder = RemoteCollectorCollector.RemoteCollectorCollectorBuilder.class)
 @EqualsAndHashCode(callSuper = true)
 public class RemoteCollectorCollector extends RemoteCollector {
-
-    /**
-     * used in the remote collector collector to specify the Collector Micro Service parameters
-     */
-    private Map<String, String> configMap;
+    
+    private static final String USERNAME_FIELD = "username";
+    private static final String PASSWORD_FIELD = "password";
     
     @Builder
     public RemoteCollectorCollector(
@@ -47,8 +47,23 @@ public class RemoteCollectorCollector extends RemoteCollector {
             @JsonProperty("username") @Nullable String username, 
             @JsonProperty("password") @Nullable char[] password, 
             @JsonProperty("url") @NonNull URL url, 
-            @JsonProperty("configMap") @Nullable Map<String, String> configMap) {
-        super(excludePatterns, normalizeLineEndings, username, password, url);
-        this.configMap = configMap;
+            @JsonProperty("configMap") @Nullable Map<String, String> parameterMap) {
+        super(excludePatterns, normalizeLineEndings, username, password, url, parameterMap);
+    }
+    
+    @Override
+    public void enrich(Map<String, String> configMap) {
+        if (this.getParameterMap() == null) {
+            this.setParameterMap(new HashMap<>());
+        }
+        if (configMap.containsKey(USERNAME_FIELD)) {
+            this.getParameterMap().put(USERNAME_FIELD, configMap.get(USERNAME_FIELD));
+            configMap.remove(USERNAME_FIELD);
+        }
+        if (configMap.containsKey(PASSWORD_FIELD)) {
+            this.getParameterMap().put(PASSWORD_FIELD, configMap.get(PASSWORD_FIELD));
+            configMap.remove(PASSWORD_FIELD);
+        }
+        super.enrich(configMap);
     }
 }

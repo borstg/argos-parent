@@ -56,8 +56,14 @@ class Argos4jSettingsTest {
         releaseCollectors1 = new ArrayList<>();
         releaseCollectors1.add(
                 ReleaseCollector.builder()
-                .name("local-collector")
+                .name("local-file-collector")
                 .collector(LocalFileCollector.builder()
+                        .path(Paths.get("foo"))
+                        .build()).build());
+        releaseCollectors1.add(
+                ReleaseCollector.builder()
+                .name("local-zip-file-collector")
+                .collector(LocalZipFileCollector.builder()
                         .path(Paths.get("foo"))
                         .build()).build());
         releaseCollectors1.add(ReleaseCollector.builder()
@@ -69,25 +75,35 @@ class Argos4jSettingsTest {
                 .name("git-collector")
                 .collector(RemoteCollectorCollector.builder()
                         .url(new URL("http://git-collector"))
+                        .build()).build());
+        releaseCollectors1.add(ReleaseCollector.builder()
+                .name("remote-file-collector")
+                .collector(RemoteFileCollector.builder()
+                        .url(new URL("http://remote-file-collector"))
+                        .build()).build());
+        releaseCollectors1.add(ReleaseCollector.builder()
+                .name("remote-zip-file-collector")
+                .collector(RemoteZipFileCollector.builder()
+                        .url(new URL("http://remote-zip-file-collector"))
                         .build()).build());
         releaseCollectors2 = new ArrayList<>();
         releaseCollectors2.add(
                 ReleaseCollector.builder()
                 .name("local-collector")
                 .collector(LocalFileCollector.builder()
-                        .path(Paths.get("foo"))
+                        .path(Paths.get("bar"))
                         .build()).build());
         releaseCollectors2.add(ReleaseCollector.builder()
                 .name("xld-collector")
                 .collector(RemoteCollectorCollector.builder()
                         .url(new URL("http://xld-collector"))
-                        .configMap(xldCollector)
+                        .parameterMap(xldCollector)
                         .build()).build());
         releaseCollectors2.add(ReleaseCollector.builder()
                 .name("git-collector")
                 .collector(RemoteCollectorCollector.builder()
                         .url(new URL("http://git-collector"))
-                        .configMap(gitCollector)
+                        .parameterMap(gitCollector)
                         .build()).build());
         
     }
@@ -123,21 +139,6 @@ class Argos4jSettingsTest {
                 .build();
         settings.enrichReleaseCollectors(configMaps);
         assertEquals(expectedSettings, settings);
-    }
-    
-    @Test
-    void throwNoCollectorsTest() {
-        Argos4jSettings settings = Argos4jSettings.builder()
-                .argosServerBaseUrl("argos-service-url")
-                .path(Arrays.asList("root", "label"))
-                .keyId("keyId")
-                .supplyChainName("supplyChainName")
-                .build();
-        Argos4jError argosError = assertThrows(Argos4jError.class, () -> {
-            settings.enrichReleaseCollectors(configMaps);
-        });
-        assertThat(argosError.getMessage(), is("No Release Collectors defined"));
-        
     }
     
     @Test

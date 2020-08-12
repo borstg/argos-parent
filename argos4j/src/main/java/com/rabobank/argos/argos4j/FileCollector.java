@@ -15,17 +15,13 @@
  */
 package com.rabobank.argos.argos4j;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.util.Map;
@@ -47,6 +43,8 @@ import java.util.Optional;
 public abstract class FileCollector {
 
     public static final String DEFAULT_EXCLUDE_PATTERNS = "{**.git/**,**.git\\**}";
+    
+    private static final String EXCLUDE_PATTERNS_FIELD = "excludePatterns";
 
     private String excludePatterns;
 
@@ -56,5 +54,12 @@ public abstract class FileCollector {
     public FileCollector(@Nullable String excludePatterns, @Nullable Boolean normalizeLineEndings) {
         this.excludePatterns = Optional.ofNullable(excludePatterns).orElse(DEFAULT_EXCLUDE_PATTERNS);
         this.normalizeLineEndings = Optional.ofNullable(normalizeLineEndings).orElse(false);
+    }
+
+    public void enrich(Map<String, String> configMap) {
+        if (configMap.containsKey(EXCLUDE_PATTERNS_FIELD)) {
+            this.excludePatterns = configMap.get(EXCLUDE_PATTERNS_FIELD);
+            configMap.remove(EXCLUDE_PATTERNS_FIELD);
+        }
     }
 }

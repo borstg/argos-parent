@@ -73,16 +73,15 @@ public class Argos4jSettings implements Serializable {
     }
     
     public void enrichReleaseCollectors(Map<String, Map<String, String>> configMaps) {
-        if (releaseCollectors == null || releaseCollectors.isEmpty()) {
-            throw new Argos4jError("No Release Collectors defined");
+        if (releaseCollectors == null 
+                || releaseCollectors.isEmpty() 
+                || configMaps == null 
+                || configMaps.isEmpty()) {
+            return;
         }
-        releaseCollectors.forEach(c -> {
-            FileCollector fc = c.getCollector();
-            if (fc instanceof RemoteCollectorCollector && configMaps.containsKey(c.getName())) {
-                RemoteCollectorCollector rc = (RemoteCollectorCollector) fc;
-                rc.getConfigMap().putAll(configMaps.get(c.getName()));
-            }
-        });
+        releaseCollectors.stream()
+            .filter(c -> configMaps.containsKey(c.getName()))
+            .forEach(c -> c.getCollector().enrich(configMaps.get(c.getName())));
     }
 
 }

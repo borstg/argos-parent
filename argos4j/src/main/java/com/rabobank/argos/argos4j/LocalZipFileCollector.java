@@ -27,12 +27,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
 
 @Getter
 @ToString
 @JsonDeserialize(builder = LocalZipFileCollector.LocalZipFileCollectorBuilder.class)
 @EqualsAndHashCode(callSuper = true)
 public class LocalZipFileCollector extends FileCollector {
+    
+    private static final String PATH_FIELD = "path";
 
     /**
      * is the zip file path
@@ -46,5 +50,14 @@ public class LocalZipFileCollector extends FileCollector {
             @JsonProperty("path") @NonNull Path path) {
         super(excludePatterns, normalizeLineEndings);
         this.path = path;
+    }
+
+    @Override
+    public void enrich(Map<String, String> configMap) {
+        super.enrich(configMap);
+        if (configMap.containsKey(PATH_FIELD)) {
+            this.path = Paths.get(configMap.get(PATH_FIELD));
+            configMap.remove(PATH_FIELD);
+        }
     }
 }
