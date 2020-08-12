@@ -34,9 +34,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -61,7 +64,12 @@ public class RemoteArtifactCollector implements ArtifactCollector {
 
     @Override
     public List<Artifact> collect() {
-        RequestTemplate requestTemplate = createRequest();
+        RequestTemplate requestTemplate;
+        try {
+            requestTemplate = createRequest();
+        } catch (URISyntaxException e) {
+            throw new Argos4jError("Creation of request returned error: "+e.getMessage());
+        }
         Client client = new Client.Default(null, null);
         Request request = requestTemplate.resolve(new HashMap<>()).request();
         log.info("execute request: {}", request.url());
@@ -101,19 +109,24 @@ public class RemoteArtifactCollector implements ArtifactCollector {
         }
     }
 
-    private RequestTemplate createRequest() {
+    private RequestTemplate createRequest() throws URISyntaxException {
         RequestTemplate requestTemplate = new RequestTemplate();
+        String url = remoteCollector.getUrl().toString();
         if (remoteCollector.getClass() == RemoteCollectorCollector.class) {
             requestTemplate.method(Request.HttpMethod.POST);
             try {
-                requestTemplate.body(new ObjectMapper().writeValueAsString((((RemoteCollectorCollector) remoteCollector).getConfigMap())));
+                requestTemplate.body(new ObjectMapper()
+                        .writeValueAsString(
+                                ((RemoteCollectorCollector) remoteCollector).getParameterMap()));
             } catch (JsonProcessingException e) {
                 throw new Argos4jError(e.getMessage());
             }
+
         } else {
             requestTemplate.method(Request.HttpMethod.GET);
+            url = appendToUrl(url, remoteCollector.getParameterMap());
         }
-        requestTemplate.target(remoteCollector.getUrl().toString());
+        requestTemplate.target(url);
         addAuthorization(requestTemplate);
         return requestTemplate;
     }
@@ -123,5 +136,28 @@ public class RemoteArtifactCollector implements ArtifactCollector {
         Optional.ofNullable(remoteCollector.getUsername())
                 .ifPresent(userInfo -> new BasicAuthRequestInterceptor(remoteCollector.getUsername(),
                         new String(remoteCollector.getPassword())).apply(requestTemplate));
+    }
+    
+    private String appendToUrl(String url, Map<String, String> parameters) throws URISyntaxException
+    {
+        URI uri = new URI(url);
+        String query = uri.getQuery();
+
+        StringBuilder builder = new StringBuilder();
+
+        if (query != null)
+            builder.append(query);
+
+        if (parameters != null) {
+            parameters.forEach((key, value) -> {
+                String keyValueParam = key + "=" + value;
+                if (!builder.toString().isEmpty())
+                    builder.append("&");    
+                builder.append(keyValueParam);
+            });
+        }
+
+        URI newUri = new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), builder.toString(), uri.getFragment());
+        return newUri.toString();
     }
 }

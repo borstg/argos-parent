@@ -30,7 +30,7 @@ def Logger logger = Logger.getLogger("")
 
 store = Jenkins.instance.getExtensionList('com.cloudbees.plugins.credentials.SystemCredentialsProvider')[0].getStore()
 
-secretKeySa1 = new UsernamePasswordCredentialsImpl(
+secretKeySa2 = new UsernamePasswordCredentialsImpl(
     CredentialsScope.GLOBAL,
     "default-sa2",
     "default-sa2",
@@ -40,6 +40,6 @@ secretKeySa1 = new UsernamePasswordCredentialsImpl(
 domain = Domain.global()
     
 // Add credentials to Jenkins credential store
-store.addCredentials(domain, secretKeySa1)
+store.addCredentials(domain, secretKeySa2)
 
 logger.info("--> credetials added.")

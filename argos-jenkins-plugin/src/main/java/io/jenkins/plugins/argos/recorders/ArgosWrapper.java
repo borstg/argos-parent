@@ -26,6 +26,7 @@ import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildWrapperDescriptor;
+import io.jenkins.plugins.argos.ArgosServiceConfiguration;
 import jenkins.tasks.SimpleBuildWrapper;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -80,7 +81,8 @@ public class ArgosWrapper extends SimpleBuildWrapper implements Serializable {
 
     @DataBoundConstructor
     public ArgosWrapper(String privateKeyCredentialId, String stepName, String layoutSegmentName, String supplyChainIdentifier, String runId) {
-        this.privateKeyCredentialId = privateKeyCredentialId;
+        String credentialId = privateKeyCredentialId != null ? privateKeyCredentialId : ArgosServiceConfiguration.get().getPrivateKeyCredentialId();
+        this.privateKeyCredentialId = credentialId;
         this.layoutSegmentName = layoutSegmentName;
         this.stepName = stepName;
         this.supplyChainIdentifier = supplyChainIdentifier;

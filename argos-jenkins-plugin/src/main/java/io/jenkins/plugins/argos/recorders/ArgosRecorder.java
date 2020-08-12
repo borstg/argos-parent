@@ -37,6 +37,7 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import io.jenkins.plugins.argos.ArgosServiceConfiguration;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.AncestorInPath;
@@ -94,7 +95,8 @@ public class ArgosRecorder extends Recorder {
         this.stepName = stepName;
         this.layoutSegmentName = layoutSegmentName;
         this.supplyChainIdentifier = supplyChainIdentifier;
-        this.privateKeyCredentialId = privateKeyCredentialId;
+        String credentialId = privateKeyCredentialId != null ? privateKeyCredentialId : ArgosServiceConfiguration.get().getPrivateKeyCredentialId();
+        this.privateKeyCredentialId = credentialId;
         this.runId = runId;
     }
 

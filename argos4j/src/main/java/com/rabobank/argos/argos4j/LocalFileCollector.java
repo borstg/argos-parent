@@ -27,13 +27,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Optional;
 
 @Getter
-@ToString
+@ToString(callSuper = true)
 @JsonDeserialize(builder = LocalFileCollector.LocalFileCollectorBuilder.class)
 @EqualsAndHashCode(callSuper = true)
 public class LocalFileCollector extends FileCollector {
+    
+    private static final String BASE_PATH_FIELD = "basePath";
+    private static final String PATH_FIELD = "path";
 
     private boolean followSymlinkDirs;
 
@@ -58,5 +63,18 @@ public class LocalFileCollector extends FileCollector {
         this.followSymlinkDirs = Optional.ofNullable(followSymlinkDirs).orElse(true);
         this.basePath = basePath;
         this.path = path;
+    }
+
+    @Override
+    public void enrich(Map<String, String> configMap) {
+        super.enrich(configMap);
+        if (configMap.containsKey(BASE_PATH_FIELD)) {
+            this.basePath = Paths.get(configMap.get(BASE_PATH_FIELD));
+            configMap.remove(BASE_PATH_FIELD);
+        }
+        if (configMap.containsKey(PATH_FIELD)) {
+            this.path = Paths.get(configMap.get(PATH_FIELD));
+            configMap.remove(PATH_FIELD);
+        }
     }
 }

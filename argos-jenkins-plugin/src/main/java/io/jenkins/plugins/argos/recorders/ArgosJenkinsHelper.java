@@ -59,7 +59,7 @@ public class ArgosJenkinsHelper {
         if (Float.parseFloat(version) < 1.8F) {
             throw new Argos4jError("bouncycastle-api plugin " + version + " installed, minimal version 1.8 required");
         }
-
+        
         checkProperty(privateKeyCredentialId, "privateKeyCredentialId");
         checkProperty(layoutSegmentName, "layoutSegmentName");
         checkProperty(stepName, "stepName");
@@ -67,7 +67,7 @@ public class ArgosJenkinsHelper {
         checkProperty(runId, "runId");
 
 
-        String argosServiceBaseUrl = ArgosServiceConfiguration.get().getArgosServiceBaseUrl() + "/api";
+        String argosServiceBaseUrl = getArgosServiceBaseApiUrl();
         checkProperty(argosServiceBaseUrl, "argosServiceBaseUrl");
         log.info("argos4j version = {}", Argos4j.getVersion());
         log.info("argosServiceBaseUrl = {}", argosServiceBaseUrl);
@@ -96,7 +96,8 @@ public class ArgosJenkinsHelper {
         }
     }
 
-    private static StandardUsernamePasswordCredentials getCredentials(String privateKeyCredentialId) {
+    public static StandardUsernamePasswordCredentials getCredentials(String privateKeyCredentialId) {
+        log.info("credential id = {}", privateKeyCredentialId);
         StandardUsernamePasswordCredentials fileCredential = CredentialsMatchers.firstOrNull(
                 CredentialsProvider.lookupCredentials(
                         StandardUsernamePasswordCredentials.class,
@@ -111,6 +112,10 @@ public class ArgosJenkinsHelper {
             throw new Argos4jError(" Could not find credentials entry with ID '" + privateKeyCredentialId + "' ");
 
         return fileCredential;
+    }
+    
+    public static String getArgosServiceBaseApiUrl() {
+        return ArgosServiceConfiguration.get().getArgosServiceBaseUrl() + "/api";
     }
 
 }

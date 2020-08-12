@@ -27,12 +27,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.net.URL;
+import java.util.Map;
 
 @Getter
-@ToString
+@ToString(callSuper = true)
 @JsonDeserialize(builder = RemoteFileCollector.RemoteFileCollectorBuilder.class)
 @EqualsAndHashCode(callSuper = true)
 public class RemoteFileCollector extends RemoteCollector {
+    
+    private static final String ARTIFACT_URI_FIELD = "artifactUri";
 
     /**
      * used in the remote file collector to specify the artifact uri when not set the last part of the uri is used
@@ -46,8 +49,18 @@ public class RemoteFileCollector extends RemoteCollector {
             @JsonProperty("username") @Nullable String username, 
             @JsonProperty("password") @Nullable char[] password, 
             @JsonProperty("url") @NonNull URL url,
+            @JsonProperty("configMap") @Nullable Map<String, String> parameterMap,
             @JsonProperty("artifactUri") @Nullable String artifactUri) {
-        super(excludePatterns, normalizeLineEndings, username, password, url);
+        super(excludePatterns, normalizeLineEndings, username, password, url, parameterMap);
         this.artifactUri = artifactUri;
+    }
+
+    @Override
+    public void enrich(Map<String, String> configMap) {
+        if (configMap.containsKey(ARTIFACT_URI_FIELD)) {
+            this.artifactUri = configMap.get(ARTIFACT_URI_FIELD);
+            configMap.remove(ARTIFACT_URI_FIELD);
+        }
+        super.enrich(configMap);
     }
 }

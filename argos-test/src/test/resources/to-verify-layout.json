@@ -15,8 +15,7 @@
     ],
     "expectedEndProducts": [
       {
-        "pattern": "*.war",
-        "destinationPathPrefix": "target",
+        "pattern": "target/*.war",
         "destinationType": "PRODUCTS",
         "destinationStepName": "deploy",
         "destinationSegmentName": "jenkins"

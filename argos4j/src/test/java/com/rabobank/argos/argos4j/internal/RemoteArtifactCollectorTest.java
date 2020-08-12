@@ -144,7 +144,7 @@ class RemoteArtifactCollectorTest {
         configMap.put("key1", "value1");
         configMap.put("key2", "value2");
         collector = ArtifactCollectorFactory.build(RemoteCollectorCollector.builder()
-                .configMap(configMap).url(new URL("http://localhost:" + randomPort + "/collect")).build());
+                .parameterMap(configMap).url(new URL("http://localhost:" + randomPort + "/collect")).build());
     }
 
     @Test

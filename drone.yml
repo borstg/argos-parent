@@ -154,6 +154,7 @@ steps:
     JAVA_OPTS: -Djenkins.install.runSetupWizard=false
     snapshotsUrl: http://nexus:8081/nexus/content/repositories/snapshots/
     releasesUrl: http://nexus:8081/nexus/content/repositories/releases/
+    argosServiceUrl: http://argos-service:8080
   volumes:
   - name: mvn_cache
     path: /root/.m2/repository
