@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
@@ -27,6 +29,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -35,6 +38,7 @@ import com.google.common.collect.ImmutableSet;
 import com.rabobank.argos.argos4j.Argos4j;
 import com.rabobank.argos.argos4j.Argos4jSettings;
 import com.rabobank.argos.argos4j.ReleaseBuilder;
+import com.rabobank.argos.domain.release.ReleaseResult;
 
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 
@@ -62,7 +66,7 @@ public class ArgosReleaseStep extends Step implements Serializable {
 
     @Override
     public StepExecution start(StepContext context) throws Exception {
-        return new Execution(this, context);
+        return new ArgosReleaseStepExecution(this, context);
     }
     
     public String getCredentialId() {
@@ -106,17 +110,19 @@ public class ArgosReleaseStep extends Step implements Serializable {
         }
     }
     
-    private static class Execution extends SynchronousNonBlockingStepExecution<Void> {
+    private static class ArgosReleaseStepExecution extends SynchronousStepExecution<Boolean> {
         private static final long serialVersionUID = 3790704651797090531L;
-        private ArgosReleaseStep step;
 
-        protected Execution(ArgosReleaseStep step, StepContext context) {
+        private ArgosReleaseStep step;
+        
+        protected ArgosReleaseStepExecution(ArgosReleaseStep step, StepContext context) {
             super(context);
             this.step = step;
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Boolean run() throws Exception {
+            TaskListener listener = getContext().get(TaskListener.class);
             StandardUsernamePasswordCredentials credentials = ArgosJenkinsHelper.getCredentials(step.getCredentialId());
             Argos4jSettings settings = Argos4jSettings.readSettings(Paths.get(step.getArgosSettingsFile()));
             settings.setArgosServerBaseUrl(ArgosJenkinsHelper.getArgosServiceBaseApiUrl());
@@ -126,8 +132,9 @@ public class ArgosReleaseStep extends Step implements Serializable {
             Argos4j argos4j = new Argos4j(settings);
             ReleaseBuilder releaseBuilder = argos4j.getReleaseBuilder();
             settings.getReleaseCollectors().forEach(r -> releaseBuilder.addFileCollector(r.getCollector()));
-            releaseBuilder.release(credentials.getPassword().getPlainText().toCharArray());
-            return null;
+            ReleaseResult result = releaseBuilder.release(credentials.getPassword().getPlainText().toCharArray());
+            listener.getLogger().println(String.format("[argos] release valid: [%s] ", result.isReleaseIsValid()));
+            return result.isReleaseIsValid();
         }
         
     }

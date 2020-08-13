@@ -31,6 +31,8 @@ import com.rabobank.argos.service.domain.link.LinkMetaBlockRepository;
 import com.rabobank.argos.service.domain.verification.VerificationProvider;
 import com.rabobank.argos.service.domain.verification.VerificationRunResult;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -44,6 +46,7 @@ import static com.rabobank.argos.domain.SupplyChainHelper.reversePath;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ReleaseServiceImpl implements ReleaseService {
 
     private final VerificationProvider verificationProvider;
@@ -55,16 +58,20 @@ public class ReleaseServiceImpl implements ReleaseService {
 
     @Override
     public ReleaseResult createRelease(String supplyChainId, List<Set<Artifact>> releaseArtifacts) {
+        log.info("Release Artifacts [{}] for supply chain [{}].", releaseArtifacts, supplyChainId);
 
         String supplyChainPath = getSupplyChainPath(supplyChainId);
         List<List<String>> releaseArtifactHashes = convertToReleaseArtifactHashes(releaseArtifacts);
         return releaseRepository
                 .findReleaseByReleasedArtifactsAndPath(releaseArtifactHashes, supplyChainPath)
-                .map(releaseDossierMetaData -> ReleaseResult
+                .map(releaseDossierMetaData -> {
+                    log.info("Artifacts already released [{}] for supply chain [{}].", releaseArtifacts, supplyChainId);
+                    return ReleaseResult
                         .builder()
                         .releaseIsValid(true)
                         .releaseDossierMetaData(releaseDossierMetaData)
-                        .build()
+                        .build();
+                }
                 )
                 .orElseGet(() -> verifyAndStoreRelease(supplyChainId, releaseArtifacts, supplyChainPath, releaseArtifactHashes));
     }
@@ -91,8 +98,10 @@ public class ReleaseServiceImpl implements ReleaseService {
                 releaseBuilder.releaseDossierMetaData(releaseDossierMetaData);
                 linkMetaBlockRepository.deleteBySupplyChainId(supplyChainId);
             }
+            log.info("Artifacts released [{}] for supply chain [{}].", releaseArtifacts, supplyChainId);
             return releaseBuilder.build();
         }
+        log.info("Artifacts release invalid [{}] for supply chain [{}].", releaseArtifacts, supplyChainId);
         return ReleaseResult.builder().releaseIsValid(false).build();
     }
 
